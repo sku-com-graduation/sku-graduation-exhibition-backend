@@ -27,4 +27,6 @@ public class Account {
     private String pwd;
 
     private LocalTime recent;
+
+    private Role role = Role.MEMBER;
 }
