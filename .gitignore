@@ -36,3 +36,8 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
+### private file ###
+.properties
+.yml
