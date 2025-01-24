@@ -41,3 +41,4 @@ out/
 ### private file ###
 .properties
 .yml
+.yaml
