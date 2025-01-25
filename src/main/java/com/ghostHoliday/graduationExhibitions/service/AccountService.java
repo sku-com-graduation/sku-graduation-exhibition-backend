@@ -1,12 +1,15 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
 import com.ghostHoliday.graduationExhibitions.domain.*;
+import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearDTO;
 import com.ghostHoliday.graduationExhibitions.dto.SaveStudentDTO;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwt;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +29,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final TeamRepository teamRepository;
     private final PostRepository postRepository;
+    private final JwtUtility jwtUtility;
 
     public Long save(Account account) {
         return accountRepository.save(account).getId();
@@ -62,6 +66,42 @@ public class AccountService {
         accountRepository.saveAll(accounts);
         teamRepository.saveAll(teams);
     }
+    @Transactional
+    public ArrayList<FindAccountByYearDTO> findAllAccountByYear(int year) {
+        List<Account> accounts = accountRepository.findAll();
+        ArrayList<FindAccountByYearDTO> findAccountByYearDTOS = new ArrayList<>();
+        for (Account account : accounts) {
+            FindAccountByYearDTO findAccountByYearDTO = new FindAccountByYearDTO();
+            Team team = account.getTeam();
+            if (year == team.getExhibition_year()){
+                findAccountByYearDTO.setTeamName(team.getName());
+                findAccountByYearDTO.setUserEmail(account.getUserEmail());
+                findAccountByYearDTO.setRecent(account.getRecent());
+                findAccountByYearDTOS.add(findAccountByYearDTO);
+            }
+        }
+        return findAccountByYearDTOS;
+
+    }
+
+    public Account tokenToAccount(String token) {
+        String userEmail = jwtUtility.validateToken(token).getSubject();
+        return accountRepository.findAccountByUserEmail(userEmail).get();
+
+    }
+
+    @Transactional
+    public void deleteAccount(Long accountId){
+        accountRepository.deleteById(accountId);
+    }
+
+    @Transactional
+    public void resetAccount(ArrayList<Long> AccountsId){
+         accountRepository.resetPasswordsToDefault(AccountsId);
+    }
+
+
+
 
     public static Post createNewPost(){
         Post post = new Post();
