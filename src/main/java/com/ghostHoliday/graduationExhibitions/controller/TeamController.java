@@ -5,10 +5,7 @@ import com.ghostHoliday.graduationExhibitions.dto.FindTeamPostInfoByYearDTO;
 import com.ghostHoliday.graduationExhibitions.service.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,5 +22,16 @@ public class TeamController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(teams);
+    }
+
+    @DeleteMapping("delete")
+    public ResponseEntity<String> deleteTeam(@RequestBody List<String> encryptionTeamIds) throws Exception {
+        try{
+            teamService.deleteTeam(encryptionTeamIds);
+            return ResponseEntity.ok("성공적으로 팀 정보를 삭제했습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.noContent().build();
+        }
+
     }
 }
