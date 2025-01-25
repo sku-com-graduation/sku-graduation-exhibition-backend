@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ghostHoliday.graduationExhibitions.dto.FindProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.RegistProfessorDTO;
+import com.ghostHoliday.graduationExhibitions.dto.UpdateProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.service.JwtUtility;
 import com.ghostHoliday.graduationExhibitions.service.ProfessorService;
 import io.jsonwebtoken.Claims;
@@ -31,15 +32,20 @@ public class ProfessorController {
             @RequestParam(value = "professorImage", required = false) MultipartFile professorImage ){
 
 
-
         // JSON 문자열을 DTO로 변환
         ObjectMapper objectMapper = new ObjectMapper();
         RegistProfessorDTO dto;
 
         try {
             dto = objectMapper.readValue(dtoJson, RegistProfessorDTO.class);
+            // 토큰 검증
+            //Claims claims = jwtUtility.validateToken(dto.getToken()); // 토큰 유효성 검사
+
         } catch (JsonProcessingException e) {
             return ResponseEntity.status(400).body("Invalid JSON format");
+        } catch (IllegalArgumentException | JwtException e) {
+            // 토큰이 유효하지 않거나 검증 중 에러가 발생하면 401 Unauthorized 응답
+            return ResponseEntity.status(401).body(null);  // 또는 적절한 오류 메시지
         }
 
                 try {
@@ -54,6 +60,46 @@ public class ProfessorController {
                         .body("교수 정보 생성 실패: " + e.getMessage());
 
                 }
+    }
+
+
+    @PatchMapping("/update")
+    public ResponseEntity<String> updateProfessor(
+            @RequestParam("dto") String dtoJson,  // dto는 String으로 받아서 파싱
+            @RequestParam(value = "professorImage", required = false) MultipartFile professorImage) {
+
+        // JSON 문자열을 DTO로 변환
+        ObjectMapper objectMapper = new ObjectMapper();
+        UpdateProfessorDTO dto;
+
+        try {
+            // JSON 문자열을 DTO로 변환
+            dto = objectMapper.readValue(dtoJson, UpdateProfessorDTO.class);
+
+            // 토큰 검증
+            if (dto.getToken() != null) {
+                try {
+                    //Claims claims = jwtUtility.validateToken(dto.getToken());
+                } catch (JwtException e) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token");
+                }
+            }
+
+            // 교수 ID 확인
+            if (dto.getProfessorId() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("교수 ID가 필요합니다.");
+            }
+
+            // 교수 정보 업데이트
+            professorService.updateProfessor(dto, professorImage);
+            return ResponseEntity.ok("교수 정보 변경 성공");
+
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid JSON format");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("교수 정보 변경 실패: " + e.getMessage());
+        }
     }
 
 
@@ -77,5 +123,7 @@ public class ProfessorController {
             return ResponseEntity.status(401).body(null);  // 또는 적절한 오류 메시지
         }
     }
+
+
 
 }

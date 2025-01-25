@@ -3,6 +3,7 @@ package com.ghostHoliday.graduationExhibitions.service;
 import com.ghostHoliday.graduationExhibitions.domain.Professor;
 import com.ghostHoliday.graduationExhibitions.dto.FindProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.RegistProfessorDTO;
+import com.ghostHoliday.graduationExhibitions.dto.UpdateProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.repository.ProfessorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -63,6 +64,47 @@ public class ProfessorService {
 
         professorRepository.save(professor);
     }
+
+
+    @Transactional
+    public void updateProfessor(UpdateProfessorDTO dto, MultipartFile professorImage) throws IOException {
+        // 기존 교수 정보를 찾아옵니다.
+        Professor professor = professorRepository.findById(dto.getProfessorId())
+                .orElseThrow(() -> new RuntimeException("교수 정보를 찾을 수 없습니다."));
+
+        // 교수 정보 업데이트
+        professor.setName(dto.getName());
+        professor.setEmail(dto.getEmail());
+        professor.setTenure(dto.isTenure());
+
+        // 기존 이미지 경로 확인 후 삭제 (경로가 있는 경우에만 삭제)
+        String existingImagePath = professor.getImageUrl();
+        if (existingImagePath != null && !existingImagePath.isEmpty()) {
+            deleteImage(existingImagePath);
+        }
+
+        // 프로필 이미지 처리 (파일이 존재하는 경우)
+        if (professorImage != null && !professorImage.isEmpty()) {
+            // 새로운 이미지 저장
+            String profileImagePath = saveProfessorImage(professorImage);
+            professor.setImageUrl(profileImagePath);
+        }
+
+        // 교수 정보 업데이트
+        professorRepository.save(professor);
+    }
+
+    // 이미지 삭제 메소드
+    private void deleteImage(String imagePath) throws IOException {
+        if (imagePath != null && !imagePath.isEmpty()) {
+            Path path = Paths.get(imagePath);
+            Files.deleteIfExists(path);  // 파일이 존재하면 삭제
+        }
+    }
+
+
+
+
 
 
     // 프로필 이미지 저장 메소드
