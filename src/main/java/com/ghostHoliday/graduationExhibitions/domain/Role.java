@@ -2,5 +2,5 @@ package com.ghostHoliday.graduationExhibitions.domain;
 
 
 public enum Role {
-    LEADER, MEMBER, ADMIN
+    LEADER, MEMBER, ADMIN, USER
 }
