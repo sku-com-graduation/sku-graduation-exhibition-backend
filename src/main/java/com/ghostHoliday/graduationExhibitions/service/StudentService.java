@@ -1,10 +1,14 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
 
+import com.ghostHoliday.graduationExhibitions.domain.Role;
 import com.ghostHoliday.graduationExhibitions.domain.Student;
 import com.ghostHoliday.graduationExhibitions.domain.StudentProfile;
+import com.ghostHoliday.graduationExhibitions.domain.Team;
 import com.ghostHoliday.graduationExhibitions.dto.SaveStudentDTO;
+import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentDTO;
 import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
+import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +26,7 @@ import java.util.stream.Collectors;
 public class StudentService {
     private final StudentRepository studentRepository;
     private final StudentProfileService studentProfileService;
+    private final TeamRepository teamRepository;
 
     @Transactional
     public void saveStudents( List<SaveStudentDTO> dto) {
@@ -86,5 +91,48 @@ public class StudentService {
             }
         }
     }
+
+
+    @Transactional
+    public void updateStudents(List<UpdateStudentDTO> dto) {
+        for (UpdateStudentDTO studentDTO : dto) {
+            // 학생을 조회하여 업데이트
+            Student student = studentRepository.findById(studentDTO.getStudentId())
+                    .orElseThrow(() -> new RuntimeException("학생을 찾을 수 없습니다."));
+
+            // Role Enum 처리 (Role 값이 비어있지 않으면 업데이트)
+            if (studentDTO.getRole() != null && !studentDTO.getRole().isEmpty()) {
+                Role role = Role.valueOf(studentDTO.getRole().toUpperCase());  // role을 Enum으로 변환
+                student.setRole(role);  // Role을 Enum으로 설정
+            }
+
+            // Team 객체 처리 (teamId 값이 비어있지 않으면 팀 업데이트)
+            if (studentDTO.getTeamId() != null) {
+                Team team = teamRepository.findById(studentDTO.getTeamId())
+                        .orElseThrow(() -> new RuntimeException("팀을 찾을 수 없습니다."));
+                student.setTeam(team);  // Team 객체를 설정
+            }
+
+            // 각 항목들에 대해서 값이 비어있지 않으면 업데이트
+            if (studentDTO.getName() != null && !studentDTO.getName().isEmpty()) {
+                student.setName(studentDTO.getName());
+            }
+
+            if (studentDTO.getStudentNumber() != null && !studentDTO.getStudentNumber().isEmpty()) {
+                student.setStudentNumber(studentDTO.getStudentNumber());
+            }
+
+            if (studentDTO.getExhibitionYear() != null && !studentDTO.getExhibitionYear().isEmpty()) {
+                student.setExhibitionYear(studentDTO.getExhibitionYear());
+            }
+
+            // 변경된 학생 정보 저장
+            studentRepository.save(student);
+        }
+    }
+
+
+
+
 
 }

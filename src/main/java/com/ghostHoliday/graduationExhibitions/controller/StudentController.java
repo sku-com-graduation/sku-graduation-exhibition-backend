@@ -1,6 +1,7 @@
 package com.ghostHoliday.graduationExhibitions.controller;
 
 import com.ghostHoliday.graduationExhibitions.dto.SaveStudentDTO;
+import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentDTO;
 import com.ghostHoliday.graduationExhibitions.service.StudentService;
 import com.opencsv.CSVReader;
 import lombok.RequiredArgsConstructor;
@@ -61,6 +62,20 @@ public class StudentController {
         }
     }
 
+
+    @PatchMapping("/update")
+    public ResponseEntity<String> updateStudents(@RequestBody List<UpdateStudentDTO> dto) {
+        try {
+            // 학생들 리스트를 서비스로 전달하여 처리
+            studentService.updateStudents(dto);
+            // 정상 처리되었으면 성공 메시지 반환
+            return ResponseEntity.ok("학생 정보 업데이트 성공");
+        } catch (Exception e) {
+            // 예외가 발생하면 적절한 에러 메시지 반환
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("학생 정보 업데이트 실패: " + e.getMessage());
+        }
+    }
 
 
 
