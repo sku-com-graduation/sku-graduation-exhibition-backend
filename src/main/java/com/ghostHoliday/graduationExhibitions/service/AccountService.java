@@ -8,6 +8,8 @@ import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwt;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final TeamRepository teamRepository;
     private final PostRepository postRepository;
+    private final JwtUtility jwtUtility;
 
     public Long save(Account account) {
         return accountRepository.save(account).getId();
@@ -80,6 +83,16 @@ public class AccountService {
         return findAccountByYearDTOS;
 
     }
+
+    public Account tokenToAccount(String token) {
+        String userEmail = jwtUtility.validateToken(token).getSubject();
+        return accountRepository.findAccountByUserEmail(userEmail).get();
+
+    }
+
+//    public void deleteAccount(Long accountId){
+//        accountRepository.deleteById(accountId);
+//    }
 
 
 
