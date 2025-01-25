@@ -24,6 +24,7 @@ public class StudentProfileService {
 
     private final StudentProfileRepository studentProfileRepository;
     private final StudentRepository studentRepository;
+    private final FileUtility fileUtility;
 
     @Transactional
     public StudentProfile saveStudentProfile(){
@@ -82,7 +83,7 @@ public class StudentProfileService {
         }
 
         // 파일 확장자 추출 (jpg 또는 png)
-        String extension = getFileExtension(profileImage.getOriginalFilename());
+        String extension = fileUtility.getFileExtension(profileImage.getOriginalFilename());
         if (extension == null) {
             throw new RuntimeException("지원되지 않는 파일 형식입니다.");
         }
@@ -109,15 +110,6 @@ public class StudentProfileService {
 
         // 상대 경로를 반환
         return "/" + fileName;  // 상대 경로 반환
-    }
-
-    private String getFileExtension(String fileName) {
-        // 파일 이름에서 확장자 추출
-        String extension = null;
-        if (fileName != null && (fileName.endsWith(".jpg") || fileName.endsWith(".png"))) {
-            extension = fileName.substring(fileName.lastIndexOf('.') + 1);
-        }
-        return extension;
     }
 
 }
