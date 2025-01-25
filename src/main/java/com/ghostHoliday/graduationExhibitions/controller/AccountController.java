@@ -1,6 +1,8 @@
 package com.ghostHoliday.graduationExhibitions.controller;
 
 
+import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearDTO;
+import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearResponseDTO;
 import com.ghostHoliday.graduationExhibitions.service.AccountService;
 import com.opencsv.exceptions.CsvException;
 import lombok.RequiredArgsConstructor;
@@ -8,12 +10,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -36,6 +38,16 @@ public class AccountController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("예기치 않은 오류가 발생했습니다: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<FindAccountByYearResponseDTO> searchAccount(@RequestParam int year) {
+        ArrayList<FindAccountByYearDTO> accounts = accountService.findAllAccountByYear(year);
+        if (accounts.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(new FindAccountByYearResponseDTO(year, accounts));
+
     }
 
 }
