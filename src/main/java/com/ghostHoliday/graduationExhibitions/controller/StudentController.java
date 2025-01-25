@@ -1,18 +1,19 @@
 package com.ghostHoliday.graduationExhibitions.controller;
 
 import com.ghostHoliday.graduationExhibitions.dto.SaveStudentDTO;
+import com.ghostHoliday.graduationExhibitions.dto.SearchStudentDTO;
+import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentDTO;
 import com.ghostHoliday.graduationExhibitions.service.StudentService;
 import com.opencsv.CSVReader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ public class StudentController {
     public ResponseEntity<String> saveStudents(@RequestParam("file") MultipartFile file) {
         try {
             // CSV 파일을 OpenCSV로 읽음
-            try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
+            try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream() , "EUC-KR"))) {
                 List<String[]> rows = csvReader.readAll(); // 파일의 모든 내용을 읽어옴
 
                 // CSV 파일에서 각 행을 SaveStudentDTO로 변환
@@ -48,6 +49,51 @@ public class StudentController {
                     .body("학생 정보 저장 중 오류가 발생했습니다. 파일 형식 또는 내용 확인을 해주세요.");
         }
     }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteStudents(@RequestBody List<Long> ids) {
+        try {
+            // 학생 삭제 로직 호출
+            studentService.deleteStudents(ids);
+
+            // 성공적인 처리 후 응답
+            return ResponseEntity.ok("학생들이 성공적으로 삭제되었습니다.");
+        } catch (Exception e) {
+            // 예외 발생 시, 에러 메시지와 함께 500 응답
+            return ResponseEntity.status(500).body("학생 삭제 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
+
+    @PatchMapping("/update")
+    public ResponseEntity<String> updateStudents(@RequestBody List<UpdateStudentDTO> dto) {
+        try {
+            // 학생들 리스트를 서비스로 전달하여 처리
+            studentService.updateStudents(dto);
+            // 정상 처리되었으면 성공 메시지 반환
+            return ResponseEntity.ok("학생 정보 업데이트 성공");
+        } catch (Exception e) {
+            // 예외가 발생하면 적절한 에러 메시지 반환
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("학생 정보 업데이트 실패: " + e.getMessage());
+        }
+    }
+
+
+    @GetMapping("/search")
+    public ResponseEntity<List<SearchStudentDTO>> searchStudents(@RequestParam("year") String year) {
+        // 학생 리스트를 조회하는 로직 (Service 호출)
+        List<SearchStudentDTO> students = studentService.searchStudentsByYear(year);
+
+        if (students.isEmpty()) {
+            // 학생들이 없을 때는 204 상태 코드와 함께 빈 리스트 반환
+            return ResponseEntity.noContent().build();
+        }
+
+        // 결과가 있으면 200 OK와 함께 응답
+        return ResponseEntity.ok(students);
+    }
+
 
 
 }

@@ -21,6 +21,7 @@ public class Student {
     @JoinColumn(name= "teamId")
     private Team team = null;
 
+    @Column(name = "name", columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String name;
     private String studentNumber;
 
