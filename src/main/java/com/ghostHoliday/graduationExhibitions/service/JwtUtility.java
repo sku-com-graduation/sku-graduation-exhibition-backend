@@ -11,7 +11,12 @@ import java.util.Date;
 public class JwtUtility {
 
     // 안전한 SecretKey 자동 생성
-    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final SecretKey secretKey;
+
+    public JwtUtility() {
+        this.secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    }
+
 
     private static final long EXPIRATION_TIME = 1000L * 60 * 60; // 1시간
 
