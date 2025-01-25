@@ -90,9 +90,9 @@ public class AccountService {
 
     }
 
-//    public void deleteAccount(Long accountId){
-//        accountRepository.deleteById(accountId);
-//    }
+    public void deleteAccount(Long accountId){
+        accountRepository.deleteById(accountId);
+    }
 
 
 
