@@ -54,7 +54,7 @@ public class AccountController {
 
     }
 
-    @GetMapping("/delete")
+    @DeleteMapping("/delete")
     public ResponseEntity<String> deleteAccount(String token) {
         Account account = accountService.tokenToAccount(token);
         try {
@@ -66,6 +66,7 @@ public class AccountController {
 
     }
 
+    @PostMapping("/reset")
     public ResponseEntity<String> resetAccount(List<String> tokens) {
         ArrayList<Long> accountsId = new ArrayList<>();
 

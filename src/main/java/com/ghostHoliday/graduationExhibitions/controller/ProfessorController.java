@@ -26,7 +26,7 @@ public class ProfessorController {
     private final JwtUtility jwtUtility;
 
 
-    @PostMapping("/save")
+    @PostMapping("/regist")
     public ResponseEntity<String> registProfessor(
             @RequestParam("dto") String dtoJson,
             @RequestParam(value = "professorImage", required = false) MultipartFile professorImage ){
