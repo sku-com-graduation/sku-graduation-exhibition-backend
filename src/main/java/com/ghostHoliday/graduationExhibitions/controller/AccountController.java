@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,15 +57,36 @@ public class AccountController {
     @GetMapping("/delete")
     public ResponseEntity<String> deleteAccount(String token) {
         Account account = accountService.tokenToAccount(token);
-        try{
+        try {
             accountService.deleteAccount(account.getId());
-            return ResponseEntity.ok(  account.getUserEmail() + " 계정을 성공적으로 삭제했습니다.");
-        }
-        catch (Exception e){
+            return ResponseEntity.ok(account.getUserEmail() + " 계정을 성공적으로 삭제했습니다.");
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("계정을 삭제하지 못했습니다." + e.getMessage());
         }
 
-
     }
 
+    public ResponseEntity<String> resetAccount(List<String> tokens) {
+        ArrayList<Long> accountsId = new ArrayList<>();
+
+        if (tokens == null || tokens.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("토큰 리스트가 비어 있습니다.");
+        }
+
+        for (String token : tokens) {
+            Account account = accountService.tokenToAccount(token);
+            accountsId.add(account.getId());
+        }
+
+        try {
+            accountService.resetAccount(accountsId);
+            return ResponseEntity.ok("계정을 성공적으로 초기화했습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("계정 초기화 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
 }
+
+
