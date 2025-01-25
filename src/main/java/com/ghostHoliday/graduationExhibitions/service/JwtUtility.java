@@ -10,16 +10,15 @@ import java.util.Date;
 
 @Service
 public class JwtUtility {
-    private String secret = "yourSecretKey";
 
+    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     private static final long EXPIRATION_TIME = 1000L * 60 * 60;
 
 
-    public String generateToken(String userId) {
-        SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    public String generateToken(String userEmail) {
         return Jwts.builder()
-                .setSubject(userId)
+                .setSubject(userEmail)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(secretKey)
@@ -28,7 +27,6 @@ public class JwtUtility {
 
     public Claims validateToken(String token) {
         try {
-            SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
             Claims claims = Jwts.parser()
                     .verifyWith(secretKey)
                     .build()

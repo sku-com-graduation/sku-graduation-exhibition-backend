@@ -39,6 +39,6 @@ out/
 
 
 ### private file ###
-.properties
-.yml
-.yaml
+*.properties
+*.yml
+*.yaml
