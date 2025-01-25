@@ -8,10 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateTeamInfoDTO {
-    private String encryptedTeamId;
-    private String encryptedprofessorId;
+public class ResponseTeamInfoDTO {
     private String name;
-    private int exhibitionYear;
+    private String professor;
     private Category category;
 }

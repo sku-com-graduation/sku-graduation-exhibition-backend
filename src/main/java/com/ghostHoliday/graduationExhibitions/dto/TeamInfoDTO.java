@@ -8,10 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateTeamInfoDTO {
-    private String encryptedTeamId;
-    private String encryptedprofessorId;
+public class TeamInfoDTO {
+    private Long teamId;
     private String name;
-    private int exhibitionYear;
+    private String professor;
     private Category category;
 }
