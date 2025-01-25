@@ -53,12 +53,18 @@ public class AccountController {
 
     }
 
-//    @GetMapping("/test")
-//    public ResponseEntity<String> deleteAccount() {
-//        accountService.deleteAccount(token);
-//
-//
-//        return ResponseEntity.ok(account.getUserEmail());
-//    }
+    @GetMapping("/delete")
+    public ResponseEntity<String> deleteAccount(String token) {
+        Account account = accountService.tokenToAccount(token);
+        try{
+            accountService.deleteAccount(account.getId());
+            return ResponseEntity.ok(  account.getUserEmail() + " 계정을 성공적으로 삭제했습니다.");
+        }
+        catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("계정을 삭제하지 못했습니다." + e.getMessage());
+        }
+
+
+    }
 
 }
