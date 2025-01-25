@@ -7,9 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStreamReader;
@@ -48,6 +46,22 @@ public class StudentController {
                     .body("학생 정보 저장 중 오류가 발생했습니다. 파일 형식 또는 내용 확인을 해주세요.");
         }
     }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteStudents(@RequestBody List<Long> ids) {
+        try {
+            // 학생 삭제 로직 호출
+            studentService.deleteStudents(ids);
+
+            // 성공적인 처리 후 응답
+            return ResponseEntity.ok("학생들이 성공적으로 삭제되었습니다.");
+        } catch (Exception e) {
+            // 예외 발생 시, 에러 메시지와 함께 500 응답
+            return ResponseEntity.status(500).body("학생 삭제 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
+
 
 
 }
