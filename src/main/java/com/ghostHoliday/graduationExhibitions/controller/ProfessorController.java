@@ -3,10 +3,12 @@ package com.ghostHoliday.graduationExhibitions.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ghostHoliday.graduationExhibitions.dto.FindProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.RegistProfessorDTO;
-import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentDTO;
-import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentProfileDTO;
+import com.ghostHoliday.graduationExhibitions.service.JwtUtility;
 import com.ghostHoliday.graduationExhibitions.service.ProfessorService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import java.util.List;
 @RequestMapping("professor")
 public class ProfessorController {
     private final ProfessorService professorService;
+    private final JwtUtility jwtUtility;
 
 
     @PostMapping("/save")
@@ -50,9 +53,29 @@ public class ProfessorController {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body("교수 정보 생성 실패: " + e.getMessage());
 
+                }
+    }
 
-            }
+
+    @GetMapping("/findAll")
+    public ResponseEntity<List<FindProfessorDTO>> findAllProfessors(@RequestHeader("Authorization") String token) {
+        // "Bearer " 부분을 제외한 실제 JWT 토큰만 추출
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);  // "Bearer " 길이만큼 잘라냄
         }
 
+        try {
+            // 토큰 검증
+            // Claims claims = jwtUtility.validateToken(token); // 토큰 유효성 검사
+
+            // 토큰이 유효하면 교수 목록을 반환
+            List<FindProfessorDTO> professors = professorService.findAllProfessors();
+            return ResponseEntity.ok(professors);
+
+        } catch (IllegalArgumentException | JwtException e) {
+            // 토큰이 유효하지 않거나 검증 중 에러가 발생하면 401 Unauthorized 응답
+            return ResponseEntity.status(401).body(null);  // 또는 적절한 오류 메시지
+        }
+    }
 
 }

@@ -1,6 +1,7 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
 import com.ghostHoliday.graduationExhibitions.domain.Professor;
+import com.ghostHoliday.graduationExhibitions.dto.FindProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.RegistProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.repository.ProfessorRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,11 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -88,5 +93,46 @@ public class ProfessorService {
         return path.toString();
     }
 
+
+    public List<FindProfessorDTO> findAllProfessors() {
+
+        return professorRepository.findAll().stream()
+                .map(this::convertToFindProfessorDTO)
+                .collect(Collectors.toList());
+
+
+    }
+
+    private FindProfessorDTO convertToFindProfessorDTO(Professor professor) {
+        FindProfessorDTO dto = new FindProfessorDTO();
+        dto.setProfessorId(professor.getId());
+        dto.setName(professor.getName());
+        dto.setEmail(professor.getEmail());
+        dto.setTenure(professor.isTenure());
+
+        // 이미지 경로가 있다면 해당 이미지를 Base64로 변환
+        if (professor.getImageUrl() != null) {
+            try {
+                String base64Image = convertImageToBase64(professor.getImageUrl());
+                dto.setProfileImg(base64Image);
+            } catch (IOException e) {
+                e.printStackTrace();
+                // 예외 처리, 기본 이미지 또는 null 반환
+                dto.setProfileImg(null);
+            }
+        }
+        return dto;
+    }
+
+    // 이미지 경로를 받아 Base64로 변환하는 메소드
+    private String convertImageToBase64(String imagePath) throws IOException {
+        File imageFile = new File(imagePath);
+        FileInputStream fileInputStream = new FileInputStream(imageFile);
+
+        byte[] imageBytes = fileInputStream.readAllBytes();
+        fileInputStream.close();
+
+        return Base64.getEncoder().encodeToString(imageBytes);
+    }
 
 }
