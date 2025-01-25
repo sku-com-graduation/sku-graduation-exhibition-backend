@@ -38,8 +38,8 @@ out/
 .vscode/
 
 
-### private file ###
-.properties
-.yml
-.yaml
+# Ignore properties and YAML files
+*.properties
+*.yml
+*.yaml
 
