@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ public class StudentController {
     public ResponseEntity<String> saveStudents(@RequestParam("file") MultipartFile file) {
         try {
             // CSV 파일을 OpenCSV로 읽음
-            try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
+            try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream() , "EUC-KR"))) {
                 List<String[]> rows = csvReader.readAll(); // 파일의 모든 내용을 읽어옴
 
                 // CSV 파일에서 각 행을 SaveStudentDTO로 변환
