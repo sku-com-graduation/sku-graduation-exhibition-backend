@@ -28,7 +28,7 @@ public class AccountController {
     private final JwtUtility jwtUtility;
 
     @PostMapping("/regist")
-    public ResponseEntity<String> registAccountAndTeam(@RequestParam MultipartFile file) {
+    public ResponseEntity<String> registAccountAndTeam(@RequestBody MultipartFile file) {
         try {
             accountService.registAccount(file);
             return ResponseEntity.status(HttpStatus.CREATED).body("계정 및 팀 정보가 성공적으로 등록되었습니다.");
@@ -55,7 +55,7 @@ public class AccountController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteAccount(String token) {
+    public ResponseEntity<String> deleteAccount(@RequestParam String token) {
         Account account = accountService.tokenToAccount(token);
         try {
             accountService.deleteAccount(account.getId());
@@ -67,7 +67,7 @@ public class AccountController {
     }
 
     @PostMapping("/reset")
-    public ResponseEntity<String> resetAccount(List<String> tokens) {
+    public ResponseEntity<String> resetAccount(@RequestBody List<String> tokens) {
         ArrayList<Long> accountsId = new ArrayList<>();
 
         if (tokens == null || tokens.isEmpty()) {
