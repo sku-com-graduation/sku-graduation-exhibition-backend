@@ -18,13 +18,13 @@ public class Post {
 
     private String content;
 
-    private String slide_url;
+    private String slideUrl;
 
-    private String poster_url;
+    private String posterUrl;
 
-    private String demo_url;
+    private String demoUrl;
 
-    private String team_profile_url;
+    private String teamProfileUrl;
 
 
 }
