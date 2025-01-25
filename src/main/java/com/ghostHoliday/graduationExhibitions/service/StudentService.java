@@ -6,6 +6,7 @@ import com.ghostHoliday.graduationExhibitions.domain.Student;
 import com.ghostHoliday.graduationExhibitions.domain.StudentProfile;
 import com.ghostHoliday.graduationExhibitions.domain.Team;
 import com.ghostHoliday.graduationExhibitions.dto.SaveStudentDTO;
+import com.ghostHoliday.graduationExhibitions.dto.SearchStudentDTO;
 import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentDTO;
 import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
@@ -131,7 +132,22 @@ public class StudentService {
         }
     }
 
+    public List<SearchStudentDTO> searchStudentsByYear(String exhibitionYear) {
+        // exhibitionYear로 학생 검색
+        List<Student> students = studentRepository.findByExhibitionYear(exhibitionYear);
 
+        // Student -> SearchStudentDTO로 변환
+        return students.stream()
+                .map(student -> new SearchStudentDTO(
+                        student.getId(),
+                        student.getTeam() != null ? student.getTeam().getId() : null, // 팀 ID
+                        student.getName(),
+                        student.getStudentNumber(),
+                        student.getRole().name(), // Role을 문자열로 변환
+                        student.getExhibitionYear()
+                ))
+                .collect(Collectors.toList());
+    }
 
 
 

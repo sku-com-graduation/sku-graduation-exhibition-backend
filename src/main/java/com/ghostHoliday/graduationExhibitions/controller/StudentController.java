@@ -1,6 +1,7 @@
 package com.ghostHoliday.graduationExhibitions.controller;
 
 import com.ghostHoliday.graduationExhibitions.dto.SaveStudentDTO;
+import com.ghostHoliday.graduationExhibitions.dto.SearchStudentDTO;
 import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentDTO;
 import com.ghostHoliday.graduationExhibitions.service.StudentService;
 import com.opencsv.CSVReader;
@@ -75,6 +76,21 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("학생 정보 업데이트 실패: " + e.getMessage());
         }
+    }
+
+
+    @GetMapping("/search")
+    public ResponseEntity<List<SearchStudentDTO>> searchStudents(@RequestParam("year") String year) {
+        // 학생 리스트를 조회하는 로직 (Service 호출)
+        List<SearchStudentDTO> students = studentService.searchStudentsByYear(year);
+
+        if (students.isEmpty()) {
+            // 학생들이 없을 때는 204 상태 코드와 함께 빈 리스트 반환
+            return ResponseEntity.noContent().build();
+        }
+
+        // 결과가 있으면 200 OK와 함께 응답
+        return ResponseEntity.ok(students);
     }
 
 
