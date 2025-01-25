@@ -73,7 +73,7 @@ public class StudentProfileService {
 
     private String saveProfileImage(MultipartFile profileImage, String studentNumber) {
         // 프로필 이미지 저장 경로 설정
-        String uploadDir = System.getProperty("user.dir") + "/StudentProfileImage";  // 현재 작업 디렉토리 내 'StudentProfileImage' 폴더
+        String uploadDir = "StudentProfileImage";  // 현재 작업 디렉토리 내 'StudentProfileImage' 폴더
 
         // 디렉토리가 존재하지 않으면 생성
         File dir = new File(uploadDir);
@@ -91,6 +91,15 @@ public class StudentProfileService {
         String fileName = studentNumber + "." + extension;
         Path targetLocation = Paths.get(uploadDir, fileName);
 
+        // 기존 파일이 존재하면 삭제
+        File existingFile = targetLocation.toFile();
+        if (existingFile.exists()) {
+            boolean deleted = existingFile.delete();
+            if (!deleted) {
+                throw new RuntimeException("기존 파일 삭제 실패");
+            }
+        }
+
         try {
             // 파일을 지정한 위치로 저장
             Files.copy(profileImage.getInputStream(), targetLocation);
@@ -98,8 +107,8 @@ public class StudentProfileService {
             throw new RuntimeException("Error saving profile image", e);
         }
 
-        // 저장된 파일의 경로 반환
-        return targetLocation.toString();  // 저장된 파일의 절대 경로 반환
+        // 상대 경로를 반환
+        return "/" + fileName;  // 상대 경로 반환
     }
 
     private String getFileExtension(String fileName) {

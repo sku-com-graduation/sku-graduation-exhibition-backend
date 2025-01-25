@@ -7,6 +7,4 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
-
-    Optional<Post> findByTeam(Long teamId);
 }
