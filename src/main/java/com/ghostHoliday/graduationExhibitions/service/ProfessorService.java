@@ -135,4 +135,28 @@ public class ProfessorService {
         return Base64.getEncoder().encodeToString(imageBytes);
     }
 
+
+    @Transactional
+    public void deleteProfessors(List<Long> ids) {
+        for (Long id : ids) {
+            // 교수 정보 가져오기
+            Professor professor = professorRepository.findById(id).get();
+
+            // 이미지 파일 경로 가져오기
+            String imagePath = professor.getImageUrl();
+            if (imagePath != null && !imagePath.isEmpty()) {
+                // 이미지 파일 경로에서 파일을 삭제
+                Path path = Paths.get(imagePath);
+                try {
+                    Files.deleteIfExists(path);  // 이미지 파일 삭제
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to delete image file: " + imagePath, e);
+                }
+            }
+
+            // 교수 객체 삭제
+            professorRepository.delete(professor);
+        }
+    }
+
 }
