@@ -66,7 +66,7 @@ public class AccountService {
         accountRepository.saveAll(accounts);
         teamRepository.saveAll(teams);
     }
-
+    @Transactional
     public ArrayList<FindAccountByYearDTO> findAllAccountByYear(int year) {
         List<Account> accounts = accountRepository.findAll();
         ArrayList<FindAccountByYearDTO> findAccountByYearDTOS = new ArrayList<>();
@@ -90,8 +90,14 @@ public class AccountService {
 
     }
 
+    @Transactional
     public void deleteAccount(Long accountId){
         accountRepository.deleteById(accountId);
+    }
+
+    @Transactional
+    public void resetAccount(ArrayList<Long> AccountsId){
+         accountRepository.resetPasswordsToDefault(AccountsId);
     }
 
 
