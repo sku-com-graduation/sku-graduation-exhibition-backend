@@ -1,9 +1,11 @@
 package com.ghostHoliday.graduationExhibitions.controller;
 
 
+import com.ghostHoliday.graduationExhibitions.domain.Account;
 import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearDTO;
 import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearResponseDTO;
 import com.ghostHoliday.graduationExhibitions.service.AccountService;
+import com.ghostHoliday.graduationExhibitions.service.JwtUtility;
 import com.opencsv.exceptions.CsvException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,7 @@ import java.util.List;
 @RequestMapping("account")
 public class AccountController {
     private final AccountService accountService;
+    private final JwtUtility jwtUtility;
 
     @PostMapping("/regist")
     public ResponseEntity<String> registAccountAndTeam(@RequestParam MultipartFile file) {
@@ -49,5 +52,13 @@ public class AccountController {
         return ResponseEntity.ok(new FindAccountByYearResponseDTO(year, accounts));
 
     }
+
+//    @GetMapping("/test")
+//    public ResponseEntity<String> deleteAccount() {
+//        accountService.deleteAccount(token);
+//
+//
+//        return ResponseEntity.ok(account.getUserEmail());
+//    }
 
 }
