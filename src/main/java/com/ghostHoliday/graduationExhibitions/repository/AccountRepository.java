@@ -17,4 +17,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     @Query("UPDATE Account a SET a.pwd = a.defaultPwd WHERE a.id IN :ids")
     void resetPasswordsToDefault(@Param("ids") List<Long> ids);
 
+    void deleteByTeamId(Long teamId);
+
 }
