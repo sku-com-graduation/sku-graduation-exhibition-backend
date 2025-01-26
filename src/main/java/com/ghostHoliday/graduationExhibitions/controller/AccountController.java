@@ -22,7 +22,17 @@ import java.util.List;
 @RequestMapping("account")
 public class AccountController {
     private final AccountService accountService;
-    private final JwtUtility jwtUtility;
+
+    @PostMapping("login")
+    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
+        try {
+            String token = accountService.login(username, password);
+            return ResponseEntity.ok(token);
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("아이디 혹은 비밀번호가 잘못되었습니다.");
+        }
+
+    }
 
     @PostMapping("/regist")
     public ResponseEntity<String> registAccountAndTeam(@RequestBody MultipartFile file) {

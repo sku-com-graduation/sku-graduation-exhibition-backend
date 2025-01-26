@@ -29,8 +29,11 @@ public class AccountService {
     private final PostRepository postRepository;
     private final JwtUtility jwtUtility;
 
-    public Long save(Account account) {
-        return accountRepository.save(account).getId();
+    @Transactional
+    public String login(String userEmail, String password) {
+        Account account = accountRepository.findAccountByuserEmailAndPwd(userEmail, password)
+                .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 잘못되었습니다."));
+        return jwtUtility.generateToken(userEmail);
     }
 
     @Transactional
