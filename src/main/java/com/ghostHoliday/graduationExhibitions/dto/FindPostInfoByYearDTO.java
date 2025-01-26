@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class FindTeamPostInfoByYearDTO {
+public class FindPostInfoByYearDTO {
     private String teamId;
     private String teamName;
     private String title;

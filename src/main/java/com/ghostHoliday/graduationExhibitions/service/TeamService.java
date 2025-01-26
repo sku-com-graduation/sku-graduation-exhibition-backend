@@ -2,9 +2,8 @@ package com.ghostHoliday.graduationExhibitions.service;
 
 import com.ghostHoliday.graduationExhibitions.domain.Category;
 import com.ghostHoliday.graduationExhibitions.domain.Post;
-import com.ghostHoliday.graduationExhibitions.domain.Professor;
 import com.ghostHoliday.graduationExhibitions.domain.Team;
-import com.ghostHoliday.graduationExhibitions.dto.FindTeamPostInfoByYearDTO;
+import com.ghostHoliday.graduationExhibitions.dto.FindPostInfoByYearDTO;
 import com.ghostHoliday.graduationExhibitions.dto.ResponseTeamInfoDTO;
 import com.ghostHoliday.graduationExhibitions.dto.UpdateTeamInfoDTO;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
@@ -32,13 +31,13 @@ public class TeamService {
         return teamRepository.findById(teamId).get();
     }
     @Transactional
-    public List<FindTeamPostInfoByYearDTO> findPostsInfoByYear(int year) throws Exception {
-        ArrayList<FindTeamPostInfoByYearDTO> findTeamPostInfoByYearDTOS = new ArrayList<>();
+    public List<FindPostInfoByYearDTO> findPostsInfoByYear(int year) throws Exception {
+        ArrayList<FindPostInfoByYearDTO> findTeamPostInfoByYearDTOS = new ArrayList<>();
 
         List<Team> teams = teamRepository.findAllByExhibitionYear(year);
 
         for (Team team : teams) {
-            FindTeamPostInfoByYearDTO findTeamPostInfoByYearDTO = new FindTeamPostInfoByYearDTO();
+            FindPostInfoByYearDTO findTeamPostInfoByYearDTO = new FindPostInfoByYearDTO();
             Post post = team.getPost();
             // PK 암호화 후 저장
             String encryptedPrimaryKey = encryptionService.encryptPrimaryKey(team.getId());

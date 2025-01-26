@@ -1,8 +1,7 @@
 package com.ghostHoliday.graduationExhibitions.controller;
 
 
-import com.ghostHoliday.graduationExhibitions.domain.Team;
-import com.ghostHoliday.graduationExhibitions.dto.FindTeamPostInfoByYearDTO;
+import com.ghostHoliday.graduationExhibitions.dto.FindPostInfoByYearDTO;
 import com.ghostHoliday.graduationExhibitions.dto.ResponseTeamInfoDTO;
 import com.ghostHoliday.graduationExhibitions.dto.UpdateTeamInfoDTO;
 import com.ghostHoliday.graduationExhibitions.service.TeamService;
@@ -10,7 +9,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,8 +20,8 @@ public class TeamController {
     private final TeamService teamService;
 
     @GetMapping("/search")
-    public ResponseEntity<List<FindTeamPostInfoByYearDTO>> findPostsInfoByYear(@RequestParam int year) throws Exception {
-        List<FindTeamPostInfoByYearDTO> teams = teamService.findPostsInfoByYear(year);
+    public ResponseEntity<List<FindPostInfoByYearDTO>> findPostsInfoByYear(@RequestParam int year) throws Exception {
+        List<FindPostInfoByYearDTO> teams = teamService.findPostsInfoByYear(year);
         if (teams.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -42,7 +40,7 @@ public class TeamController {
     }
 
     @PatchMapping("update")
-    public ResponseEntity<List<ResponseTeamInfoDTO>> updateTeam(@RequestBody List<UpdateTeamInfoDTO> updateTeamInfoDTOS) throws Exception {
+    public ResponseEntity<List<ResponseTeamInfoDTO>> updateTeamInfo(@RequestBody List<UpdateTeamInfoDTO> updateTeamInfoDTOS) throws Exception {
 
         try {
             List<ResponseTeamInfoDTO> updatedTeams = teamService.updateTeamInfo(updateTeamInfoDTOS);
