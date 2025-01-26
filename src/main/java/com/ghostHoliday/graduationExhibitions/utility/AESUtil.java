@@ -1,4 +1,4 @@
-package com.ghostHoliday.graduationExhibitions;
+package com.ghostHoliday.graduationExhibitions.utility;
 
 
 import javax.crypto.Cipher;

@@ -5,7 +5,7 @@ import com.ghostHoliday.graduationExhibitions.domain.Account;
 import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearDTO;
 import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearResponseDTO;
 import com.ghostHoliday.graduationExhibitions.service.AccountService;
-import com.ghostHoliday.graduationExhibitions.service.JwtUtility;
+import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.exceptions.CsvException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 

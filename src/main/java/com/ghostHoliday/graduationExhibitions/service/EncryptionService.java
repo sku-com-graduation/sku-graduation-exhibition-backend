@@ -1,6 +1,6 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
-import com.ghostHoliday.graduationExhibitions.AESUtil;
+import com.ghostHoliday.graduationExhibitions.utility.AESUtil;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
