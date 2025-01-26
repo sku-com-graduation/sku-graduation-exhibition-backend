@@ -1,20 +1,19 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
-import com.ghostHoliday.graduationExhibitions.domain.Category;
-import com.ghostHoliday.graduationExhibitions.domain.Post;
-import com.ghostHoliday.graduationExhibitions.domain.Team;
-import com.ghostHoliday.graduationExhibitions.dto.FindPostInfoByYearDTO;
-import com.ghostHoliday.graduationExhibitions.dto.FindTeamInfoByYearDTO;
-import com.ghostHoliday.graduationExhibitions.dto.ResponseTeamInfoDTO;
-import com.ghostHoliday.graduationExhibitions.dto.UpdateTeamInfoDTO;
+import com.ghostHoliday.graduationExhibitions.domain.*;
+import com.ghostHoliday.graduationExhibitions.dto.*;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
+import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
+import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +22,7 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final EncryptionService encryptionService;
     private final AccountRepository accountRepository;
+    private final JwtUtility jwtUtility;
 
     public Long save(Team team){
         return teamRepository.save(team).getId();
@@ -81,9 +81,18 @@ public class TeamService {
         return teams;
     }
 
-//    public List<FindTeamInfoByYearDTO> findTeamInfoByYear(int year, String token) throws Exception {
+//    public List<FindTeamInfoByYearDTO> findTeamInfoByYear(int year, Account account) throws Exception {
 //        ArrayList<FindTeamInfoByYearDTO> findTeamInfoByYearDTOS = new ArrayList<>();
 //
+//        List<Team> teams = teamRepository.findAllByExhibitionYear(year);
+//        List<Professor> professors = new ArrayList<>();
+//        if (!account.getRole().equals(Role.ADMIN)){
+//
+//            // TeamInfoDTO
+//            TeamInfoDTO teamInfoDTO = new TeamInfoDTO();
+//
+//
+//        }
 //    }
 
 
