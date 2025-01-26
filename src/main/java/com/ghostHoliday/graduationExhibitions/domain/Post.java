@@ -6,6 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 @Entity
 public class Post {
@@ -15,6 +17,13 @@ public class Post {
     private Long id;
 
     private String title;
+
+    @Column(nullable = false, unique = true)
+    private String uuid;
+
+    public Post(){
+        this.uuid = UUID.randomUUID().toString();
+    }
 
     private String content;
 

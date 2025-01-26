@@ -1,7 +1,11 @@
 package com.ghostHoliday.graduationExhibitions.utility;
 
 
+import com.ghostHoliday.graduationExhibitions.domain.Team;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.nio.file.Files;
 
 
 @Service
@@ -16,4 +20,6 @@ public class FileUtility {
         }
         return extension;
     }
+
+
 }

@@ -11,5 +11,5 @@ import java.util.ArrayList;
 @AllArgsConstructor
 public class UpdateSlideImageDTO {
     private String token;
-    private ArrayList<String> images;
+    private String encryptionTeamId;
 }
