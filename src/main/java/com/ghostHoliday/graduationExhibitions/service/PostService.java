@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -65,6 +66,7 @@ public class PostService {
         if(!directory.exists()){
             directory.mkdirs();
         }
+        cleanDirectory(directory);
 
         long currentFileCount = Files.list(Paths.get(uploadDir))
                 .filter(path -> !Files.isDirectory(path))
@@ -75,8 +77,7 @@ public class PostService {
         }
 
 
-
-        List<String> savedFiles = new ArrayList<>();
+        int fileIndex = 1;
         for (MultipartFile file : files) {
             String extention = fileUtility.getFileExtension(file.getOriginalFilename());
             // 이미지 파일 여부 확인
@@ -85,33 +86,21 @@ public class PostService {
             }
 
             // 파일 저장
-            String fileName = findNextNumber(uploadDir) + "." + extention;
+            String fileName = "slide" + fileIndex + "." + extention;
             Path filePath = Paths.get(uploadDir +"\\"+ fileName);
             Files.write(filePath, file.getBytes());
-            savedFiles.add(fileName);
+            fileIndex++;
         }
 
         } catch (IOException e) {
             throw new RuntimeException("파일 업로드 중 오류 발생: " + e.getMessage(), e);
         }
     }
-    static int findNextNumber(String uploadDir) throws IOException {
-        // 기존 파일 이름 중 숫자를 추출하여 오름차순 정렬
-        List<Integer> existingNumbers = new ArrayList<>();
-        Files.list(Paths.get(uploadDir))
-                .filter(path -> !Files.isDirectory(path))
-                .map(path -> path.getFileName().toString())
-                .filter(fileName -> fileName.matches("\\d+\\.jpg")) // "숫자.jpg" 형식인 파일만 필터링
-                .forEach(fileName -> {
-                    int number = Integer.parseInt(fileName.replace(".jpg", ""));
-                    existingNumbers.add(number);
-                });
-        existingNumbers.sort(Integer::compareTo);
-
-        // 다음 파일 번호 결정
-        int nextFileNumber = existingNumbers.isEmpty() ? 1 : existingNumbers.get(existingNumbers.size() - 1) + 1;
-        return nextFileNumber;
+    static void cleanDirectory(File directory) {
+        File[] files = directory.listFiles();
+        Arrays.stream(files).forEach(File::delete);
     }
+
 }
 
 
