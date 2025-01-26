@@ -4,6 +4,7 @@ import com.ghostHoliday.graduationExhibitions.domain.Category;
 import com.ghostHoliday.graduationExhibitions.domain.Post;
 import com.ghostHoliday.graduationExhibitions.domain.Team;
 import com.ghostHoliday.graduationExhibitions.dto.FindPostInfoByYearDTO;
+import com.ghostHoliday.graduationExhibitions.dto.FindTeamInfoByYearDTO;
 import com.ghostHoliday.graduationExhibitions.dto.ResponseTeamInfoDTO;
 import com.ghostHoliday.graduationExhibitions.dto.UpdateTeamInfoDTO;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
@@ -79,6 +80,14 @@ public class TeamService {
         }
         return teams;
     }
+
+//    public List<FindTeamInfoByYearDTO> findTeamInfoByYear(int year, String token) throws Exception {
+//        ArrayList<FindTeamInfoByYearDTO> findTeamInfoByYearDTOS = new ArrayList<>();
+//
+//    }
+
+
+
 
     static ResponseTeamInfoDTO updateTeam(Team team, Long teamId, Long professorId, String name, int year, Category category){
         ResponseTeamInfoDTO teamInfo = new ResponseTeamInfoDTO();
