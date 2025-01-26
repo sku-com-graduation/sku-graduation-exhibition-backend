@@ -12,5 +12,4 @@ import java.util.ArrayList;
 public class FindTeamInfoByYearDTO {
     private int year;
     private ArrayList<TeamInfoDTO> teams;
-    private ArrayList<ProfessorInfoDTO> professor;
 }
