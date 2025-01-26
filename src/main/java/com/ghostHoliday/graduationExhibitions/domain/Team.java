@@ -20,7 +20,7 @@ public class Team {
 
     private String name;
 
-    private int exhibition_year;
+    private int exhibitionYear;
 
     private Category category;
 }

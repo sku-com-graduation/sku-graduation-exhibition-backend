@@ -16,7 +16,7 @@ public class Account {
     private Long id;
 
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "teamId")
     private Team team;
 

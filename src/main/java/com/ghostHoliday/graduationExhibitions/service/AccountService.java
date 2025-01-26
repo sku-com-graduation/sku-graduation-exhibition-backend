@@ -2,14 +2,12 @@ package com.ghostHoliday.graduationExhibitions.service;
 
 import com.ghostHoliday.graduationExhibitions.domain.*;
 import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearDTO;
-import com.ghostHoliday.graduationExhibitions.dto.SaveStudentDTO;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
+import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwt;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,7 +71,7 @@ public class AccountService {
         for (Account account : accounts) {
             FindAccountByYearDTO findAccountByYearDTO = new FindAccountByYearDTO();
             Team team = account.getTeam();
-            if (year == team.getExhibition_year()){
+            if (year == team.getExhibitionYear()){
                 findAccountByYearDTO.setTeamName(team.getName());
                 findAccountByYearDTO.setUserEmail(account.getUserEmail());
                 findAccountByYearDTO.setRecent(account.getRecent());
@@ -120,7 +118,7 @@ public class AccountService {
         team.setName(teamName);
         team.setCategory(category);
         team.setProfessor(null); // 추 후 교수 정보로 변경
-        team.setExhibition_year(year);
+        team.setExhibitionYear(year);
         team.setPost(post);
         return team;
     }
