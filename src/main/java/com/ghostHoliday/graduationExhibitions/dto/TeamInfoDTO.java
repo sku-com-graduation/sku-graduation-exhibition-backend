@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TeamInfoDTO {
-    private Long teamId;
+    private String encryptedTeamId;
     private String name;
     private String professor;
     private Category category;
