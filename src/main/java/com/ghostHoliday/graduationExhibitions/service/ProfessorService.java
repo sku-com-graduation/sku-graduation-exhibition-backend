@@ -5,6 +5,7 @@ import com.ghostHoliday.graduationExhibitions.dto.FindProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.RegistProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.UpdateProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.repository.ProfessorRepository;
+import com.ghostHoliday.graduationExhibitions.utility.FileUtility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

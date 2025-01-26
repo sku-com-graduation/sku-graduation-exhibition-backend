@@ -1,4 +1,4 @@
-package com.ghostHoliday.graduationExhibitions.service;
+package com.ghostHoliday.graduationExhibitions.utility;
 
 
 import org.springframework.stereotype.Service;

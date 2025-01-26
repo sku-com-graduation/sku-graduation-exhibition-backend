@@ -6,6 +6,7 @@ import com.ghostHoliday.graduationExhibitions.domain.StudentProfile;
 import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentProfileDTO;
 import com.ghostHoliday.graduationExhibitions.repository.StudentProfileRepository;
 import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
+import com.ghostHoliday.graduationExhibitions.utility.FileUtility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
