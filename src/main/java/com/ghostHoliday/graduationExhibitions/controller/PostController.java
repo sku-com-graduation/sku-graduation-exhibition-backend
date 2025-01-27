@@ -31,4 +31,24 @@ public class PostController {
             return ResponseEntity.status(500).body("파일 업로드 실패: " + e.getMessage());
         }
     }
+
+    @PostMapping("update/post")
+    public ResponseEntity<String> updateSlideImages(
+            @RequestParam("token") String token,
+            @RequestParam("encryptionTeamId") String encryptionTeamId,
+            @RequestParam("teamProfileImg") MultipartFile teamProfileImg,
+            @RequestParam("demo") MultipartFile demo,
+            @RequestParam("poster") MultipartFile poster)
+            throws Exception {
+        try {
+            postService.updatePostInfo(token,encryptionTeamId,teamProfileImg,demo,poster);
+            return ResponseEntity.ok("파일 업로드에 성공했습니다.");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("파일 업로드 실패: " + e.getMessage());
+        }
+    }
+
+
 }
