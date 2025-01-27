@@ -61,11 +61,8 @@ public class PostService {
         }
 
         Post post = team.getPost();
-        String uploadDir = "teamPost" + "\\" + post.getUuid() + "\\" + "slideImage";
+        String uploadDir = post.getSlideUrl();
         File directory = new File(uploadDir);
-        if(!directory.exists()){
-            directory.mkdirs();
-        }
         cleanDirectory(directory);
 
         long currentFileCount = Files.list(Paths.get(uploadDir))
