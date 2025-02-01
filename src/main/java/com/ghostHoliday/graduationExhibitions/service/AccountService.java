@@ -2,6 +2,7 @@ package com.ghostHoliday.graduationExhibitions.service;
 
 import com.ghostHoliday.graduationExhibitions.domain.*;
 import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearDTO;
+import com.ghostHoliday.graduationExhibitions.dto.LoginDTO;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
@@ -9,6 +10,7 @@ import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -31,10 +34,14 @@ public class AccountService {
     private final JwtUtility jwtUtility;
 
     @Transactional
-    public String login(String userEmail, String password) {
+    public LoginDTO login(String userEmail, String password) {
         Account account = accountRepository.findAccountByuserEmailAndPwd(userEmail, password)
                 .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 잘못되었습니다."));
-        return jwtUtility.generateToken(userEmail);
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setToken(jwtUtility.generateToken(userEmail));
+        loginDTO.setRole(account.getRole());
+        loginDTO.setTeamName(account.getTeam().getName());
+        return loginDTO;
     }
 
     @Transactional
