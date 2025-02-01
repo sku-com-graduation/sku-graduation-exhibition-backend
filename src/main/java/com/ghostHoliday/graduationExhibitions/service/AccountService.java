@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
@@ -52,6 +53,13 @@ public class AccountService {
 
             // 해당 팀의 post 생성
             Post post = createNewPost();
+            //포스트 저장폴더 생성
+            String uploadDir = "teamPost" + "\\" + post.getUuid();
+            File directory = new File(uploadDir);
+            if(!directory.exists()){
+                directory.mkdirs();
+            }
+
             postRepository.save(post);
 
             // 팀 생성
@@ -108,10 +116,23 @@ public class AccountService {
         Post post = new Post();
         post.setTitle(null);
         post.setContent(null);
-        post.setSlideUrl(null);
-        post.setPosterUrl(null);
-        post.setDemoUrl(null);
-        post.setTeamProfileUrl(null);
+        // 슬라이드 저장 폴더 생성
+        String uploadSlideDir = "teamPost" + "\\" + post.getUuid() + "\\" + "slideImage";
+        File slideDir = new File(uploadSlideDir);
+        if(!slideDir.exists()){
+            slideDir.mkdirs();
+        }
+        post.setSlideUrl(uploadSlideDir);
+
+        //포스트 저장폴더 생성
+        String uploadPostDir = "teamPost" + "\\" + post.getUuid();
+        File postDir = new File(uploadPostDir);
+        if(!postDir.exists()){
+            postDir.mkdirs();
+        }
+        post.setPosterUrl(uploadPostDir + "\\" + "poster");
+        post.setDemoUrl(uploadPostDir + "\\" + "demo");
+        post.setTeamProfileUrl(uploadPostDir + "\\" + "teamProfile");
 
         return post;
     }
@@ -136,5 +157,6 @@ public class AccountService {
         account.setTeam(team);
         return account;
     }
+
 }
 

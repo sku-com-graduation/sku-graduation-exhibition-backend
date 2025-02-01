@@ -23,7 +23,7 @@ import java.util.List;
 public class AccountController {
     private final AccountService accountService;
 
-    @PostMapping("login")
+    @PostMapping("/login")
     public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
         try {
             String token = accountService.login(username, password);

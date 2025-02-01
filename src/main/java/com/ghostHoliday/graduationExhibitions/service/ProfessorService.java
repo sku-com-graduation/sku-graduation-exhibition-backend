@@ -56,7 +56,7 @@ public class ProfessorService {
         }
 
         // 파일 확장자 추출 (jpg 또는 png)
-        String extension = fileUtility.getFileExtension(professorImage .getOriginalFilename());
+        String extension = fileUtility.getImageFileExtension(professorImage .getOriginalFilename());
         if (extension == null) {
             throw new RuntimeException("지원되지 않는 파일 형식입니다.");
         }
@@ -120,7 +120,7 @@ public class ProfessorService {
         }
 
         // 파일 확장자 추출
-        String extension = fileUtility.getFileExtension(professorImage.getOriginalFilename());
+        String extension = fileUtility.getImageFileExtension(professorImage.getOriginalFilename());
         if (extension == null || (!extension.equalsIgnoreCase("jpg") && !extension.equalsIgnoreCase("png"))) {
             throw new RuntimeException("지원되지 않는 파일 형식입니다.");
         }
