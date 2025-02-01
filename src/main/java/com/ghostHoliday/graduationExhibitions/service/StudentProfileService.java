@@ -84,7 +84,7 @@ public class StudentProfileService {
         }
 
         // 파일 확장자 추출 (jpg 또는 png)
-        String extension = fileUtility.getFileExtension(profileImage.getOriginalFilename());
+        String extension = fileUtility.getImageFileExtension(profileImage.getOriginalFilename());
         if (extension == null) {
             throw new RuntimeException("지원되지 않는 파일 형식입니다.");
         }
