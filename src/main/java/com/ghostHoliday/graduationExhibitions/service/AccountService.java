@@ -5,6 +5,7 @@ import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearDTO;
 import com.ghostHoliday.graduationExhibitions.dto.LoginDTO;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
+import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.CSVReader;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,7 @@ public class AccountService {
     private final TeamRepository teamRepository;
     private final PostRepository postRepository;
     private final JwtUtility jwtUtility;
+    private final StudentRepository studentRepository;
 
     @Transactional
     public LoginDTO login(String userEmail, String password) {
@@ -46,17 +49,14 @@ public class AccountService {
 
     @Transactional
     public void registAccount(MultipartFile file) throws IOException, CsvException {
-        CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream(), "EUC-KR"));
+        CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
         List<String []> rows = csvReader.readAll();
-        ArrayList<Team> teams = new ArrayList<>();
         ArrayList<Account> accounts = new ArrayList<>();
         int year = LocalDateTime.now().getYear();
         for (String[] row : rows) {
             String teamName = row[0];
             Category category = Category.valueOf(row[1]);
             String professorName = row[2];
-            String studentNumber = row[3];
-            String userEmail = row[4];
 
             // 해당 팀의 post 생성
             Post post = createNewPost();
@@ -68,20 +68,32 @@ public class AccountService {
             }
 
             postRepository.save(post);
-
             // 팀 생성
             Team team = createTeam(teamName, category, year, post);
-            teams.add(team);
+            teamRepository.save(team);
 
-            // 계정 생성
-            Account account = createAccount(userEmail, studentNumber, team);
-            accounts.add(account);
-
+            for(int i = 1; i < 6; i++) {
+                String name = row[3*i];
+                String number = row[3*i+1];
+                String email = row[3*i+2];
+                Student student = studentRepository.findByStudentNumber(number);
+                if (i == 1){
+                    // 팀장이라면 계정 생성
+                    student.setRole(Role.LEADER);
+                    Account account = createAccount(email, number, team);
+                    accounts.add(account);
+                }
+                else {
+                    student.setRole(Role.MEMBER);
+                }
+                student.setTeam(team);
+                student.getStudentProfile().setStudentEmail(email);
+            }
         }
-        
         accountRepository.saveAll(accounts);
-        teamRepository.saveAll(teams);
+
     }
+
     @Transactional
     public ArrayList<FindAccountByYearDTO> findAllAccountByYear(int year) {
         List<Account> accounts = accountRepository.findAll();
