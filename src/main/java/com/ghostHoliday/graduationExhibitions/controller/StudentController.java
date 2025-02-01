@@ -5,6 +5,7 @@ import com.ghostHoliday.graduationExhibitions.dto.SearchStudentDTO;
 import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentDTO;
 import com.ghostHoliday.graduationExhibitions.service.StudentService;
 import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -28,7 +30,7 @@ public class StudentController {
     public ResponseEntity<String> saveStudents(@RequestParam("file") MultipartFile file) {
         try {
             // CSV 파일을 OpenCSV로 읽음
-            try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream() , "EUC-KR"))) {
+            try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream() , StandardCharsets.UTF_8))) {
                 List<String[]> rows = csvReader.readAll(); // 파일의 모든 내용을 읽어옴
 
                 // CSV 파일에서 각 행을 SaveStudentDTO로 변환
@@ -93,7 +95,6 @@ public class StudentController {
         // 결과가 있으면 200 OK와 함께 응답
         return ResponseEntity.ok(students);
     }
-
 
 
 }
