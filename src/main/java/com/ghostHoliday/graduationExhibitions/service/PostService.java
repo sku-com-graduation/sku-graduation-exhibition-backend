@@ -1,10 +1,10 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
-import com.ghostHoliday.graduationExhibitions.domain.Account;
-import com.ghostHoliday.graduationExhibitions.domain.Post;
-import com.ghostHoliday.graduationExhibitions.domain.Team;
+import com.ghostHoliday.graduationExhibitions.domain.*;
+import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentProfileByPostDTO;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
+import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
 import com.ghostHoliday.graduationExhibitions.utility.FileUtility;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
@@ -27,14 +27,11 @@ import java.util.Objects;
 @Transactional(readOnly = true)
 public class PostService {
     private final PostRepository postRepository;
-    private final TeamRepository teamRepository;
-    private final AccountRepository accountRepository;
     private final EncryptionService encryptionService;
     private final AccountService accountService;
-    private final JwtUtility jwtUtility;
+    private final StudentRepository studentRepository;
     private final FileUtility fileUtility;
     private final int MAX_IMAGES = 10;
-
 
 
     public Long save(Post post) {
@@ -146,6 +143,26 @@ public class PostService {
         } catch (IOException e) {
             throw new RuntimeException("파일 업로드 중 오류 발생: " + e.getMessage(), e);
         }
+    }
+
+    @Transactional
+    public void updateStudentProfileByPost(String token, UpdateStudentProfileByPostDTO dto) throws Exception {
+        Account account = accountService.tokenToAccount(token);
+        Team team = account.getTeam();
+
+        Long decryptedTeamId = encryptionService.decryptPrimaryKey(dto.getEncryptedTeamId());
+
+        if (!Objects.equals(team.getId(), decryptedTeamId)){
+            throw new IllegalArgumentException("잘못된 처리입니다.");
+        }
+        Long studentId = encryptionService.decryptPrimaryKey(dto.getEncryptedStudentId());
+        StudentProfile studentProfile = studentRepository.findById(studentId).get().getStudentProfile();
+        studentProfile.setInfo(dto.getInfo());
+        studentProfile.setGithubUrl(dto.getGithubUrl());
+        studentProfile.setStudentEmail(dto.getStudentEmail());
+        studentProfile.setStudentBlog(dto.getStudentBlog());
+
+
     }
 
     static void cleanDirectory(File directory) {
