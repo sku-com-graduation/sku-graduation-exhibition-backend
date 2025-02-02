@@ -4,6 +4,7 @@ package com.ghostHoliday.graduationExhibitions.controller;
 import com.ghostHoliday.graduationExhibitions.domain.Account;
 import com.ghostHoliday.graduationExhibitions.dto.*;
 import com.ghostHoliday.graduationExhibitions.service.AccountService;
+import com.ghostHoliday.graduationExhibitions.service.EncryptionService;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.exceptions.CsvException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +24,7 @@ import java.util.*;
 @RequestMapping("account")
 public class AccountController {
     private final AccountService accountService;
+    private final EncryptionService encryptionService;
 
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody LoginRequestDTO request) {
@@ -70,11 +72,20 @@ public class AccountController {
 
     @DeleteMapping("/admin/delete")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public ResponseEntity<String> deleteAccount(@RequestParam String token) {
-        Account account = accountService.tokenToAccount(token);
+    public ResponseEntity<String> deleteAccount(@RequestBody List<String> encryptedAccountIds) throws Exception {
+
+        if (encryptedAccountIds == null || encryptedAccountIds.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("토큰 리스트가 비어 있습니다.");
+        }
+        ArrayList<Long> accountIds = new ArrayList<>();
         try {
-            accountService.deleteAccount(account.getId());
-            return ResponseEntity.ok(account.getUserEmail() + " 계정을 성공적으로 삭제했습니다.");
+            for (String encryptedAccountId : encryptedAccountIds) {
+                Long accountId = encryptionService.decryptPrimaryKey(encryptedAccountId);
+                accountIds.add(accountId);
+            }
+            accountService.deleteAccount(accountIds);
+            return ResponseEntity.ok("계정을 성공적으로 삭제했습니다.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("계정을 삭제하지 못했습니다." + e.getMessage());
         }
@@ -83,17 +94,17 @@ public class AccountController {
 
     @PostMapping("/admin/reset")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public ResponseEntity<String> resetAccount(@RequestBody List<String> tokens) {
+    public ResponseEntity<String> resetAccount(@RequestBody List<String> encryptedAccountIds) throws Exception {
         ArrayList<Long> accountsId = new ArrayList<>();
 
-        if (tokens == null || tokens.isEmpty()) {
+        if (encryptedAccountIds == null || encryptedAccountIds.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("토큰 리스트가 비어 있습니다.");
         }
 
-        for (String token : tokens) {
-            Account account = accountService.tokenToAccount(token);
-            accountsId.add(account.getId());
+        for (String encryptedAccountId : encryptedAccountIds) {
+            Long accountId = encryptionService.decryptPrimaryKey(encryptedAccountId);
+            accountsId.add(accountId);
         }
 
         try {

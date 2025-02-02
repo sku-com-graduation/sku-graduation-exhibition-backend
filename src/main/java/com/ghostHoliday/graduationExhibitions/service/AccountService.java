@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -128,8 +129,8 @@ public class AccountService {
     }
 
     @Transactional
-    public void deleteAccount(Long accountId){
-        accountRepository.deleteById(accountId);
+    public void deleteAccount(ArrayList<Long> accountIds){
+        accountRepository.deleteAllById(accountIds);
     }
 
     @Transactional
