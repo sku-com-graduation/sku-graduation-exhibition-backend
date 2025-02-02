@@ -21,12 +21,11 @@ import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("account")
 public class AccountController {
     private final AccountService accountService;
     private final EncryptionService encryptionService;
 
-    @PostMapping("/login")
+    @PostMapping("account/login")
     public ResponseEntity<Object> login(@RequestBody LoginRequestDTO request) {
         try {
             LoginDTO dto = accountService.login(request.getUserName(), request.getPassword());
@@ -40,7 +39,7 @@ public class AccountController {
 
     }
 
-    @PostMapping("/admin/regist")
+    @PostMapping("admin/account/regist")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<String> registAccountAndTeam(@RequestBody MultipartFile file) {
 
@@ -59,7 +58,7 @@ public class AccountController {
         }
     }
 
-    @GetMapping("/admin/search")
+    @GetMapping("admin/account/search")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<FindAccountByYearResponseDTO> searchAccount(@RequestParam int year) throws Exception {
         ArrayList<FindAccountByYearDTO> accounts = accountService.findAllAccountByYear(year);
@@ -70,7 +69,7 @@ public class AccountController {
 
     }
 
-    @DeleteMapping("/admin/delete")
+    @DeleteMapping("admin/account/delete")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<String> deleteAccount(@RequestBody List<String> encryptedAccountIds) throws Exception {
 
@@ -92,7 +91,7 @@ public class AccountController {
 
     }
 
-    @PostMapping("/admin/reset")
+    @PostMapping("admin/account/reset")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<String> resetAccount(@RequestBody List<String> encryptedAccountIds) throws Exception {
         ArrayList<Long> accountsId = new ArrayList<>();
