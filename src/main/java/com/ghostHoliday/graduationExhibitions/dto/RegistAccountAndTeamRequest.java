@@ -1,15 +1,13 @@
 package com.ghostHoliday.graduationExhibitions.dto;
 
-import com.ghostHoliday.graduationExhibitions.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginDTO {
-    private String token;
-    private Role role;
-    private String teamName;
+public class RegistAccountAndTeamRequest {
+    private MultipartFile file;
 }

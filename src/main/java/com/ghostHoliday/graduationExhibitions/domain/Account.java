@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.sql.Blob;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Data
@@ -26,7 +27,8 @@ public class Account {
 
     private String pwd;
 
-    private LocalTime recent;
+    private LocalDateTime recent;
 
+    @Enumerated(EnumType.STRING)
     private Role role = Role.MEMBER;
 }
