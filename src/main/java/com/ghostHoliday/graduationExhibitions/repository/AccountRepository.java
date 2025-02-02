@@ -19,6 +19,5 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     void deleteByTeamId(Long teamId);
 
-    Optional<Account> findAccountByuserEmailAndPwd(String userEmail, String password);
 
 }
