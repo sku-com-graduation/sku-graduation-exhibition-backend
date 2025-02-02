@@ -27,7 +27,7 @@ public class AccountController {
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody LoginRequestDTO request) {
         try {
-            LoginDTO dto = accountService.login(request.getUsername(), request.getPassword());
+            LoginDTO dto = accountService.login(request.getUserName(), request.getPassword());
             return ResponseEntity.ok(dto);
         }catch (IllegalArgumentException e) {
             Map<String, String> errorResponse = new HashMap<>();
