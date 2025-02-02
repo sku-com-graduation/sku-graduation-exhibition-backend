@@ -39,6 +39,7 @@ public class AccountService {
     private final JwtUtility jwtUtility;
     private final StudentRepository studentRepository;
     private final TokenService tokenService;
+    private final EncryptionService encryptionService;
 
     @Transactional
     public LoginDTO login(String userEmail, String password) {
@@ -101,13 +102,15 @@ public class AccountService {
     }
 
     @Transactional
-    public ArrayList<FindAccountByYearDTO> findAllAccountByYear(int year) {
+    public ArrayList<FindAccountByYearDTO> findAllAccountByYear(int year) throws Exception {
         List<Account> accounts = accountRepository.findAll();
         ArrayList<FindAccountByYearDTO> findAccountByYearDTOS = new ArrayList<>();
         for (Account account : accounts) {
+            String encryptedAccountId = encryptionService.encryptPrimaryKey(account.getId());
             FindAccountByYearDTO findAccountByYearDTO = new FindAccountByYearDTO();
             Team team = account.getTeam();
             if (year == team.getExhibitionYear()){
+                findAccountByYearDTO.setEncryptedAccountId(encryptedAccountId);
                 findAccountByYearDTO.setTeamName(team.getName());
                 findAccountByYearDTO.setUserEmail(account.getUserEmail());
                 findAccountByYearDTO.setRecent(account.getRecent());

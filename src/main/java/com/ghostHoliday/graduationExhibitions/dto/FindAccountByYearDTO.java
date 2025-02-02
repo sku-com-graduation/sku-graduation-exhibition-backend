@@ -11,6 +11,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FindAccountByYearDTO {
+    private String encryptedAccountId;
     private String teamName;
     private String userEmail;
     private LocalDateTime recent;
