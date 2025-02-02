@@ -5,6 +5,7 @@ import com.ghostHoliday.graduationExhibitions.domain.Account;
 import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearDTO;
 import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearResponseDTO;
 import com.ghostHoliday.graduationExhibitions.dto.LoginDTO;
+import com.ghostHoliday.graduationExhibitions.dto.LoginRequestDTO;
 import com.ghostHoliday.graduationExhibitions.service.AccountService;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.exceptions.CsvException;
@@ -24,9 +25,9 @@ public class AccountController {
     private final AccountService accountService;
 
     @PostMapping("/login")
-    public ResponseEntity<Object> login(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<Object> login(@RequestBody LoginRequestDTO request) {
         try {
-            LoginDTO dto = accountService.login(username, password);
+            LoginDTO dto = accountService.login(request.getUsername(), request.getPassword());
             return ResponseEntity.ok(dto);
         }catch (IllegalArgumentException e) {
             Map<String, String> errorResponse = new HashMap<>();
