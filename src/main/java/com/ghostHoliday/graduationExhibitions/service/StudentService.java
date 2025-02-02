@@ -33,6 +33,7 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final StudentProfileService studentProfileService;
     private final TeamRepository teamRepository;
+    private final EncryptionService encryptionService;
 
     @Transactional
     public void saveStudents( List<SaveStudentDTO> dto) {
@@ -100,10 +101,11 @@ public class StudentService {
 
 
     @Transactional
-    public void updateStudents(List<UpdateStudentDTO> dto) {
+    public void updateStudents(List<UpdateStudentDTO> dto) throws Exception {
         for (UpdateStudentDTO studentDTO : dto) {
             // 학생을 조회하여 업데이트
-            Student student = studentRepository.findById(studentDTO.getStudentId())
+
+            Student student = studentRepository.findById(encryptionService.decryptPrimaryKey(studentDTO.getEncryptedStudentId()))
                     .orElseThrow(() -> new RuntimeException("학생을 찾을 수 없습니다."));
 
             // Role Enum 처리 (Role 값이 비어있지 않으면 업데이트)
@@ -111,10 +113,9 @@ public class StudentService {
                 Role role = Role.valueOf(studentDTO.getRole().toUpperCase());  // role을 Enum으로 변환
                 student.setRole(role);  // Role을 Enum으로 설정
             }
-
             // Team 객체 처리 (teamId 값이 비어있지 않으면 팀 업데이트)
-            if (studentDTO.getTeamId() != null) {
-                Team team = teamRepository.findById(studentDTO.getTeamId())
+            if (encryptionService.decryptPrimaryKey(studentDTO.getEncryptedTeamId()) != null) {
+                Team team = teamRepository.findById(encryptionService.decryptPrimaryKey(studentDTO.getEncryptedTeamId()))
                         .orElseThrow(() -> new RuntimeException("팀을 찾을 수 없습니다."));
                 student.setTeam(team);  // Team 객체를 설정
             }
@@ -143,14 +144,20 @@ public class StudentService {
 
         // Student -> SearchStudentDTO로 변환
         return students.stream()
-                .map(student -> new SearchStudentDTO(
-                        student.getId(),
-                        student.getTeam() != null ? student.getTeam().getId() : null, // 팀 ID
-                        student.getName(),
-                        student.getStudentNumber(),
-                        student.getRole().name(), // Role을 문자열로 변환
-                        student.getExhibitionYear()
-                ))
+                .map(student -> {
+                    try {
+                        return new SearchStudentDTO(
+                                encryptionService.encryptPrimaryKey(student.getId()),
+                                student.getTeam() != null ? encryptionService.encryptPrimaryKey(student.getTeam().getId()) : null, // 팀 ID
+                                student.getName(),
+                                student.getStudentNumber(),
+                                student.getRole().name(), // Role을 문자열로 변환
+                                student.getExhibitionYear()
+                        );
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .collect(Collectors.toList());
     }
 
