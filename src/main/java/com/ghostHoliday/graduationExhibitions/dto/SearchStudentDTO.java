@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SearchStudentDTO{
-    private Long studentId;
-    private Long teamId;
+    private String encryptedStudentId;
+    private String encryptedTeamId;
     private String name;
     private String studentNumber;
     private String role;
