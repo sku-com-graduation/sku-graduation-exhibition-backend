@@ -2,16 +2,16 @@ package com.ghostHoliday.graduationExhibitions.controller;
 
 
 import com.ghostHoliday.graduationExhibitions.domain.Account;
-import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearDTO;
-import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearResponseDTO;
-import com.ghostHoliday.graduationExhibitions.dto.LoginDTO;
-import com.ghostHoliday.graduationExhibitions.dto.LoginRequestDTO;
+import com.ghostHoliday.graduationExhibitions.dto.*;
 import com.ghostHoliday.graduationExhibitions.service.AccountService;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.exceptions.CsvException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,6 +28,7 @@ public class AccountController {
     public ResponseEntity<Object> login(@RequestBody LoginRequestDTO request) {
         try {
             LoginDTO dto = accountService.login(request.getUserName(), request.getPassword());
+
             return ResponseEntity.ok(dto);
         }catch (IllegalArgumentException e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -37,8 +38,10 @@ public class AccountController {
 
     }
 
-    @PostMapping("/regist")
+    @PostMapping("/admin/regist")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<String> registAccountAndTeam(@RequestBody MultipartFile file) {
+
         try {
             accountService.registAccount(file);
             return ResponseEntity.status(HttpStatus.CREATED).body("계정 및 팀 정보가 성공적으로 등록되었습니다.");
@@ -54,7 +57,8 @@ public class AccountController {
         }
     }
 
-    @GetMapping("/search")
+    @GetMapping("/admin/search")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<FindAccountByYearResponseDTO> searchAccount(@RequestParam int year) {
         ArrayList<FindAccountByYearDTO> accounts = accountService.findAllAccountByYear(year);
         if (accounts.isEmpty()) {
@@ -64,7 +68,8 @@ public class AccountController {
 
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/admin/delete")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<String> deleteAccount(@RequestParam String token) {
         Account account = accountService.tokenToAccount(token);
         try {
@@ -76,7 +81,8 @@ public class AccountController {
 
     }
 
-    @PostMapping("/reset")
+    @PostMapping("/admin/reset")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<String> resetAccount(@RequestBody List<String> tokens) {
         ArrayList<Long> accountsId = new ArrayList<>();
 
