@@ -40,9 +40,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/account/login").permitAll()
+                        .requestMatchers("team/search/teamPost").permitAll()
+                        .requestMatchers("account/login").permitAll()
                         .requestMatchers("admin/**").hasRole("ADMIN") // ADMIN만 접근 가능
-                        .requestMatchers("/student/save").hasRole("ADMIN") // ADMIN만 접근 가능
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtility), UsernamePasswordAuthenticationFilter.class);

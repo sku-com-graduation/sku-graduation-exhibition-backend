@@ -43,7 +43,7 @@ public class TeamService {
             // PK 암호화 후 저장
             String encryptedPrimaryKey = encryptionService.encryptPrimaryKey(team.getId());
             findTeamPostInfoByYearDTO.setTeamName(team.getName());
-            findTeamPostInfoByYearDTO.setTeamId(encryptedPrimaryKey);
+            findTeamPostInfoByYearDTO.setEncryptedTeamId(encryptedPrimaryKey);
             findTeamPostInfoByYearDTO.setTitle(post.getTitle());
             findTeamPostInfoByYearDTO.setTeamProfileImage(null);
             findTeamPostInfoByYearDTO.setCategory(team.getCategory());
