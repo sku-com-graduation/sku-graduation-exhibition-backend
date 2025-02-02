@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
@@ -21,12 +22,11 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("team")
 public class TeamController {
     private final TeamService teamService;
-    private final TokenService tokenService;
 
-    @GetMapping("/search/teamPost")
+
+    @GetMapping("team/search/teamPost")
     public ResponseEntity<List<FindPostInfoByYearDTO>> findPostsInfoByYear(@RequestParam int year) throws Exception {
         List<FindPostInfoByYearDTO> teams = teamService.findPostsInfoByYear(year);
         if (teams.isEmpty()) {
@@ -35,7 +35,8 @@ public class TeamController {
         return ResponseEntity.ok(teams);
     }
 
-    @DeleteMapping("delete")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @DeleteMapping("admin/team/delete")
     public ResponseEntity<String> deleteTeam(@RequestBody List<String> encryptionTeamIds) throws Exception {
         try {
             teamService.deleteTeam(encryptionTeamIds);
@@ -43,10 +44,10 @@ public class TeamController {
         } catch (Exception e) {
             return ResponseEntity.noContent().build();
         }
-
     }
 
-    @PatchMapping("update")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PatchMapping("admin/team/update")
     public ResponseEntity<List<ResponseTeamInfoDTO>> updateTeamInfo(@RequestBody List<UpdateTeamInfoDTO> updateTeamInfoDTOS) throws Exception {
 
         try {
@@ -69,14 +70,14 @@ public class TeamController {
         }
     }
 
-    @GetMapping("search/teamInfo")
-    public ResponseEntity<FindTeamInfoByYearDTO> findTeamInfoByYear(@RequestParam int year, String token) throws Exception {
-//            if (!tokenService.isAdmin(token)) {
-//                throw new AccessDeniedException("관리자 권한이 필요합니다.");
-//            }
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @GetMapping("admin/team/search/teamInfo")
+    public ResponseEntity<FindTeamInfoByYearDTO> findTeamInfoByYear(@RequestParam int year) throws Exception {
+
         FindTeamInfoByYearDTO teamInfo = teamService.findTeamInfoByYear(year);
         return ResponseEntity.ok(teamInfo);
     }
+
 }
 
 
