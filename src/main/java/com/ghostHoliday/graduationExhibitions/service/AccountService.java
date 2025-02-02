@@ -3,6 +3,7 @@ package com.ghostHoliday.graduationExhibitions.service;
 import com.ghostHoliday.graduationExhibitions.domain.*;
 import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearDTO;
 import com.ghostHoliday.graduationExhibitions.dto.LoginDTO;
+import com.ghostHoliday.graduationExhibitions.dto.RegistAccountAndTeamRequest;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
 import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
@@ -12,6 +13,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,13 +38,15 @@ public class AccountService {
     private final PostRepository postRepository;
     private final JwtUtility jwtUtility;
     private final StudentRepository studentRepository;
+    private final TokenService tokenService;
 
     @Transactional
     public LoginDTO login(String userEmail, String password) {
         Account account = accountRepository.findAccountByuserEmailAndPwd(userEmail, password)
                 .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 잘못되었습니다."));
+        account.setRecent(LocalDateTime.now());
         LoginDTO loginDTO = new LoginDTO();
-        loginDTO.setToken(jwtUtility.generateToken(userEmail));
+        loginDTO.setToken(jwtUtility.generateToken(userEmail,account.getRole()));
         loginDTO.setRole(account.getRole());
         loginDTO.setTeamName(account.getTeam().getName());
         return loginDTO;
@@ -49,6 +54,7 @@ public class AccountService {
 
     @Transactional
     public void registAccount(MultipartFile file) throws IOException, CsvException {
+
         CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
         List<String []> rows = csvReader.readAll();
         ArrayList<Account> accounts = new ArrayList<>();

@@ -3,11 +3,11 @@ package com.ghostHoliday.graduationExhibitions.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginRequestDTO {
-    private String userName;
-    private String password;
+public class RegistAccountAndTeamRequest {
+    private MultipartFile file;
 }

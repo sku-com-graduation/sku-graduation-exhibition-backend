@@ -22,5 +22,6 @@ public class Team {
 
     private int exhibitionYear;
 
+    @Enumerated(EnumType.STRING)
     private Category category;
 }

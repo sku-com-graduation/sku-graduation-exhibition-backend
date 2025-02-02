@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginDTO {
-    String token;
-    Role role;
-    String teamName;
+    private String token;
+    private Role role;
+    private String teamName;
 }
