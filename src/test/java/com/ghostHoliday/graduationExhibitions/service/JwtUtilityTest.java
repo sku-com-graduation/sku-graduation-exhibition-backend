@@ -1,5 +1,6 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
+import com.ghostHoliday.graduationExhibitions.domain.Role;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ class JwtUtilityTest {
     @Test
     void generateToken() {
         String userEmail = "juns0720@sungkyul.ac.kr";
-        String token = jwtUtility.generateToken(userEmail);
+        String token = jwtUtility.generateToken(userEmail, Role.ADMIN);
         Claims claims = jwtUtility.validateToken(token);
 
 

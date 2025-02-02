@@ -2,15 +2,17 @@ package com.ghostHoliday.graduationExhibitions.controller;
 
 
 import com.ghostHoliday.graduationExhibitions.domain.Account;
-import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearDTO;
-import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearResponseDTO;
-import com.ghostHoliday.graduationExhibitions.dto.LoginDTO;
+import com.ghostHoliday.graduationExhibitions.dto.*;
 import com.ghostHoliday.graduationExhibitions.service.AccountService;
+import com.ghostHoliday.graduationExhibitions.service.EncryptionService;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.exceptions.CsvException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,11 +24,13 @@ import java.util.*;
 @RequestMapping("account")
 public class AccountController {
     private final AccountService accountService;
+    private final EncryptionService encryptionService;
 
     @PostMapping("/login")
-    public ResponseEntity<Object> login(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<Object> login(@RequestBody LoginRequestDTO request) {
         try {
-            LoginDTO dto = accountService.login(username, password);
+            LoginDTO dto = accountService.login(request.getUserName(), request.getPassword());
+
             return ResponseEntity.ok(dto);
         }catch (IllegalArgumentException e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -36,8 +40,10 @@ public class AccountController {
 
     }
 
-    @PostMapping("/regist")
+    @PostMapping("/admin/regist")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<String> registAccountAndTeam(@RequestBody MultipartFile file) {
+
         try {
             accountService.registAccount(file);
             return ResponseEntity.status(HttpStatus.CREATED).body("계정 및 팀 정보가 성공적으로 등록되었습니다.");
@@ -53,8 +59,9 @@ public class AccountController {
         }
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<FindAccountByYearResponseDTO> searchAccount(@RequestParam int year) {
+    @GetMapping("/admin/search")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity<FindAccountByYearResponseDTO> searchAccount(@RequestParam int year) throws Exception {
         ArrayList<FindAccountByYearDTO> accounts = accountService.findAllAccountByYear(year);
         if (accounts.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -63,30 +70,41 @@ public class AccountController {
 
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteAccount(@RequestParam String token) {
-        Account account = accountService.tokenToAccount(token);
+    @DeleteMapping("/admin/delete")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity<String> deleteAccount(@RequestBody List<String> encryptedAccountIds) throws Exception {
+
+        if (encryptedAccountIds == null || encryptedAccountIds.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("토큰 리스트가 비어 있습니다.");
+        }
+        ArrayList<Long> accountIds = new ArrayList<>();
         try {
-            accountService.deleteAccount(account.getId());
-            return ResponseEntity.ok(account.getUserEmail() + " 계정을 성공적으로 삭제했습니다.");
+            for (String encryptedAccountId : encryptedAccountIds) {
+                Long accountId = encryptionService.decryptPrimaryKey(encryptedAccountId);
+                accountIds.add(accountId);
+            }
+            accountService.deleteAccount(accountIds);
+            return ResponseEntity.ok("계정을 성공적으로 삭제했습니다.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("계정을 삭제하지 못했습니다." + e.getMessage());
         }
 
     }
 
-    @PostMapping("/reset")
-    public ResponseEntity<String> resetAccount(@RequestBody List<String> tokens) {
+    @PostMapping("/admin/reset")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity<String> resetAccount(@RequestBody List<String> encryptedAccountIds) throws Exception {
         ArrayList<Long> accountsId = new ArrayList<>();
 
-        if (tokens == null || tokens.isEmpty()) {
+        if (encryptedAccountIds == null || encryptedAccountIds.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("토큰 리스트가 비어 있습니다.");
         }
 
-        for (String token : tokens) {
-            Account account = accountService.tokenToAccount(token);
-            accountsId.add(account.getId());
+        for (String encryptedAccountId : encryptedAccountIds) {
+            Long accountId = encryptionService.decryptPrimaryKey(encryptedAccountId);
+            accountsId.add(accountId);
         }
 
         try {

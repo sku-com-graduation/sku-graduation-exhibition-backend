@@ -1,6 +1,5 @@
 package com.ghostHoliday.graduationExhibitions.dto;
 
-import com.ghostHoliday.graduationExhibitions.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,8 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginDTO {
-    private String token;
-    private Role role;
-    private String teamName;
+public class LoginRequestDTO {
+    private String userName;
+    private String password;
 }

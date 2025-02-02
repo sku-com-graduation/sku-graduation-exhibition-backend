@@ -9,6 +9,7 @@ import com.opencsv.exceptions.CsvException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +28,7 @@ public class StudentController {
 
     // CSV 파일을 받아서 처리하는 메소드
     @PostMapping("/save")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<String> saveStudents(@RequestParam("file") MultipartFile file) {
         try {
             // CSV 파일을 OpenCSV로 읽음
