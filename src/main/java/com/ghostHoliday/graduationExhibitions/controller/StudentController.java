@@ -3,6 +3,7 @@ package com.ghostHoliday.graduationExhibitions.controller;
 import com.ghostHoliday.graduationExhibitions.dto.SaveStudentDTO;
 import com.ghostHoliday.graduationExhibitions.dto.SearchStudentDTO;
 import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentDTO;
+import com.ghostHoliday.graduationExhibitions.service.EncryptionService;
 import com.ghostHoliday.graduationExhibitions.service.StudentService;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
@@ -13,18 +14,21 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.thymeleaf.expression.Ids;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("student")
+@RequestMapping("admin/student")
 public class StudentController {
     private final StudentService studentService;
+    private final EncryptionService encryptionService;
 
     // CSV 파일을 받아서 처리하는 메소드
     @PostMapping("/save")
@@ -53,12 +57,19 @@ public class StudentController {
                     .body("학생 정보 저장 중 오류가 발생했습니다. 파일 형식 또는 내용 확인을 해주세요.");
         }
     }
-
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteStudents(@RequestBody List<Long> ids) {
+    public ResponseEntity<String> deleteStudents(@RequestBody List<String> encryptedStudentIds) {
+
+        ArrayList<Long> teamIds = new ArrayList<>();
         try {
             // 학생 삭제 로직 호출
-            studentService.deleteStudents(ids);
+            for (String encryptedTeamId : encryptedStudentIds) {
+                Long accountId = encryptionService.decryptPrimaryKey(encryptedTeamId);
+                teamIds.add(accountId);
+            }
+
+            studentService.deleteStudents(teamIds);
 
             // 성공적인 처리 후 응답
             return ResponseEntity.ok("학생들이 성공적으로 삭제되었습니다.");
@@ -68,7 +79,7 @@ public class StudentController {
         }
     }
 
-
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PatchMapping("/update")
     public ResponseEntity<String> updateStudents(@RequestBody List<UpdateStudentDTO> dto) {
         try {
@@ -83,7 +94,7 @@ public class StudentController {
         }
     }
 
-
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @GetMapping("/search")
     public ResponseEntity<List<SearchStudentDTO>> searchStudents(@RequestParam("year") String year) {
         // 학생 리스트를 조회하는 로직 (Service 호출)
