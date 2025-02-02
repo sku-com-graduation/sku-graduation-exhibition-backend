@@ -1,4 +1,4 @@
-package com.ghostHoliday.graduationExhibitions.Config;
+package com.ghostHoliday.graduationExhibitions.config;
 
 import com.ghostHoliday.graduationExhibitions.utility.JwtAuthenticationFilter;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -21,6 +23,11 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtUtility jwtUtility;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     public SecurityConfig(JwtUtility jwtUtility) {
         this.jwtUtility = jwtUtility;

@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface TeamRepository extends JpaRepository<Team, Long> {
     public List<Team> findAllByExhibitionYear(int year);
+    public Team findByName(String name);
 }

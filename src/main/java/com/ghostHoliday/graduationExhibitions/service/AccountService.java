@@ -14,6 +14,7 @@ import com.opencsv.exceptions.CsvException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,13 +40,17 @@ public class AccountService {
     private final PostRepository postRepository;
     private final JwtUtility jwtUtility;
     private final StudentRepository studentRepository;
-    private final TokenService tokenService;
     private final EncryptionService encryptionService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public LoginDTO login(String userEmail, String password) {
-        Account account = accountRepository.findAccountByuserEmailAndPwd(userEmail, password)
-                .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 잘못되었습니다."));
+        System.out.println(userEmail);
+        Account account = accountRepository.findAccountByUserEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("아이디가 잘못되었습니다."));
+        if (!passwordEncoder.matches(password,account.getPwd())){
+            throw new RuntimeException("비밀번호가 잘못되었습니다.");
+        }
         account.setRecent(LocalDateTime.now());
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setToken(jwtUtility.generateToken(userEmail,account.getRole()));
