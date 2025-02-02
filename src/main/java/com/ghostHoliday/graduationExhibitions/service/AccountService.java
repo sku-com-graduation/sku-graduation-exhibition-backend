@@ -71,8 +71,8 @@ public class AccountService {
             // 팀 생성
             Team team = createTeam(teamName, category, year, post);
             teamRepository.save(team);
-
-            for(int i = 1; i < 6; i++) {
+            int total = (row.length / 3);
+            for(int i = 1; i < total; i++) {
                 String name = row[3*i];
                 String number = row[3*i+1];
                 String email = row[3*i+2];
