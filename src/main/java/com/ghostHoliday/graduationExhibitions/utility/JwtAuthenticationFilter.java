@@ -24,16 +24,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return path.startsWith("/public/");  // ✅ /public/** 경로는 필터 제외
+    }
+
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         String requestURI = request.getRequestURI();
-
-        // 🔹 로그인 요청(`/account/login`)은 필터 통과
-        if (requestURI.equals("/account/login")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         String token = extractToken(request);
 
