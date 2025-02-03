@@ -31,18 +31,18 @@ public class ProfessorService {
     private final FileUtility fileUtility;
 
     @Transactional
-    public void registProfessor( RegistProfessorDTO dto, MultipartFile professorImage) throws IOException {
+    public void registProfessor(RegistProfessorDTO dto) throws IOException {
         
         // 교수 객체 생성
         Professor professor = new Professor();
         professor.setName(dto.getName());
         professor.setEmail(dto.getEmail());
         professor.setTenure(dto.isTenure());
-
+        MultipartFile profileImage = dto.getProfileImage();
 
         // 프로필 이미지 처리 (파일이 존재하는 경우)
-        if (professorImage != null && !professorImage.isEmpty()) {
-            String profileImagePath = saveProfessorImage(professorImage);
+        if (profileImage != null && !profileImage.isEmpty()) {
+            String profileImagePath = saveProfessorImage(profileImage);
             professor.setImageUrl(profileImagePath);
         }
 
@@ -56,13 +56,10 @@ public class ProfessorService {
         }
 
         // 파일 확장자 추출 (jpg 또는 png)
-        String extension = fileUtility.getImageFileExtension(professorImage .getOriginalFilename());
+        String extension = fileUtility.getImageFileExtension(profileImage .getOriginalFilename());
         if (extension == null) {
             throw new RuntimeException("지원되지 않는 파일 형식입니다.");
         }
-
-
-
         professorRepository.save(professor);
     }
 
@@ -102,11 +99,6 @@ public class ProfessorService {
             Files.deleteIfExists(path);  // 파일이 존재하면 삭제
         }
     }
-
-
-
-
-
 
     // 프로필 이미지 저장 메소드
     private String saveProfessorImage(MultipartFile professorImage) throws IOException {
