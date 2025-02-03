@@ -1,5 +1,6 @@
 package com.ghostHoliday.graduationExhibitions.controller;
 
+import com.ghostHoliday.graduationExhibitions.dto.SearchPostInfoDTO;
 import com.ghostHoliday.graduationExhibitions.dto.UpdateSlideImageDTO;
 import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentProfileByPostDTO;
 import com.ghostHoliday.graduationExhibitions.dto.UpdateTeamPostDTO;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -58,7 +61,7 @@ public class PostController {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
-    @PatchMapping("user/update/studentProfile")
+    @PatchMapping("user/post/update/studentProfile")
     public ResponseEntity<String> updateStudentProfile(
             @ModelAttribute UpdateStudentProfileByPostDTO dto,
             @RequestHeader("Authorization") String token
@@ -69,6 +72,17 @@ public class PostController {
         } catch (Exception e){
             return ResponseEntity.status(500).body("학생 정보 수정에 실패했습니다." + e.getMessage());
         }
+    }
+
+    @PostMapping("public/post/search")
+    public ResponseEntity<SearchPostInfoDTO> searchPost(@RequestBody Map<String, String> requestBody) throws Exception {
+//        try {
+            String encryptedTeamId = requestBody.get("encryptedTeamId");
+            SearchPostInfoDTO result = postService.searchPostInfo(encryptedTeamId);
+            return ResponseEntity.ok(result);
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().build();
+//        }
     }
 
 
