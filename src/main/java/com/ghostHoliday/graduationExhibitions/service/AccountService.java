@@ -53,7 +53,7 @@ public class AccountService {
         }
         account.setRecent(LocalDateTime.now());
         LoginDTO loginDTO = new LoginDTO();
-        loginDTO.setToken(jwtUtility.generateToken(userEmail,account.getRole()));
+        loginDTO.setAccessToken(jwtUtility.generateToken(userEmail,account.getRole()));
         loginDTO.setRole(account.getRole());
         if (account.getRole().equals(Role.ADMIN))
             loginDTO.setTeamName(null);
