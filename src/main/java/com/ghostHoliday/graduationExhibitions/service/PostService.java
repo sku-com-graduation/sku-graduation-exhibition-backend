@@ -44,25 +44,47 @@ public class PostService {
     public SearchPostInfoDTO searchPostInfo(String encryptedTeamId) throws Exception {
         Long requestTeamId = encryptionService.decryptPrimaryKey(encryptedTeamId);
 
-
         List<StudentInfoDTO> studentInfoDTOS = new ArrayList<>();
         List<Student> students = studentRepository.findAllByTeamId(requestTeamId);
+
         for (Student student : students) {
+            System.out.println(student + " 현재 학생");
+
             StudentInfoDTO studentInfoDTO = new StudentInfoDTO();
             StudentProfile studentProfile = student.getStudentProfile();
 
-            studentInfoDTO.setName(student.getName());
-            studentInfoDTO.setInfo(studentProfile.getInfo());
-            studentInfoDTO.setRole(student.getRole());
-            studentInfoDTO.setGithubUrl(studentProfile.getGithubUrl());
-            studentInfoDTO.setStudentEmail(studentProfile.getStudentEmail());
-            studentInfoDTO.setStudentBlog(studentProfile.getStudentBlog());
-            studentInfoDTO.setProfileImage(encodeFileToBase64(studentProfile.getStudentProfileUrl()));
+            // 이름 (null 체크)
+            studentInfoDTO.setName(student.getName() != null ? student.getName() : "이름 없음");
+
+            // 정보 (null 체크)
+            studentInfoDTO.setInfo(studentProfile.getInfo() != null ? studentProfile.getInfo() : "정보 없음");
+
+            // 역할 (null 체크)
+            studentInfoDTO.setRole(student.getRole() != null ? student.getRole() : null);
+
+            // Github URL (null 체크)
+            studentInfoDTO.setGithubUrl(studentProfile.getGithubUrl() != null ? studentProfile.getGithubUrl() : "Github URL 없음");
+
+            // 이메일 (null 체크)
+            studentInfoDTO.setStudentEmail(studentProfile.getStudentEmail() != null ? studentProfile.getStudentEmail() : "이메일 없음");
+
+            // 블로그 (null 체크)
+            studentInfoDTO.setStudentBlog(studentProfile.getStudentBlog() != null ? studentProfile.getStudentBlog() : "블로그 없음");
+
+            // 프로필 이미지 URL (null 체크)
+            String profileImageUrl = studentProfile.getStudentProfileUrl();
+            studentInfoDTO.setProfileImage(profileImageUrl != null && !profileImageUrl.isEmpty()
+                    ? encodeFileToBase64(profileImageUrl)
+                    : ""); // 기본값은 빈 문자열로 설정 (혹은 기본 이미지를 설정할 수 있음)
 
             studentInfoDTOS.add(studentInfoDTO);
         }
 
+
+
+
         Team team = teamRepository.findById(requestTeamId).get();
+
         Post post = team.getPost();
         PostTeamInfoDTO postTeamInfoDTO = new PostTeamInfoDTO();
         postTeamInfoDTO.setProjectName(post.getTitle());
@@ -71,6 +93,7 @@ public class PostService {
         postTeamInfoDTO.setSlideImages(slideImagesToBase64(post.getSlideUrl()));
         postTeamInfoDTO.setPosterImage(encodeFileToBase64(post.getPosterUrl()));
         postTeamInfoDTO.setDemoVideo(encodeFileToBase64(post.getDemoUrl()));
+
 
         return new SearchPostInfoDTO(studentInfoDTOS, postTeamInfoDTO);
     }
