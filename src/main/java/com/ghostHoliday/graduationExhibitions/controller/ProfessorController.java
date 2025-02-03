@@ -80,7 +80,7 @@ public class ProfessorController {
 
 
 
-
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteStudents(
             @RequestBody List<String> encryptedProfessorIds) {
