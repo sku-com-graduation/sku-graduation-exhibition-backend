@@ -1,9 +1,7 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
 import com.ghostHoliday.graduationExhibitions.domain.*;
-import com.ghostHoliday.graduationExhibitions.dto.UpdateSlideImageDTO;
-import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentProfileByPostDTO;
-import com.ghostHoliday.graduationExhibitions.dto.UpdateTeamPostDTO;
+import com.ghostHoliday.graduationExhibitions.dto.*;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
 import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
@@ -15,11 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +37,42 @@ public class PostService {
 
     public Long save(Post post) {
         return postRepository.save(post).getId();
+    }
+
+
+    @Transactional
+    public SearchPostInfoDTO searchPostInfo(String encryptedTeamId) throws Exception {
+        Long requestTeamId = encryptionService.decryptPrimaryKey(encryptedTeamId);
+
+
+        List<StudentInfoDTO> studentInfoDTOS = new ArrayList<>();
+        List<Student> students = studentRepository.findAllByTeamId(requestTeamId);
+        for (Student student : students) {
+            StudentInfoDTO studentInfoDTO = new StudentInfoDTO();
+            StudentProfile studentProfile = student.getStudentProfile();
+
+            studentInfoDTO.setName(student.getName());
+            studentInfoDTO.setInfo(studentProfile.getInfo());
+            studentInfoDTO.setRole(student.getRole());
+            studentInfoDTO.setGithubUrl(studentProfile.getGithubUrl());
+            studentInfoDTO.setStudentEmail(studentProfile.getStudentEmail());
+            studentInfoDTO.setStudentBlog(studentProfile.getStudentBlog());
+            studentInfoDTO.setProfileImage(encodeFileToBase64(studentProfile.getStudentProfileUrl()));
+
+            studentInfoDTOS.add(studentInfoDTO);
+        }
+
+        Team team = teamRepository.findById(requestTeamId).get();
+        Post post = team.getPost();
+        PostTeamInfoDTO postTeamInfoDTO = new PostTeamInfoDTO();
+        postTeamInfoDTO.setProjectName(post.getTitle());
+        postTeamInfoDTO.setExplanation(post.getContent());
+        postTeamInfoDTO.setTeamProfileImage(encodeFileToBase64(post.getTeamProfileUrl()));
+        postTeamInfoDTO.setSlideImages(slideImagesToBase64(post.getSlideUrl()));
+        postTeamInfoDTO.setPosterImage(encodeFileToBase64(post.getPosterUrl()));
+        postTeamInfoDTO.setDemoVideo(encodeFileToBase64(post.getDemoUrl()));
+
+        return new SearchPostInfoDTO(studentInfoDTOS, postTeamInfoDTO);
     }
 
     @Transactional
@@ -219,6 +255,33 @@ public class PostService {
 
         // 저장된 파일 경로 반환
         return path.toString();
+    }
+
+    public static String encodeFileToBase64(String filePath) throws IOException {
+        File imageFile = new File(filePath);
+        FileInputStream fileInputStream = new FileInputStream(imageFile);
+
+        byte[] imageBytes = fileInputStream.readAllBytes();
+        fileInputStream.close();
+
+        return Base64.getEncoder().encodeToString(imageBytes);
+    }
+
+    public static List<String> slideImagesToBase64(String folderPath) throws IOException {
+        try (Stream<Path> paths = Files.list(Paths.get(folderPath))) {
+            List<String> slideImages = new ArrayList<>();
+            paths.filter(Files::isRegularFile) // 파일만 선택 (디렉토리 제외)
+                    .forEach(path -> {
+                        try {
+                            String base64 = encodeFileToBase64(String.valueOf(path));
+                            slideImages.add(base64);
+                        } catch (IOException e) {
+                            System.err.println("파일 변환 실패: " + path);
+                            e.printStackTrace();
+                        }
+                    });
+            return slideImages;
+        }
     }
 
 }
