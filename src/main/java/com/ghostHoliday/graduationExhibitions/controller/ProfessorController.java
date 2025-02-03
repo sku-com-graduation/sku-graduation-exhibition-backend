@@ -83,22 +83,10 @@ public class ProfessorController {
 
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteStudents(
-            @RequestHeader("Authorization") String token,
-            @RequestBody List<Long> ids) {
-
-        // "Bearer " 부분을 제외한 실제 JWT 토큰만 추출
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);  // "Bearer " 길이만큼 잘라냄
-        }
-
+            @RequestBody List<String> encryptedProfessorIds) {
         try {
-
-            // 토큰 검증
-            // Claims claims = jwtUtility.validateToken(token); // 토큰 유효성 검사
-
-
             // 학생 삭제 로직 호출
-            professorService.deleteProfessors(ids);
+            professorService.deleteProfessors(encryptedProfessorIds);
 
             // 성공적인 처리 후 응답
             return ResponseEntity.ok("교수 정보가 성공적으로 삭제되었습니다.");
