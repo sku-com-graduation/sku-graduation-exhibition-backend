@@ -2,6 +2,7 @@ package com.ghostHoliday.graduationExhibitions.controller;
 
 import com.ghostHoliday.graduationExhibitions.dto.UpdateSlideImageDTO;
 import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentProfileByPostDTO;
+import com.ghostHoliday.graduationExhibitions.dto.UpdateTeamPostDTO;
 import com.ghostHoliday.graduationExhibitions.service.PostService;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import io.jsonwebtoken.Jwt;
@@ -27,7 +28,8 @@ public class PostController {
     @PatchMapping("user/post/update/slideImage")
     public ResponseEntity<String> updateSlideImages(
             @ModelAttribute UpdateSlideImageDTO dto,
-            @RequestHeader("Authorization") String token) throws Exception {
+            @RequestHeader("Authorization") String token
+    ) throws Exception {
         try {
 
             postService.updateSlideImage(dto, jwtUtility.getEmailFromToken(token));
@@ -39,16 +41,14 @@ public class PostController {
         }
     }
 
-    @PatchMapping("update/teamPost")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    @PatchMapping("user/post/update/teamPost")
     public ResponseEntity<String> updateTeamPost(
-            @RequestParam("token") String token,
-            @RequestParam("encryptionTeamId") String encryptionTeamId,
-            @RequestParam("teamProfileImg") MultipartFile teamProfileImg,
-            @RequestParam("demo") MultipartFile demo,
-            @RequestParam("poster") MultipartFile poster)
-            throws Exception {
+            @ModelAttribute UpdateTeamPostDTO dto,
+            @RequestHeader("Authorization") String token
+    ) throws Exception {
         try {
-            postService.updatePostInfo(token,encryptionTeamId,teamProfileImg,demo,poster);
+            postService.updatePostInfo(dto, jwtUtility.getEmailFromToken(token));
             return ResponseEntity.ok("파일 업로드에 성공했습니다.");
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
