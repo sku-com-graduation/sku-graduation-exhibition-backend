@@ -43,36 +43,15 @@ public class ProfessorController {
                 }
     }
 
-
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PatchMapping("/update")
     public ResponseEntity<String> updateProfessor(
-            @RequestParam("dto") String dtoJson,  // dto는 String으로 받아서 파싱
-            @RequestParam(value = "professorImage", required = false) MultipartFile professorImage) {
+            @ModelAttribute UpdateProfessorDTO dto) {
 
-        // JSON 문자열을 DTO로 변환
-        ObjectMapper objectMapper = new ObjectMapper();
-        UpdateProfessorDTO dto;
 
         try {
-            // JSON 문자열을 DTO로 변환
-            dto = objectMapper.readValue(dtoJson, UpdateProfessorDTO.class);
-
-            // 토큰 검증
-            if (dto.getToken() != null) {
-                try {
-                    //Claims claims = jwtUtility.validateToken(dto.getToken());
-                } catch (JwtException e) {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token");
-                }
-            }
-
-            // 교수 ID 확인
-            if (dto.getProfessorId() == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("교수 ID가 필요합니다.");
-            }
-
             // 교수 정보 업데이트
-            professorService.updateProfessor(dto, professorImage);
+            professorService.updateProfessor(dto);
             return ResponseEntity.ok("교수 정보 변경 성공");
 
         } catch (JsonProcessingException e) {

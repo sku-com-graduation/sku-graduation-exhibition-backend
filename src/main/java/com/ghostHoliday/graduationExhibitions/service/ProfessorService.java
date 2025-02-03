@@ -67,9 +67,9 @@ public class ProfessorService {
 
 
     @Transactional
-    public void updateProfessor(UpdateProfessorDTO dto, MultipartFile professorImage) throws IOException {
+    public void updateProfessor(UpdateProfessorDTO dto) throws Exception {
         // 기존 교수 정보를 찾아옵니다.
-        Professor professor = professorRepository.findById(dto.getProfessorId())
+        Professor professor = professorRepository.findById(encryptionService.decryptPrimaryKey(dto.getEncryptedProfessorId()))
                 .orElseThrow(() -> new RuntimeException("교수 정보를 찾을 수 없습니다."));
 
         // 교수 정보 업데이트
@@ -82,11 +82,11 @@ public class ProfessorService {
         if (existingImagePath != null && !existingImagePath.isEmpty()) {
             deleteImage(existingImagePath);
         }
-
+        MultipartFile profileImage = dto.getProfileImage();
         // 프로필 이미지 처리 (파일이 존재하는 경우)
-        if (professorImage != null && !professorImage.isEmpty()) {
+        if (profileImage != null && !profileImage.isEmpty()) {
             // 새로운 이미지 저장
-            String profileImagePath = saveProfessorImage(professorImage);
+            String profileImagePath = saveProfessorImage(profileImage);
             professor.setImageUrl(profileImagePath);
         }
 
