@@ -7,6 +7,7 @@ import com.ghostHoliday.graduationExhibitions.dto.UpdateProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.repository.ProfessorRepository;
 import com.ghostHoliday.graduationExhibitions.utility.FileUtility;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,20 +30,21 @@ public class ProfessorService {
 
     private final ProfessorRepository professorRepository;
     private final FileUtility fileUtility;
+    private final EncryptionService encryptionService;
 
     @Transactional
-    public void registProfessor( RegistProfessorDTO dto, MultipartFile professorImage) throws IOException {
+    public void registProfessor(RegistProfessorDTO dto) throws IOException {
         
         // 교수 객체 생성
         Professor professor = new Professor();
         professor.setName(dto.getName());
         professor.setEmail(dto.getEmail());
         professor.setTenure(dto.isTenure());
-
+        MultipartFile profileImage = dto.getProfileImage();
 
         // 프로필 이미지 처리 (파일이 존재하는 경우)
-        if (professorImage != null && !professorImage.isEmpty()) {
-            String profileImagePath = saveProfessorImage(professorImage);
+        if (profileImage != null && !profileImage.isEmpty()) {
+            String profileImagePath = saveProfessorImage(profileImage);
             professor.setImageUrl(profileImagePath);
         }
 
@@ -56,21 +58,18 @@ public class ProfessorService {
         }
 
         // 파일 확장자 추출 (jpg 또는 png)
-        String extension = fileUtility.getImageFileExtension(professorImage .getOriginalFilename());
+        String extension = fileUtility.getImageFileExtension(profileImage .getOriginalFilename());
         if (extension == null) {
             throw new RuntimeException("지원되지 않는 파일 형식입니다.");
         }
-
-
-
         professorRepository.save(professor);
     }
 
 
     @Transactional
-    public void updateProfessor(UpdateProfessorDTO dto, MultipartFile professorImage) throws IOException {
+    public void updateProfessor(UpdateProfessorDTO dto) throws Exception {
         // 기존 교수 정보를 찾아옵니다.
-        Professor professor = professorRepository.findById(dto.getProfessorId())
+        Professor professor = professorRepository.findById(encryptionService.decryptPrimaryKey(dto.getEncryptedProfessorId()))
                 .orElseThrow(() -> new RuntimeException("교수 정보를 찾을 수 없습니다."));
 
         // 교수 정보 업데이트
@@ -83,11 +82,11 @@ public class ProfessorService {
         if (existingImagePath != null && !existingImagePath.isEmpty()) {
             deleteImage(existingImagePath);
         }
-
+        MultipartFile profileImage = dto.getProfileImage();
         // 프로필 이미지 처리 (파일이 존재하는 경우)
-        if (professorImage != null && !professorImage.isEmpty()) {
+        if (profileImage != null && !profileImage.isEmpty()) {
             // 새로운 이미지 저장
-            String profileImagePath = saveProfessorImage(professorImage);
+            String profileImagePath = saveProfessorImage(profileImage);
             professor.setImageUrl(profileImagePath);
         }
 
@@ -102,11 +101,6 @@ public class ProfessorService {
             Files.deleteIfExists(path);  // 파일이 존재하면 삭제
         }
     }
-
-
-
-
-
 
     // 프로필 이미지 저장 메소드
     private String saveProfessorImage(MultipartFile professorImage) throws IOException {
@@ -137,33 +131,38 @@ public class ProfessorService {
     }
 
 
+    @SneakyThrows
     public List<FindProfessorDTO> findAllProfessors() {
-
         return professorRepository.findAll().stream()
-                .map(this::convertToFindProfessorDTO)
+                .map(professor -> {
+                    try {
+                        return convertToFindProfessorDTO(professor);
+                    } catch (Exception e) {
+                        e.printStackTrace(); // 예외 로그 출력
+                        return new FindProfessorDTO(); // 예외 발생 시 기본 DTO 반환
+                    }
+                })
                 .collect(Collectors.toList());
-
-
     }
 
     private FindProfessorDTO convertToFindProfessorDTO(Professor professor) {
         FindProfessorDTO dto = new FindProfessorDTO();
-        dto.setProfessorId(professor.getId());
-        dto.setName(professor.getName());
-        dto.setEmail(professor.getEmail());
-        dto.setTenure(professor.isTenure());
 
-        // 이미지 경로가 있다면 해당 이미지를 Base64로 변환
-        if (professor.getImageUrl() != null) {
-            try {
-                String base64Image = convertImageToBase64(professor.getImageUrl());
-                dto.setProfileImg(base64Image);
-            } catch (IOException e) {
-                e.printStackTrace();
-                // 예외 처리, 기본 이미지 또는 null 반환
-                dto.setProfileImg(null);
+        try {
+            dto.setEncryptedProfessorId(encryptionService.encryptPrimaryKey(professor.getId()));
+            dto.setName(professor.getName());
+            dto.setEmail(professor.getEmail());
+            dto.setTenure(professor.isTenure());
+
+            // 이미지 경로가 있다면 Base64 변환
+            if (professor.getImageUrl() != null) {
+                dto.setProfileImg(convertImageToBase64(professor.getImageUrl()));
             }
+        } catch (Exception e) {
+            e.printStackTrace(); // 예외 발생 시 로그 기록
+            dto.setProfileImg(null); // 예외 발생 시 기본값 설정
         }
+
         return dto;
     }
 
@@ -180,10 +179,10 @@ public class ProfessorService {
 
 
     @Transactional
-    public void deleteProfessors(List<Long> ids) {
-        for (Long id : ids) {
+    public void deleteProfessors(List<String> encryptedIds) throws Exception {
+        for (String encryptedId : encryptedIds) {
             // 교수 정보 가져오기
-            Professor professor = professorRepository.findById(id).get();
+            Professor professor = professorRepository.findById(encryptionService.decryptPrimaryKey(encryptedId)).get();
 
             // 이미지 파일 경로 가져오기
             String imagePath = professor.getImageUrl();
