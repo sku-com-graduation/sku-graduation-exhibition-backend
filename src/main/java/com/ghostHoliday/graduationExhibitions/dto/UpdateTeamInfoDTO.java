@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateTeamInfoDTO {
     private String encryptedTeamId;
-    private String encryptedprofessorId;
+    private String encryptedProfessorId;
     private String name;
     private int exhibitionYear;
     private Category category;

@@ -9,7 +9,6 @@ import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
 import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
 import com.ghostHoliday.graduationExhibitions.utility.FileUtility;
-import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -44,15 +41,14 @@ public class PostService {
 
     @Transactional
     public void updatePostInfo(UpdateTeamPostDTO dto, String userEmail) throws Exception {
-        Long requestedTeamId  = encryptionService.decryptPrimaryKey(dto.getEncryptionTeamId());
+        Long requestedTeamId  = encryptionService.decryptPrimaryKey(dto.getEncryptedTeamId());
 
         Account account = accountRepository.findAccountByUserEmail(userEmail)
                 .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
-        System.out.println(userEmail);
-        System.out.println(account.getRole());
+
         Team userTeam = account.getTeam();
         if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(requestedTeamId))) {
-            throw new IllegalStateException("해당 팀의 슬라이드를 수정할 권한이 없습니다.");
+            throw new IllegalStateException("해당 팀의 포스트를 수정할 권한이 없습니다.");
         }
 
         Team team = teamRepository.findById(requestedTeamId)
@@ -65,10 +61,9 @@ public class PostService {
         if (teamProfileExtension == null) {
             throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + dto.getTeamProfileImg().getOriginalFilename());
         }
-
-        String teamProfileFileName = "." + teamProfileExtension;
-        Path teamProfileFilePath = Paths.get(post.getTeamProfileUrl() + teamProfileFileName);
-
+        String teamProfilefileName = "teamProfile." + teamProfileExtension;
+        Path teamProfileFilePath = Paths.get("teamPost",post.getUuid(),teamProfilefileName);
+        post.setTeamProfileUrl(teamProfileFilePath.toString());
         // 기존 파일 삭제
         if (Files.exists(teamProfileFilePath)) {
             Files.delete(teamProfileFilePath);
@@ -81,10 +76,9 @@ public class PostService {
         if (demoExtension == null) {
             throw new IllegalStateException("avi, mp4, mkv 파일만 업로드 가능합니다. " + dto.getDemo().getOriginalFilename());
         }
-
-        String demoFileName = "." + demoExtension;
-        Path demoFilePath = Paths.get(post.getDemoUrl() + demoFileName);
-
+        String demoFileName = "demo."+demoExtension;
+        Path demoFilePath = Paths.get("teamPost",post.getUuid(),demoFileName);
+        post.setDemoUrl(demoFilePath.toString());
         // 기존 파일 삭제
         if (Files.exists(demoFilePath)) {
             Files.delete(demoFilePath);
@@ -97,10 +91,9 @@ public class PostService {
         if (posterExtension == null) {
             throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + dto.getPoster().getOriginalFilename());
         }
-
-        String posterFileName = "." + posterExtension;
-        Path posterFilePath = Paths.get(post.getPosterUrl() + posterFileName);
-
+        String posterFileName = "poster." + posterExtension;
+        Path posterFilePath = Paths.get("teamPost",post.getUuid(),posterFileName);
+        post.setPosterUrl(posterFilePath.toString());
         // 기존 파일 삭제
         if (Files.exists(posterFilePath)) {
             Files.delete(posterFilePath);
@@ -114,12 +107,11 @@ public class PostService {
     @Transactional
     public void updateSlideImage(UpdateSlideImageDTO dto, String userEmail) throws Exception {
         try{
-        Long requestedTeamId  = encryptionService.decryptPrimaryKey(dto.getEncryptionTeamId());
+        Long requestedTeamId  = encryptionService.decryptPrimaryKey(dto.getEncryptedTeamId());
 
         Account account = accountRepository.findAccountByUserEmail(userEmail)
                 .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
-            System.out.println(userEmail);
-            System.out.println(account.getRole());
+
         Team userTeam = account.getTeam();
         if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(requestedTeamId))) {
             throw new IllegalStateException("해당 팀의 슬라이드를 수정할 권한이 없습니다.");
@@ -165,21 +157,34 @@ public class PostService {
     }
 
     @Transactional
-    public void updateStudentProfileByPost(String token, UpdateStudentProfileByPostDTO dto) throws Exception {
-        Account account = accountService.tokenToAccount(token);
-        Team team = account.getTeam();
+    public void updateStudentProfileByPost(UpdateStudentProfileByPostDTO dto, String userEmail) throws Exception {
+        Long requestedTeamId  = encryptionService.decryptPrimaryKey(dto.getEncryptedTeamId());
+        Long requestedStudentId  = encryptionService.decryptPrimaryKey(dto.getEncryptedStudentId());
 
-        Long decryptedTeamId = encryptionService.decryptPrimaryKey(dto.getEncryptedTeamId());
 
-        if (!Objects.equals(team.getId(), decryptedTeamId)){
-            throw new IllegalArgumentException("잘못된 처리입니다.");
+        Account account = accountRepository.findAccountByUserEmail(userEmail)
+                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
+
+        Team userTeam = account.getTeam();
+        Student student = studentRepository.findById(requestedStudentId).get();
+        if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(requestedTeamId))) {
+            throw new IllegalStateException("해당 팀의 포스트를 수정할 권한이 없습니다.");
         }
-        Long studentId = encryptionService.decryptPrimaryKey(dto.getEncryptedStudentId());
-        StudentProfile studentProfile = studentRepository.findById(studentId).get().getStudentProfile();
-        studentProfile.setInfo(dto.getInfo());
+
+        if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(student.getTeam().getId()))) {
+            throw new IllegalStateException("해당 팀의 포스트를 수정할 권한이 없습니다.");
+        }
+
+        Team team = teamRepository.findById(requestedTeamId)
+                .orElseThrow(() -> new IllegalStateException("해당 팀을 찾을 수 없습니다."));
+
+        StudentProfile studentProfile = studentRepository.findById(requestedStudentId).get().getStudentProfile();
         studentProfile.setGithubUrl(dto.getGithubUrl());
         studentProfile.setStudentEmail(dto.getStudentEmail());
         studentProfile.setStudentBlog(dto.getStudentBlog());
+        studentProfile.setInfo(dto.getInfo());
+        String url = saveStudentProfileImage(dto.getProfileImage(), student.getStudentNumber());
+        studentProfile.setStudentProfileUrl(url);
 
 
     }
@@ -189,6 +194,32 @@ public class PostService {
         Arrays.stream(files).forEach(File::delete);
     }
 
+
+    private String saveStudentProfileImage(MultipartFile studentImage, String number) throws IOException {
+        // 저장할 디렉토리 경로
+        String uploadDir = "studentProfileImage";
+        File dir = new File(uploadDir);
+
+        // 디렉토리가 없으면 생성
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        // 파일 확장자 추출
+        String extension = fileUtility.getImageFileExtension(studentImage.getOriginalFilename());
+        if (extension == null || (!extension.equalsIgnoreCase("jpg") && !extension.equalsIgnoreCase("png"))) {
+            throw new RuntimeException("지원되지 않는 파일 형식입니다.");
+        }
+
+        String fileName = number + "." + extension;
+
+        // 파일을 실제 경로에 저장
+        Path path = Paths.get(uploadDir, fileName);
+        Files.write(path, studentImage.getBytes());
+
+        // 저장된 파일 경로 반환
+        return path.toString();
+    }
 
 }
 

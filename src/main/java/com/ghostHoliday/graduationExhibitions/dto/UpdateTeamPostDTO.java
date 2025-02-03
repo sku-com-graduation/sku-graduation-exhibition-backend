@@ -9,8 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateTeamPostDTO {
-    String encryptionTeamId;
-    MultipartFile teamProfileImg;
-    MultipartFile demo;
-    MultipartFile poster;
+    private String encryptedTeamId;
+    private MultipartFile teamProfileImg;
+    private MultipartFile demo;
+    private MultipartFile poster;
 }

@@ -12,6 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateSlideImageDTO {
-    private String encryptionTeamId;
+    private String encryptedTeamId;
     private List<MultipartFile> files;
 }
