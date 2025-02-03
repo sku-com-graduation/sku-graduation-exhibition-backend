@@ -7,6 +7,7 @@ import com.ghostHoliday.graduationExhibitions.dto.UpdateProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.repository.ProfessorRepository;
 import com.ghostHoliday.graduationExhibitions.utility.FileUtility;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +30,7 @@ public class ProfessorService {
 
     private final ProfessorRepository professorRepository;
     private final FileUtility fileUtility;
+    private final EncryptionService encryptionService;
 
     @Transactional
     public void registProfessor(RegistProfessorDTO dto) throws IOException {
@@ -129,33 +131,38 @@ public class ProfessorService {
     }
 
 
+    @SneakyThrows
     public List<FindProfessorDTO> findAllProfessors() {
-
         return professorRepository.findAll().stream()
-                .map(this::convertToFindProfessorDTO)
+                .map(professor -> {
+                    try {
+                        return convertToFindProfessorDTO(professor);
+                    } catch (Exception e) {
+                        e.printStackTrace(); // 예외 로그 출력
+                        return new FindProfessorDTO(); // 예외 발생 시 기본 DTO 반환
+                    }
+                })
                 .collect(Collectors.toList());
-
-
     }
 
     private FindProfessorDTO convertToFindProfessorDTO(Professor professor) {
         FindProfessorDTO dto = new FindProfessorDTO();
-        dto.setProfessorId(professor.getId());
-        dto.setName(professor.getName());
-        dto.setEmail(professor.getEmail());
-        dto.setTenure(professor.isTenure());
 
-        // 이미지 경로가 있다면 해당 이미지를 Base64로 변환
-        if (professor.getImageUrl() != null) {
-            try {
-                String base64Image = convertImageToBase64(professor.getImageUrl());
-                dto.setProfileImg(base64Image);
-            } catch (IOException e) {
-                e.printStackTrace();
-                // 예외 처리, 기본 이미지 또는 null 반환
-                dto.setProfileImg(null);
+        try {
+            dto.setEncryptedProfessorId(encryptionService.encryptPrimaryKey(professor.getId()));
+            dto.setName(professor.getName());
+            dto.setEmail(professor.getEmail());
+            dto.setTenure(professor.isTenure());
+
+            // 이미지 경로가 있다면 Base64 변환
+            if (professor.getImageUrl() != null) {
+                dto.setProfileImg(convertImageToBase64(professor.getImageUrl()));
             }
+        } catch (Exception e) {
+            e.printStackTrace(); // 예외 발생 시 로그 기록
+            dto.setProfileImg(null); // 예외 발생 시 기본값 설정
         }
+
         return dto;
     }
 

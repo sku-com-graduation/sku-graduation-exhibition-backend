@@ -83,7 +83,7 @@ public class ProfessorController {
         }
     }
 
-
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/search")
     public ResponseEntity<List<FindProfessorDTO>> findAllProfessors() {
 
@@ -92,9 +92,10 @@ public class ProfessorController {
             List<FindProfessorDTO> professors = professorService.findAllProfessors();
             return ResponseEntity.ok(professors);
 
-        } catch (IllegalArgumentException | JwtException e) {
-            // 토큰이 유효하지 않거나 검증 중 에러가 발생하면 401 Unauthorized 응답
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(401).body(null);  // 또는 적절한 오류 메시지
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
