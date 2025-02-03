@@ -25,7 +25,7 @@ public class AccountController {
     private final AccountService accountService;
     private final EncryptionService encryptionService;
 
-    @PostMapping("account/login")
+    @PostMapping("public/account/login")
     public ResponseEntity<Object> login(@RequestBody LoginRequestDTO request) {
         try {
             LoginDTO dto = accountService.login(request.getUserName(), request.getPassword());

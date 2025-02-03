@@ -6,18 +6,14 @@ import com.ghostHoliday.graduationExhibitions.dto.FindPostInfoByYearDTO;
 import com.ghostHoliday.graduationExhibitions.dto.FindTeamInfoByYearDTO;
 import com.ghostHoliday.graduationExhibitions.dto.ResponseTeamInfoDTO;
 import com.ghostHoliday.graduationExhibitions.dto.UpdateTeamInfoDTO;
-import com.ghostHoliday.graduationExhibitions.service.AccountService;
 import com.ghostHoliday.graduationExhibitions.service.TeamService;
-import com.ghostHoliday.graduationExhibitions.service.TokenService;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestController
@@ -26,7 +22,7 @@ public class TeamController {
     private final TeamService teamService;
 
 
-    @GetMapping("team/search/teamPost")
+    @GetMapping("public/team/search/teamPost")
     public ResponseEntity<List<FindPostInfoByYearDTO>> findPostsInfoByYear(@RequestParam int year) throws Exception {
         List<FindPostInfoByYearDTO> teams = teamService.findPostsInfoByYear(year);
         if (teams.isEmpty()) {

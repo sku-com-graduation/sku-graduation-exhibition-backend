@@ -1,6 +1,7 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
 import com.ghostHoliday.graduationExhibitions.domain.*;
+import com.ghostHoliday.graduationExhibitions.dto.UpdateSlideImageDTO;
 import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentProfileByPostDTO;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
@@ -32,6 +33,8 @@ public class PostService {
     private final StudentRepository studentRepository;
     private final FileUtility fileUtility;
     private final int MAX_IMAGES = 10;
+    private final TeamRepository teamRepository;
+    private final AccountRepository accountRepository;
 
 
     public Long save(Post post) {
@@ -101,15 +104,23 @@ public class PostService {
 
 
     @Transactional
-    public void updateSlideImage(String token,String encryptionTeamId, List<MultipartFile> files) throws Exception {
+    public void updateSlideImage(UpdateSlideImageDTO dto, String userEmail) throws Exception {
         try{
-        Account account = accountService.tokenToAccount(token);
-        Team team = account.getTeam();
-        Long decryptedTeamId = encryptionService.decryptPrimaryKey(encryptionTeamId);
+        Long requestedTeamId  = encryptionService.decryptPrimaryKey(dto.getEncryptionTeamId());
 
-        if (!Objects.equals(team.getId(), decryptedTeamId)){
-            throw new IllegalArgumentException("잘못된 처리입니다.");
+        Account account = accountRepository.findAccountByUserEmail(userEmail)
+                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
+            System.out.println(userEmail);
+            System.out.println(account.getRole());
+        Team userTeam = account.getTeam();
+        if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(requestedTeamId))) {
+            throw new IllegalStateException("해당 팀의 슬라이드를 수정할 권한이 없습니다.");
         }
+
+        Team team = teamRepository.findById(requestedTeamId)
+                .orElseThrow(() -> new IllegalStateException("해당 팀을 찾을 수 없습니다."));
+
+        List<MultipartFile> files = dto.getFiles();
 
         Post post = team.getPost();
         String uploadDir = post.getSlideUrl();

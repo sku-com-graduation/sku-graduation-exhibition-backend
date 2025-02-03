@@ -23,6 +23,8 @@ public class Student {
 
     @Column(name = "name", columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String name;
+
+    @Column(unique = true)
     private String studentNumber;
 
     @Enumerated(EnumType.STRING)
