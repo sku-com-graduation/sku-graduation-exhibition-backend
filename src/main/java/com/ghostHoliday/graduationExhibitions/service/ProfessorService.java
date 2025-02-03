@@ -179,10 +179,10 @@ public class ProfessorService {
 
 
     @Transactional
-    public void deleteProfessors(List<Long> ids) {
-        for (Long id : ids) {
+    public void deleteProfessors(List<String> encryptedIds) throws Exception {
+        for (String encryptedId : encryptedIds) {
             // 교수 정보 가져오기
-            Professor professor = professorRepository.findById(id).get();
+            Professor professor = professorRepository.findById(encryptionService.decryptPrimaryKey(encryptedId)).get();
 
             // 이미지 파일 경로 가져오기
             String imagePath = professor.getImageUrl();
