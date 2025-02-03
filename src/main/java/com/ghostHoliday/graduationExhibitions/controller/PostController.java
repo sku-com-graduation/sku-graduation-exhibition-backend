@@ -57,14 +57,14 @@ public class PostController {
         }
     }
 
-    @PatchMapping("update/studentProfile")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    @PatchMapping("user/update/studentProfile")
     public ResponseEntity<String> updateStudentProfile(
-            @RequestParam String token,
-            @RequestParam UpdateStudentProfileByPostDTO updateStudentProfileByPostDTO,
-            @RequestParam MultipartFile studentProfileImage
+            @ModelAttribute UpdateStudentProfileByPostDTO dto,
+            @RequestHeader("Authorization") String token
             ) throws Exception {
         try {
-            postService.updateStudentProfileByPost(token, updateStudentProfileByPostDTO);
+            postService.updateStudentProfileByPost(dto, jwtUtility.getEmailFromToken(token));
             return ResponseEntity.ok("학생 정보를 수정했습니다.");
         } catch (Exception e){
             return ResponseEntity.status(500).body("학생 정보 수정에 실패했습니다." + e.getMessage());
