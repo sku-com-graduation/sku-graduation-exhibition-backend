@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class FindProfessorDTO{
 
-    private Long professorId;
+    private String encryptedProfessorId;
     private String name;
     private String email;
     private String profileImg;
