@@ -1,9 +1,6 @@
 package com.ghostHoliday.graduationExhibitions.controller;
 
-import com.ghostHoliday.graduationExhibitions.dto.SearchPostInfoDTO;
-import com.ghostHoliday.graduationExhibitions.dto.UpdateSlideImageDTO;
-import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentProfileByPostDTO;
-import com.ghostHoliday.graduationExhibitions.dto.UpdateTeamPostDTO;
+import com.ghostHoliday.graduationExhibitions.dto.*;
 import com.ghostHoliday.graduationExhibitions.service.PostService;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import io.jsonwebtoken.Jwt;
@@ -74,15 +71,16 @@ public class PostController {
         }
     }
 
+
     @PostMapping("public/post/search")
-    public ResponseEntity<SearchPostInfoDTO> searchPost(@RequestBody Map<String, String> requestBody) throws Exception {
-//        try {
-            String encryptedTeamId = requestBody.get("encryptedTeamId");
-            SearchPostInfoDTO result = postService.searchPostInfo(encryptedTeamId);
+    public ResponseEntity<SearchPostInfoDTO> searchPost(@RequestBody SearchPostRequestDTO dto) throws Exception {
+        try {
+            System.out.println(dto.getEncryptedTeamId() + " 현재 암호팀번호");
+            SearchPostInfoDTO result = postService.searchPostInfo(dto.getEncryptedTeamId());
             return ResponseEntity.ok(result);
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().build();
-//        }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
 
