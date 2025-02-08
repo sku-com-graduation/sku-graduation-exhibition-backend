@@ -1,30 +1,38 @@
 package com.ghostHoliday.graduationExhibitions.controller;
 
-import com.ghostHoliday.graduationExhibitions.dto.UpdateSlideImageDTO;
-import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentProfileByPostDTO;
+import com.ghostHoliday.graduationExhibitions.dto.*;
 import com.ghostHoliday.graduationExhibitions.service.PostService;
+import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
+import io.jsonwebtoken.Jwt;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.sql.Update;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @RestController
-@RequestMapping ("post")
 @RequiredArgsConstructor
 public class PostController {
     
     private final PostService postService;
-    
-    @PatchMapping("update/slideImage")
+    private final JwtUtility jwtUtility;
+
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    @PatchMapping("user/post/update/slideImage")
     public ResponseEntity<String> updateSlideImages(
-            @RequestParam("token") String token,
-            @RequestParam("encryptionTeamId") String encryptionTeamId,
-            @RequestParam("files") List<MultipartFile> files) throws Exception {
+            @ModelAttribute UpdateSlideImageDTO dto,
+            @RequestHeader("Authorization") String token
+    ) throws Exception {
         try {
-            postService.updateSlideImage(token,encryptionTeamId,files);
+
+            postService.updateSlideImage(dto, jwtUtility.getEmailFromToken(token));
             return ResponseEntity.ok("파일 업로드에 성공했습니다.");
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -33,16 +41,14 @@ public class PostController {
         }
     }
 
-    @PatchMapping("update/teamPost")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    @PatchMapping("user/post/update/teamPost")
     public ResponseEntity<String> updateTeamPost(
-            @RequestParam("token") String token,
-            @RequestParam("encryptionTeamId") String encryptionTeamId,
-            @RequestParam("teamProfileImg") MultipartFile teamProfileImg,
-            @RequestParam("demo") MultipartFile demo,
-            @RequestParam("poster") MultipartFile poster)
-            throws Exception {
+            @ModelAttribute UpdateTeamPostDTO dto,
+            @RequestHeader("Authorization") String token
+    ) throws Exception {
         try {
-            postService.updatePostInfo(token,encryptionTeamId,teamProfileImg,demo,poster);
+            postService.updatePostInfo(dto, jwtUtility.getEmailFromToken(token));
             return ResponseEntity.ok("파일 업로드에 성공했습니다.");
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -51,17 +57,29 @@ public class PostController {
         }
     }
 
-    @PatchMapping("update/studentProfile")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    @PatchMapping("user/post/update/studentProfile")
     public ResponseEntity<String> updateStudentProfile(
-            @RequestParam String token,
-            @RequestParam UpdateStudentProfileByPostDTO updateStudentProfileByPostDTO,
-            @RequestParam MultipartFile studentProfileImage
+            @ModelAttribute UpdateStudentProfileByPostDTO dto,
+            @RequestHeader("Authorization") String token
             ) throws Exception {
         try {
-            postService.updateStudentProfileByPost(token, updateStudentProfileByPostDTO);
+            postService.updateStudentProfileByPost(dto, jwtUtility.getEmailFromToken(token));
             return ResponseEntity.ok("학생 정보를 수정했습니다.");
         } catch (Exception e){
             return ResponseEntity.status(500).body("학생 정보 수정에 실패했습니다." + e.getMessage());
+        }
+    }
+
+
+    @PostMapping("public/post/search")
+    public ResponseEntity<SearchPostInfoDTO> searchPost(@RequestBody SearchPostRequestDTO dto) throws Exception {
+        try {
+            System.out.println(dto.getEncryptedTeamId() + " 현재 암호팀번호");
+            SearchPostInfoDTO result = postService.searchPostInfo(dto.getEncryptedTeamId());
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 

@@ -19,7 +19,7 @@ public class JwtUtility {
 
     private static final long EXPIRATION_TIME = 1000L * 60 * 60; // 1시간
 
-    // ✅ 토큰 생성 (role 포함)
+    //토큰 생성 (role 포함)
     public String generateToken(String userEmail, Role role) {
         return Jwts.builder()
                 .setSubject(userEmail)
@@ -30,7 +30,7 @@ public class JwtUtility {
                 .compact();
     }
 
-    // ✅ 토큰 검증 및 파싱
+    //토큰 검증 및 파싱
     public Claims validateToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)
@@ -39,7 +39,18 @@ public class JwtUtility {
                 .getBody();
     }
 
-    // ✅ 토큰 만료 여부 확인
+    public String getEmailFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token.replace("Bearer ", "")) // "Bearer " 제거
+                .getBody();
+
+        return claims.getSubject(); // 이메일 반환
+    }
+
+
+    //토큰 만료 여부 확인
     public boolean isTokenExpired(String token) {
         return validateToken(token).getExpiration().before(new Date());
     }

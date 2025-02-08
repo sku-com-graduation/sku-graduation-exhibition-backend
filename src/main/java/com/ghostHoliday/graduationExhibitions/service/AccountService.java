@@ -53,7 +53,7 @@ public class AccountService {
         }
         account.setRecent(LocalDateTime.now());
         LoginDTO loginDTO = new LoginDTO();
-        loginDTO.setToken(jwtUtility.generateToken(userEmail,account.getRole()));
+        loginDTO.setAccessToken(jwtUtility.generateToken(userEmail,account.getRole()));
         loginDTO.setRole(account.getRole());
         if (account.getRole().equals(Role.ADMIN))
             loginDTO.setTeamName(null);
@@ -96,7 +96,7 @@ public class AccountService {
                 if (i == 1){
                     // 팀장이라면 계정 생성
                     student.setRole(Role.LEADER);
-                    Account account = createAccount(email, number, team);
+                    Account account = createAccount(email, passwordEncoder.encode(number), team);
                     accounts.add(account);
                 }
                 else {
@@ -112,12 +112,14 @@ public class AccountService {
 
     @Transactional
     public ArrayList<FindAccountByYearDTO> findAllAccountByYear(int year) throws Exception {
-        List<Account> accounts = accountRepository.findAll();
+        List<Account> accounts = accountRepository.findNonAdminAccountsByExhibitionYear(year);
         ArrayList<FindAccountByYearDTO> findAccountByYearDTOS = new ArrayList<>();
+
         for (Account account : accounts) {
             String encryptedAccountId = encryptionService.encryptPrimaryKey(account.getId());
             FindAccountByYearDTO findAccountByYearDTO = new FindAccountByYearDTO();
             Team team = account.getTeam();
+
             if (year == team.getExhibitionYear()){
                 findAccountByYearDTO.setEncryptedAccountId(encryptedAccountId);
                 findAccountByYearDTO.setTeamName(team.getName());
@@ -126,6 +128,7 @@ public class AccountService {
                 findAccountByYearDTOS.add(findAccountByYearDTO);
             }
         }
+
         return findAccountByYearDTOS;
 
     }
