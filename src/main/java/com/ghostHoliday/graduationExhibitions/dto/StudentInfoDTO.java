@@ -12,8 +12,8 @@ public class StudentInfoDTO {
     private String name;
     private String info;
     private Role role;
-    private String profileImage;
     private String githubUrl;
     private String studentEmail;
     private String studentBlog;
+    private String profileImage;
 }

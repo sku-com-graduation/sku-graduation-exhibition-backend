@@ -1,15 +1,15 @@
 package com.ghostHoliday.graduationExhibitions.dto;
 
-import com.ghostHoliday.graduationExhibitions.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginDTO {
-    private String accessToken;
-    private Role role;
-    private String teamName;
+public class SearchPostInfoDTO {
+    List<StudentInfoDTO> students;
+    PostTeamInfoDTO teamInfo;
 }
