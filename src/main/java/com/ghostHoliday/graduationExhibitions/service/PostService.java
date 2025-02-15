@@ -89,6 +89,7 @@ public class PostService {
         PostTeamInfoDTO postTeamInfoDTO = new PostTeamInfoDTO();
         postTeamInfoDTO.setProjectName(post.getTitle());
         postTeamInfoDTO.setExplanation(post.getContent());
+        postTeamInfoDTO.setCategory(team.getCategory());
         postTeamInfoDTO.setTeamProfileImage(encodeFileToBase64(post.getTeamProfileUrl()));
         postTeamInfoDTO.setSlideImages(slideImagesToBase64(post.getSlideUrl()));
         postTeamInfoDTO.setPosterImage(encodeFileToBase64(post.getPosterUrl()));
@@ -114,6 +115,10 @@ public class PostService {
                 .orElseThrow(() -> new IllegalStateException("해당 팀을 찾을 수 없습니다."));
 
         Post post = team.getPost();
+
+        post.setTitle(dto.getTitle());
+        post.setContent(dto.getContent());
+        team.setCategory(dto.getCategory());
 
         // 팀 프로필 이미지 업로드
         String teamProfileExtension = fileUtility.getImageFileExtension(dto.getTeamProfileImg().getOriginalFilename());
@@ -146,9 +151,9 @@ public class PostService {
         Files.write(demoFilePath, dto.getDemo().getBytes());
 
         // 포스터 이미지 업로드
-        String posterExtension = fileUtility.getImageFileExtension(dto.getPoster().getOriginalFilename());
+        String posterExtension = fileUtility.getImageFileExtension(dto.getPosterImg().getOriginalFilename());
         if (posterExtension == null) {
-            throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + dto.getPoster().getOriginalFilename());
+            throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + dto.getPosterImg().getOriginalFilename());
         }
         String posterFileName = "poster." + posterExtension;
         Path posterFilePath = Paths.get("teamPost",post.getUuid(),posterFileName);
@@ -158,7 +163,7 @@ public class PostService {
             Files.delete(posterFilePath);
         }
 
-        Files.write(posterFilePath, dto.getPoster().getBytes());
+        Files.write(posterFilePath, dto.getPosterImg().getBytes());
     }
 
 
@@ -166,49 +171,49 @@ public class PostService {
     @Transactional
     public void updateSlideImage(UpdateSlideImageDTO dto, String userEmail) throws Exception {
         try{
-        Long requestedTeamId  = encryptionService.decryptPrimaryKey(dto.getEncryptedTeamId());
+            Long requestedTeamId  = encryptionService.decryptPrimaryKey(dto.getEncryptedTeamId());
 
-        Account account = accountRepository.findAccountByUserEmail(userEmail)
-                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
+            Account account = accountRepository.findAccountByUserEmail(userEmail)
+                    .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
 
-        Team userTeam = account.getTeam();
-        if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(requestedTeamId))) {
-            throw new IllegalStateException("해당 팀의 슬라이드를 수정할 권한이 없습니다.");
-        }
-
-        Team team = teamRepository.findById(requestedTeamId)
-                .orElseThrow(() -> new IllegalStateException("해당 팀을 찾을 수 없습니다."));
-
-        List<MultipartFile> files = dto.getFiles();
-
-        Post post = team.getPost();
-        String uploadDir = post.getSlideUrl();
-        File directory = new File(uploadDir);
-        cleanDirectory(directory);
-
-        long currentFileCount = Files.list(Paths.get(uploadDir))
-                .filter(path -> !Files.isDirectory(path))
-                .count();
-
-        if (currentFileCount + files.size() > MAX_IMAGES) {
-                    throw new IllegalStateException("최대 파일 업로드 제한(" + MAX_IMAGES + "개)을 초과합니다.");
-        }
-
-
-        int fileIndex = 1;
-        for (MultipartFile file : files) {
-            String extention = fileUtility.getImageFileExtension(file.getOriginalFilename());
-            // 이미지 파일 여부 확인
-            if (extention == null) {
-                throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + file.getOriginalFilename());
+            Team userTeam = account.getTeam();
+            if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(requestedTeamId))) {
+                throw new IllegalStateException("해당 팀의 슬라이드를 수정할 권한이 없습니다.");
             }
 
-            // 파일 저장
-            String fileName = "slide" + fileIndex + "." + extention;
-            Path filePath = Paths.get(uploadDir +"\\"+ fileName);
-            Files.write(filePath, file.getBytes());
-            fileIndex++;
-        }
+            Team team = teamRepository.findById(requestedTeamId)
+                    .orElseThrow(() -> new IllegalStateException("해당 팀을 찾을 수 없습니다."));
+
+            List<MultipartFile> files = dto.getFiles();
+
+            Post post = team.getPost();
+            String uploadDir = post.getSlideUrl();
+            File directory = new File(uploadDir);
+            cleanDirectory(directory);
+
+            long currentFileCount = Files.list(Paths.get(uploadDir))
+                    .filter(path -> !Files.isDirectory(path))
+                    .count();
+
+            if (currentFileCount + files.size() > MAX_IMAGES) {
+                throw new IllegalStateException("최대 파일 업로드 제한(" + MAX_IMAGES + "개)을 초과합니다.");
+            }
+
+
+            int fileIndex = 1;
+            for (MultipartFile file : files) {
+                String extention = fileUtility.getImageFileExtension(file.getOriginalFilename());
+                // 이미지 파일 여부 확인
+                if (extention == null) {
+                    throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + file.getOriginalFilename());
+                }
+
+                // 파일 저장
+                String fileName = "slide" + fileIndex + "." + extention;
+                Path filePath = Paths.get(uploadDir +"\\"+ fileName);
+                Files.write(filePath, file.getBytes());
+                fileIndex++;
+            }
 
         } catch (IOException e) {
             throw new RuntimeException("파일 업로드 중 오류 발생: " + e.getMessage(), e);
@@ -308,6 +313,3 @@ public class PostService {
     }
 
 }
-
-
-
