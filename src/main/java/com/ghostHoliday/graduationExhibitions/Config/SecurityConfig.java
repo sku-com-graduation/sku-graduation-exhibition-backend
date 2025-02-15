@@ -54,7 +54,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of("*")); // 모든 Origin 허용
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 모든 HTTP 메서드 허용
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH")); // 모든 HTTP 메서드 허용
         configuration.setAllowedHeaders(Arrays.asList("*")); // 모든 헤더 허용
         configuration.setAllowCredentials(true); // 인증 정보(쿠키, 헤더 등) 포함 허용
 
