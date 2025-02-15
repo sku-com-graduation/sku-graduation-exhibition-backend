@@ -6,6 +6,7 @@ import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import io.jsonwebtoken.Jwt;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.sql.Update;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -73,15 +75,18 @@ public class PostController {
 
 
     @PostMapping("public/post/search")
-    public ResponseEntity<SearchPostInfoDTO> searchPost(@RequestBody SearchPostRequestDTO dto) throws Exception {
+    public ResponseEntity<?> searchPost(@RequestBody SearchPostRequestDTO dto) throws Exception {
         try {
-            System.out.println(dto.getEncryptedTeamId() + " 현재 암호팀번호");
             SearchPostInfoDTO result = postService.searchPostInfo(dto.getEncryptedTeamId());
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+
+
 
 
 }
