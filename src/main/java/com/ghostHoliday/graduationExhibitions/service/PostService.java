@@ -87,14 +87,28 @@ public class PostService {
 
         Post post = team.getPost();
         PostTeamInfoDTO postTeamInfoDTO = new PostTeamInfoDTO();
-        postTeamInfoDTO.setProjectName(post.getTitle());
-        postTeamInfoDTO.setExplanation(post.getContent());
-        postTeamInfoDTO.setCategory(team.getCategory());
-        postTeamInfoDTO.setTeamProfileImage(encodeFileToBase64(post.getTeamProfileUrl()));
-        postTeamInfoDTO.setSlideImages(slideImagesToBase64(post.getSlideUrl()));
-        postTeamInfoDTO.setPosterImage(encodeFileToBase64(post.getPosterUrl()));
-        postTeamInfoDTO.setDemoVideo(encodeFileToBase64(post.getDemoUrl()));
 
+        postTeamInfoDTO.setProjectName(post != null ? post.getTitle() : null);
+        postTeamInfoDTO.setExplanation(post != null ? post.getContent() : null);
+        postTeamInfoDTO.setCategory(team.getCategory());
+
+        postTeamInfoDTO.setTeamProfileImage(
+                post != null && post.getTeamProfileUrl() != null && !post.getTeamProfileUrl().isEmpty() ? encodeFileToBase64(post.getTeamProfileUrl()) : null
+        );
+
+        postTeamInfoDTO.setSlideImages(
+                post != null && post.getSlideUrl() != null && !post.getSlideUrl().isEmpty() && !Files.list(Paths.get(post.getSlideUrl())).findAny().isEmpty()
+                        ? slideImagesToBase64(post.getSlideUrl())
+                        : null
+        );
+
+        postTeamInfoDTO.setPosterImage(
+                post != null && post.getPosterUrl() != null && !post.getPosterUrl().isEmpty() ? encodeFileToBase64(post.getPosterUrl()) : null
+        );
+
+        postTeamInfoDTO.setDemoVideo(
+                post != null && post.getDemoUrl() != null && !post.getDemoUrl().isEmpty() ? encodeFileToBase64(post.getDemoUrl()) : null
+        );
 
         return new SearchPostInfoDTO(studentInfoDTOS, postTeamInfoDTO);
     }
@@ -285,30 +299,38 @@ public class PostService {
         return path.toString();
     }
 
-    public static String encodeFileToBase64(String filePath) throws IOException {
+    public static String encodeFileToBase64(String filePath) {
         File imageFile = new File(filePath);
-        FileInputStream fileInputStream = new FileInputStream(imageFile);
+        if (!imageFile.exists() || imageFile.isDirectory()) {
+            return null;
+        }
 
-        byte[] imageBytes = fileInputStream.readAllBytes();
-        fileInputStream.close();
-
-        return Base64.getEncoder().encodeToString(imageBytes);
+        try (FileInputStream fileInputStream = new FileInputStream(imageFile)) {
+            byte[] imageBytes = fileInputStream.readAllBytes();
+            return Base64.getEncoder().encodeToString(imageBytes);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
-    public static List<String> slideImagesToBase64(String folderPath) throws IOException {
+    public static List<String> slideImagesToBase64(String folderPath) {
+        File folder = new File(folderPath);
+        if (!folder.exists() || !folder.isDirectory()) {
+            return null;
+        }
+
         try (Stream<Path> paths = Files.list(Paths.get(folderPath))) {
             List<String> slideImages = new ArrayList<>();
             paths.filter(Files::isRegularFile) // 파일만 선택 (디렉토리 제외)
                     .forEach(path -> {
-                        try {
-                            String base64 = encodeFileToBase64(String.valueOf(path));
+                        String base64 = encodeFileToBase64(String.valueOf(path));
+                        if (base64 != null) {
                             slideImages.add(base64);
-                        } catch (IOException e) {
-                            System.err.println("파일 변환 실패: " + path);
-                            e.printStackTrace();
                         }
                     });
-            return slideImages;
+            return slideImages.isEmpty() ? null : slideImages;
+        } catch (IOException e) {
+            return null;
         }
     }
 
