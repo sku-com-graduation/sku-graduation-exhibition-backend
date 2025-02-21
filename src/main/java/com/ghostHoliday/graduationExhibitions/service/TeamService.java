@@ -5,13 +5,18 @@ import com.ghostHoliday.graduationExhibitions.dto.*;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
+import com.ghostHoliday.graduationExhibitions.utility.Base64Utility;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +27,7 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final EncryptionService encryptionService;
     private final AccountRepository accountRepository;
-    private final JwtUtility jwtUtility;
+    private final Base64Utility base64Utility;
 
     public Long save(Team team){
         return teamRepository.save(team).getId();
@@ -45,7 +50,7 @@ public class TeamService {
             findTeamPostInfoByYearDTO.setTeamName(team.getName());
             findTeamPostInfoByYearDTO.setEncryptedTeamId(encryptedPrimaryKey);
             findTeamPostInfoByYearDTO.setTitle(post.getTitle());
-            findTeamPostInfoByYearDTO.setTeamProfileImage(null);
+            findTeamPostInfoByYearDTO.setTeamProfileImage(post != null && post.getTeamProfileUrl() != null && !post.getTeamProfileUrl().isEmpty() ? base64Utility.encodeFileToBase64(post.getTeamProfileUrl()) : null);
             findTeamPostInfoByYearDTO.setCategory(team.getCategory());
 
             findTeamPostInfoByYearDTOS.add(findTeamPostInfoByYearDTO);
@@ -117,6 +122,7 @@ public class TeamService {
         teamInfo.setCategory(category);
         return teamInfo;
     }
+
 
 
 

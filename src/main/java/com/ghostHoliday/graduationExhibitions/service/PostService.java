@@ -6,6 +6,7 @@ import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
 import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
+import com.ghostHoliday.graduationExhibitions.utility.Base64Utility;
 import com.ghostHoliday.graduationExhibitions.utility.FileUtility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ import java.util.stream.Stream;
 public class PostService {
     private final PostRepository postRepository;
     private final EncryptionService encryptionService;
-    private final AccountService accountService;
+    private final Base64Utility base64Utility;
     private final StudentRepository studentRepository;
     private final FileUtility fileUtility;
     private final int MAX_IMAGES = 10;
@@ -74,7 +75,7 @@ public class PostService {
             // 프로필 이미지 URL (null 체크)
             String profileImageUrl = studentProfile.getStudentProfileUrl();
             studentInfoDTO.setProfileImage(profileImageUrl != null && !profileImageUrl.isEmpty()
-                    ? encodeFileToBase64(profileImageUrl)
+                    ? base64Utility.encodeFileToBase64(profileImageUrl)
                     : ""); // 기본값은 빈 문자열로 설정 (혹은 기본 이미지를 설정할 수 있음)
 
             studentInfoDTOS.add(studentInfoDTO);
@@ -93,21 +94,21 @@ public class PostService {
         postTeamInfoDTO.setCategory(team.getCategory());
 
         postTeamInfoDTO.setTeamProfileImage(
-                post != null && post.getTeamProfileUrl() != null && !post.getTeamProfileUrl().isEmpty() ? encodeFileToBase64(post.getTeamProfileUrl()) : null
+                post != null && post.getTeamProfileUrl() != null && !post.getTeamProfileUrl().isEmpty() ? base64Utility.encodeFileToBase64(post.getTeamProfileUrl()) : null
         );
 
         postTeamInfoDTO.setSlideImages(
                 post != null && post.getSlideUrl() != null && !post.getSlideUrl().isEmpty() && !Files.list(Paths.get(post.getSlideUrl())).findAny().isEmpty()
-                        ? slideImagesToBase64(post.getSlideUrl())
+                        ? base64Utility.ImagesToBase64(post.getSlideUrl())
                         : null
         );
 
         postTeamInfoDTO.setPosterImage(
-                post != null && post.getPosterUrl() != null && !post.getPosterUrl().isEmpty() ? encodeFileToBase64(post.getPosterUrl()) : null
+                post != null && post.getPosterUrl() != null && !post.getPosterUrl().isEmpty() ? base64Utility.encodeFileToBase64(post.getPosterUrl()) : null
         );
 
         postTeamInfoDTO.setDemoVideo(
-                post != null && post.getDemoUrl() != null && !post.getDemoUrl().isEmpty() ? encodeFileToBase64(post.getDemoUrl()) : null
+                post != null && post.getDemoUrl() != null && !post.getDemoUrl().isEmpty() ? base64Utility.encodeFileToBase64(post.getDemoUrl()) : null
         );
 
         return new SearchPostInfoDTO(studentInfoDTOS, postTeamInfoDTO);
@@ -299,39 +300,8 @@ public class PostService {
         return path.toString();
     }
 
-    public static String encodeFileToBase64(String filePath) {
-        File imageFile = new File(filePath);
-        if (!imageFile.exists() || imageFile.isDirectory()) {
-            return null;
-        }
 
-        try (FileInputStream fileInputStream = new FileInputStream(imageFile)) {
-            byte[] imageBytes = fileInputStream.readAllBytes();
-            return Base64.getEncoder().encodeToString(imageBytes);
-        } catch (IOException e) {
-            return null;
-        }
-    }
 
-    public static List<String> slideImagesToBase64(String folderPath) {
-        File folder = new File(folderPath);
-        if (!folder.exists() || !folder.isDirectory()) {
-            return null;
-        }
 
-        try (Stream<Path> paths = Files.list(Paths.get(folderPath))) {
-            List<String> slideImages = new ArrayList<>();
-            paths.filter(Files::isRegularFile) // 파일만 선택 (디렉토리 제외)
-                    .forEach(path -> {
-                        String base64 = encodeFileToBase64(String.valueOf(path));
-                        if (base64 != null) {
-                            slideImages.add(base64);
-                        }
-                    });
-            return slideImages.isEmpty() ? null : slideImages;
-        } catch (IOException e) {
-            return null;
-        }
-    }
 
 }
