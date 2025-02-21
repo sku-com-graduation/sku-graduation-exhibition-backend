@@ -56,7 +56,7 @@ public class AccountService {
         loginDTO.setAccessToken(jwtUtility.generateToken(userEmail,account.getRole()));
         loginDTO.setRole(account.getRole());
         if (account.getRole().equals(Role.ADMIN))
-            loginDTO.setTeamName(null);
+            loginDTO.setTeamName("ADMIN");
         else
             loginDTO.setTeamName(account.getTeam().getName());
         return loginDTO;
