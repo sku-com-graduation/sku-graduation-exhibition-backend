@@ -87,7 +87,7 @@ public class PostService {
 
         Post post = team.getPost();
         PostTeamInfoDTO postTeamInfoDTO = new PostTeamInfoDTO();
-
+         postTeamInfoDTO.setUuid(post.getUuid());
         postTeamInfoDTO.setProjectName(post != null ? post.getTitle() : null);
         postTeamInfoDTO.setExplanation(post != null ? post.getContent() : null);
         postTeamInfoDTO.setCategory(team.getCategory());
@@ -135,9 +135,9 @@ public class PostService {
         team.setCategory(dto.getCategory());
 
         // 팀 프로필 이미지 업로드
-        String teamProfileExtension = fileUtility.getImageFileExtension(dto.getTeamProfileImg().getOriginalFilename());
+        String teamProfileExtension = fileUtility.getImageFileExtension(dto.getTeamProfileImage().getOriginalFilename());
         if (teamProfileExtension == null) {
-            throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + dto.getTeamProfileImg().getOriginalFilename());
+            throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + dto.getTeamProfileImage().getOriginalFilename());
         }
         String teamProfilefileName = "teamProfile." + teamProfileExtension;
         Path teamProfileFilePath = Paths.get("teamPost",post.getUuid(),teamProfilefileName);
@@ -147,7 +147,7 @@ public class PostService {
             Files.delete(teamProfileFilePath);
         }
 
-        Files.write(teamProfileFilePath, dto.getTeamProfileImg().getBytes());
+        Files.write(teamProfileFilePath, dto.getTeamProfileImage().getBytes());
 
         // 데모 영상 업로드
         String demoExtension = fileUtility.getVideoFileExtension(dto.getDemo().getOriginalFilename());
