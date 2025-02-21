@@ -1,13 +1,11 @@
-package com.ghostHoliday.graduationExhibitions.config;
+package com.ghostHoliday.graduationExhibitions.Config;
 
 import com.ghostHoliday.graduationExhibitions.domain.*;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
-import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DataInitializer {
 
     private final AccountRepository accountRepository;
-    private final TeamRepository teamRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Bean

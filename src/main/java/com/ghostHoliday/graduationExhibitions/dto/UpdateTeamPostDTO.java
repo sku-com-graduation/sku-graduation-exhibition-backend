@@ -14,7 +14,7 @@ public class UpdateTeamPostDTO {
     private String title;
     private String content;
     private Category category;
-    private MultipartFile teamProfileImg;
+    private MultipartFile teamProfileImage;
     private MultipartFile demo;
     private MultipartFile posterImg;
 }

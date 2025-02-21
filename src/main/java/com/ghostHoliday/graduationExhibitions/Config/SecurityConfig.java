@@ -1,4 +1,4 @@
-package com.ghostHoliday.graduationExhibitions.config;
+package com.ghostHoliday.graduationExhibitions.Config;
 
 import com.ghostHoliday.graduationExhibitions.utility.JwtAuthenticationFilter;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
