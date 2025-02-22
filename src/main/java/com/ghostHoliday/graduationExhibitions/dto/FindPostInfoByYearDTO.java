@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FindPostInfoByYearDTO {
-    private String encryptedTeamId;
+    private String uuid;
     private String teamName;
     private String title;
     private String teamProfileImage;

@@ -46,9 +46,8 @@ public class TeamService {
             FindPostInfoByYearDTO findTeamPostInfoByYearDTO = new FindPostInfoByYearDTO();
             Post post = team.getPost();
             // PK 암호화 후 저장
-            String encryptedPrimaryKey = encryptionService.encryptPrimaryKey(team.getId());
             findTeamPostInfoByYearDTO.setTeamName(team.getName());
-            findTeamPostInfoByYearDTO.setEncryptedTeamId(encryptedPrimaryKey);
+            findTeamPostInfoByYearDTO.setUuid(post.getUuid());
             findTeamPostInfoByYearDTO.setTitle(post.getTitle());
             findTeamPostInfoByYearDTO.setTeamProfileImage(post != null && post.getTeamProfileUrl() != null && !post.getTeamProfileUrl().isEmpty() ? base64Utility.encodeFileToBase64(post.getTeamProfileUrl()) : null);
             findTeamPostInfoByYearDTO.setCategory(team.getCategory());
