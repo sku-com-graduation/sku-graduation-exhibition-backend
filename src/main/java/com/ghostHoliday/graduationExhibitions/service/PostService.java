@@ -34,6 +34,7 @@ public class PostService {
     private final int MAX_IMAGES = 10;
     private final TeamRepository teamRepository;
     private final AccountRepository accountRepository;
+    private final AccountService accountService;
 
 
     public Long save(Post post) {
@@ -51,8 +52,6 @@ public class PostService {
         List<Student> students = studentRepository.findAllByTeamId(requestTeamId);
 
         for (Student student : students) {
-            System.out.println(student + " 현재 학생");
-
             StudentInfoDTO studentInfoDTO = new StudentInfoDTO();
             StudentProfile studentProfile = student.getStudentProfile();
 
@@ -260,9 +259,20 @@ public class PostService {
         studentProfile.setInfo(dto.getInfo());
         String url = saveStudentProfileImage(dto.getProfileImage(), student.getStudentNumber());
         studentProfile.setStudentProfileUrl(url);
-
-
     }
+
+    public boolean verifyEditPermission(String token, String requestedUuid){
+        Account account = accountService.tokenToAccount(token);
+        if (account.getRole().equals(Role.ADMIN))
+            return true;
+
+        String uuid = account.getTeam().getPost().getUuid();
+        if (requestedUuid.equals(uuid))
+            return true;
+        else
+            throw new IllegalStateException("해당 팀의 포스트를 수정할 권한이 없습니다.");
+    }
+
 
     static void cleanDirectory(File directory) {
         File[] files = directory.listFiles();

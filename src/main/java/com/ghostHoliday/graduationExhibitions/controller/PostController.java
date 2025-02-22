@@ -85,6 +85,16 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    @PostMapping("user/post/update/verify")
+    public ResponseEntity<String> verifyEditPermission(@RequestBody verifyEditPermissionRequestDTO dto) throws Exception {
+        try {
+            boolean response = postService.verifyEditPermission(dto.getToken(), dto.getUuid());
+            return ResponseEntity.ok("인증 성공");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        }
+    }
 
 
 
