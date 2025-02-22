@@ -12,4 +12,5 @@ public class LoginDTO {
     private String accessToken;
     private Role role;
     private String teamName;
+    private String uuid;
 }
