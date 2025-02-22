@@ -42,8 +42,10 @@ public class PostService {
 
 
     @Transactional
-    public SearchPostInfoDTO searchPostInfo(String encryptedTeamId) throws Exception {
-        Long requestTeamId = encryptionService.decryptPrimaryKey(encryptedTeamId);
+    public SearchPostInfoDTO searchPostInfo(String uuid) throws Exception {
+        Post post = postRepository.findByUuid(uuid).get();
+        Team team = teamRepository.findByPostId(post.getId()).get();
+        Long requestTeamId = team.getId();
 
         List<StudentInfoDTO> studentInfoDTOS = new ArrayList<>();
         List<Student> students = studentRepository.findAllByTeamId(requestTeamId);
@@ -81,12 +83,6 @@ public class PostService {
             studentInfoDTOS.add(studentInfoDTO);
         }
 
-
-
-
-        Team team = teamRepository.findById(requestTeamId).get();
-
-        Post post = team.getPost();
         PostTeamInfoDTO postTeamInfoDTO = new PostTeamInfoDTO();
          postTeamInfoDTO.setUuid(post.getUuid());
         postTeamInfoDTO.setProjectName(post != null ? post.getTitle() : null);

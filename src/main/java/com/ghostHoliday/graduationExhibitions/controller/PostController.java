@@ -77,7 +77,7 @@ public class PostController {
     @PostMapping("public/post/search")
     public ResponseEntity<?> searchPost(@RequestBody SearchPostRequestDTO dto) throws Exception {
         try {
-            SearchPostInfoDTO result = postService.searchPostInfo(dto.getEncryptedTeamId());
+            SearchPostInfoDTO result = postService.searchPostInfo(dto.getUuid());
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();

@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SearchPostRequestDTO {
-    private String encryptedTeamId;
+    private String uuid;
 
 }
