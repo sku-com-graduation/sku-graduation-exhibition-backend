@@ -1,14 +1,13 @@
 package com.ghostHoliday.graduationExhibitions.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class SearchPostRequestDTO {
+@NoArgsConstructor
+public class verifyEditPermissionRequestDTO {
+    private String token;
     private String uuid;
-
 }

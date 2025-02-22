@@ -41,7 +41,6 @@ public class AccountService {
 
     @Transactional
     public LoginDTO login(String userEmail, String password) {
-        System.out.println(userEmail);
         Account account = accountRepository.findAccountByUserEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("아이디가 잘못되었습니다."));
         if (!passwordEncoder.matches(password,account.getPwd())){
