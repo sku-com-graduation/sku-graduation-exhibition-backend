@@ -51,10 +51,14 @@ public class AccountService {
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setAccessToken(jwtUtility.generateToken(userEmail,account.getRole()));
         loginDTO.setRole(account.getRole());
-        if (account.getRole().equals(Role.ADMIN))
+        if (account.getRole().equals(Role.ADMIN)) {
             loginDTO.setTeamName("ADMIN");
-        else
+            loginDTO.setUuid(null);
+        }
+        else {
             loginDTO.setTeamName(account.getTeam().getName());
+            loginDTO.setUuid(account.getTeam().getPost().getUuid());
+        }
         return loginDTO;
     }
 
