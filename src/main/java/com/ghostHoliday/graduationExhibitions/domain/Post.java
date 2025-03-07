@@ -25,6 +25,7 @@ public class Post {
         this.uuid = UUID.randomUUID().toString();
     }
 
+    @Column(length = 600)
     private String content;
 
     private String slideUrl;
