@@ -80,7 +80,7 @@ public class StudentController {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    @PatchMapping("/update")
+    @PutMapping("/update")
     public ResponseEntity<String> updateStudents(@RequestBody List<UpdateStudentDTO> dto) {
         try {
             // 학생들 리스트를 서비스로 전달하여 처리

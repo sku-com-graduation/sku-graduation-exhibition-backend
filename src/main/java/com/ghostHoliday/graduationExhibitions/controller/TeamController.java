@@ -43,7 +43,7 @@ public class TeamController {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    @PatchMapping("admin/team/update")
+    @PutMapping("admin/team/update")
     public ResponseEntity<List<ResponseTeamInfoDTO>> updateTeamInfo(@RequestBody List<UpdateTeamInfoDTO> updateTeamInfoDTOS) throws Exception {
 
         try {

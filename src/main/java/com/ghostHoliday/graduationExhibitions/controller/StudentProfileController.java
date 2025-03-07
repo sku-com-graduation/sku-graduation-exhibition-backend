@@ -17,7 +17,7 @@ public class StudentProfileController {
 
     private final StudentProfileService studentProfileService;
 
-    @PatchMapping("/updateProfile")
+    @PutMapping("/updateProfile")
     public ResponseEntity<String> updateStudentProfile(
             @RequestParam("dto") String dtoJson,  // JSON 데이터를 String으로 받기
             @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) {

@@ -27,7 +27,7 @@ public class PostController {
     private final JwtUtility jwtUtility;
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
-    @PatchMapping("user/post/update/slideImage")
+    @PutMapping("user/post/update/slideImage")
     public ResponseEntity<String> updateSlideImages(
             @ModelAttribute UpdateSlideImageDTO dto,
             @RequestHeader("Authorization") String token
@@ -44,7 +44,7 @@ public class PostController {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
-    @PatchMapping("user/post/update/teamPost")
+    @PutMapping("user/post/update/teamPost")
     public ResponseEntity<String> updateTeamPost(
             @ModelAttribute UpdateTeamPostDTO dto,
             @RequestHeader("Authorization") String token
@@ -60,7 +60,7 @@ public class PostController {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
-    @PatchMapping("user/post/update/studentProfile")
+    @PutMapping("user/post/update/studentProfile")
     public ResponseEntity<String> updateStudentProfile(
             @ModelAttribute UpdateStudentProfileByPostDTO dto,
             @RequestHeader("Authorization") String token
