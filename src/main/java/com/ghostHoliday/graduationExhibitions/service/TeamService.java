@@ -85,24 +85,21 @@ public class TeamService {
         return teams;
     }
 
-    public FindTeamInfoByYearDTO findTeamInfoByYear(int year) throws Exception {
-        FindTeamInfoByYearDTO findTeamInfoByYearDTO = new FindTeamInfoByYearDTO();
+    public List<FindTeamInfoByYearDTO> findTeamInfoByYear(int year) throws Exception {
 
         List<Team> teams = teamRepository.findAllByExhibitionYear(year);
-        ArrayList<TeamInfoDTO> teamInfoDTOS = new ArrayList<>();
+        ArrayList<FindTeamInfoByYearDTO> findTeamInfoByYearDTOs = new ArrayList<>();
 
         for (Team team : teams) {
-            TeamInfoDTO teamInfoDTO = new TeamInfoDTO();
-            teamInfoDTO.setEncryptedTeamId(encryptionService.encryptPrimaryKey(team.getId()));
-            teamInfoDTO.setEncryptedProfessorId(null);
-            teamInfoDTO.setName(team.getName());
-            teamInfoDTO.setCategory(team.getCategory());
+            FindTeamInfoByYearDTO findTeamInfoByYearDTO = new FindTeamInfoByYearDTO();
+            findTeamInfoByYearDTO.setEncryptedTeamId(encryptionService.encryptPrimaryKey(team.getId()));
+            findTeamInfoByYearDTO.setEncryptedProfessorId(null);
+            findTeamInfoByYearDTO.setName(team.getName());
+            findTeamInfoByYearDTO.setCategory(team.getCategory());
 
-            teamInfoDTOS.add(teamInfoDTO);
+            findTeamInfoByYearDTOs.add(findTeamInfoByYearDTO);
         }
-        findTeamInfoByYearDTO.setTeams(teamInfoDTOS);
-        findTeamInfoByYearDTO.setYear(year);
-        return findTeamInfoByYearDTO;
+        return findTeamInfoByYearDTOs;
     }
 
 
