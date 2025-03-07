@@ -44,7 +44,7 @@ public class ProfessorController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PatchMapping("/update")
+    @PutMapping("/update")
     public ResponseEntity<String> updateProfessor(
             @ModelAttribute UpdateProfessorDTO dto) {
 
