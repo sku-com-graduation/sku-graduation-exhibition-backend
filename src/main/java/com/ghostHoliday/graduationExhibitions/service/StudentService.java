@@ -114,9 +114,11 @@ public class StudentService {
                 student.setRole(role);  // Role을 Enum으로 설정
             }
             // Team 객체 처리 (teamId 값이 비어있지 않으면 팀 업데이트)
-            if (encryptionService.decryptPrimaryKey(studentDTO.getEncryptedTeamId()) != null) {
-                Team team = teamRepository.findById(encryptionService.decryptPrimaryKey(studentDTO.getEncryptedTeamId()))
-                        .orElseThrow(() -> new RuntimeException("팀을 찾을 수 없습니다."));
+            if (studentDTO.getEncryptedTeamId() == null)
+                student.setTeam(null);
+            else {
+                Team team = teamRepository.findById(encryptionService.decryptPrimaryKey(
+                        studentDTO.getEncryptedTeamId())).get();
                 student.setTeam(team);  // Team 객체를 설정
             }
 
@@ -129,12 +131,8 @@ public class StudentService {
                 student.setStudentNumber(studentDTO.getStudentNumber());
             }
 
-            if (studentDTO.getExhibitionYear() != null && !studentDTO.getExhibitionYear().isEmpty()) {
-                student.setExhibitionYear(studentDTO.getExhibitionYear());
-            }
+            student.setExhibitionYear(studentDTO.getExhibitionYear());
 
-            // 변경된 학생 정보 저장
-            studentRepository.save(student);
         }
     }
 
