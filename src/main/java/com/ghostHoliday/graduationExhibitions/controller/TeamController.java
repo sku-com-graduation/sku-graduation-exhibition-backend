@@ -68,9 +68,9 @@ public class TeamController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @GetMapping("admin/team/search/teamInfo")
-    public ResponseEntity<FindTeamInfoByYearDTO> findTeamInfoByYear(@RequestParam int year) throws Exception {
+    public ResponseEntity<List<FindTeamInfoByYearDTO>> findTeamInfoByYear(@RequestParam int year) throws Exception {
 
-        FindTeamInfoByYearDTO teamInfo = teamService.findTeamInfoByYear(year);
+        List<FindTeamInfoByYearDTO> teamInfo = teamService.findTeamInfoByYear(year);
         return ResponseEntity.ok(teamInfo);
     }
 
