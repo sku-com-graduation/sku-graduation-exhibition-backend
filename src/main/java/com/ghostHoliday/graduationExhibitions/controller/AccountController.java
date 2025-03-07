@@ -60,12 +60,12 @@ public class AccountController {
 
     @GetMapping("admin/account/search")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public ResponseEntity<FindAccountByYearResponseDTO> searchAccount(@RequestParam int year) throws Exception {
-        ArrayList<FindAccountByYearDTO> accounts = accountService.findAllAccountByYear(year);
+    public ResponseEntity<List<FindAccountByYearResponseDTO>> searchAccount(@RequestParam int year) throws Exception {
+        List<FindAccountByYearResponseDTO> accounts = accountService.findAllAccountByYear(year);
         if (accounts.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(new FindAccountByYearResponseDTO(year, accounts));
+        return ResponseEntity.ok(accounts);
 
     }
 
