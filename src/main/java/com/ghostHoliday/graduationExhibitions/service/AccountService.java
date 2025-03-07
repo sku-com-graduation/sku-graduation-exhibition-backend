@@ -51,6 +51,7 @@ public class AccountService {
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setAccessToken(jwtUtility.generateToken(userEmail,account.getRole()));
         loginDTO.setRole(account.getRole());
+        loginDTO.setRecent(account.getRecent());
         if (account.getRole().equals(Role.ADMIN)) {
             loginDTO.setTeamName("ADMIN");
             loginDTO.setUuid(null);
