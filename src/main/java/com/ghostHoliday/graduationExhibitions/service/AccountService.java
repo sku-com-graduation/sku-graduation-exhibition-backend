@@ -2,6 +2,7 @@ package com.ghostHoliday.graduationExhibitions.service;
 
 import com.ghostHoliday.graduationExhibitions.domain.*;
 import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearDTO;
+import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearResponseDTO;
 import com.ghostHoliday.graduationExhibitions.dto.LoginDTO;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
@@ -50,6 +51,7 @@ public class AccountService {
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setAccessToken(jwtUtility.generateToken(userEmail,account.getRole()));
         loginDTO.setRole(account.getRole());
+        loginDTO.setRecent(account.getRecent());
         if (account.getRole().equals(Role.ADMIN)) {
             loginDTO.setTeamName("ADMIN");
             loginDTO.setUuid(null);
@@ -110,25 +112,25 @@ public class AccountService {
     }
 
     @Transactional
-    public ArrayList<FindAccountByYearDTO> findAllAccountByYear(int year) throws Exception {
+    public List<FindAccountByYearResponseDTO> findAllAccountByYear(int year) throws Exception {
         List<Account> accounts = accountRepository.findNonAdminAccountsByExhibitionYear(year);
-        ArrayList<FindAccountByYearDTO> findAccountByYearDTOS = new ArrayList<>();
+        ArrayList<FindAccountByYearResponseDTO> FindAccountByYearResponseDTOS = new ArrayList<>();
 
         for (Account account : accounts) {
             String encryptedAccountId = encryptionService.encryptPrimaryKey(account.getId());
-            FindAccountByYearDTO findAccountByYearDTO = new FindAccountByYearDTO();
+            FindAccountByYearResponseDTO findAccountByYearResponseDTO = new FindAccountByYearResponseDTO();
             Team team = account.getTeam();
 
             if (year == team.getExhibitionYear()){
-                findAccountByYearDTO.setEncryptedAccountId(encryptedAccountId);
-                findAccountByYearDTO.setTeamName(team.getName());
-                findAccountByYearDTO.setUserEmail(account.getUserEmail());
-                findAccountByYearDTO.setRecent(account.getRecent());
-                findAccountByYearDTOS.add(findAccountByYearDTO);
+                findAccountByYearResponseDTO.setEncryptedAccountId(encryptedAccountId);
+                findAccountByYearResponseDTO.setTeamName(team.getName());
+                findAccountByYearResponseDTO.setUserEmail(account.getUserEmail());
+                findAccountByYearResponseDTO.setRecent(account.getRecent());
+                FindAccountByYearResponseDTOS.add(findAccountByYearResponseDTO);
             }
         }
 
-        return findAccountByYearDTOS;
+        return FindAccountByYearResponseDTOS;
 
     }
 
