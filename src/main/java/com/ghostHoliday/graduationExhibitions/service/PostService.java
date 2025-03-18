@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.lang.model.element.NestingKind;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -83,7 +84,7 @@ public class PostService {
         }
 
         PostTeamInfoDTO postTeamInfoDTO = new PostTeamInfoDTO();
-         postTeamInfoDTO.setUuid(post.getUuid());
+        postTeamInfoDTO.setUuid(post.getUuid());
         postTeamInfoDTO.setProjectName(post != null ? post.getTitle() : null);
         postTeamInfoDTO.setExplanation(post != null ? post.getContent() : null);
         postTeamInfoDTO.setCategory(team.getCategory());
@@ -181,22 +182,26 @@ public class PostService {
     @Transactional
     public void updateSlideImage(UpdateSlideImageDTO dto, String userEmail) throws Exception {
         try{
-            Long requestedTeamId  = encryptionService.decryptPrimaryKey(dto.getEncryptedTeamId());
+            String requestedTeamUuId  = dto.getTeamUuid();
 
             Account account = accountRepository.findAccountByUserEmail(userEmail)
                     .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
 
+            Post post = postRepository.findByUuid(requestedTeamUuId).get();
+
+            Team reqestedTeam = teamRepository.findByPostId(post.getId())
+                    .orElseThrow(() -> new IllegalStateException("해당 팀을 찾을 수 없습니다."));
+
+
             Team userTeam = account.getTeam();
-            if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(requestedTeamId))) {
+            if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(reqestedTeam.getId()))) {
                 throw new IllegalStateException("해당 팀의 슬라이드를 수정할 권한이 없습니다.");
             }
 
-            Team team = teamRepository.findById(requestedTeamId)
-                    .orElseThrow(() -> new IllegalStateException("해당 팀을 찾을 수 없습니다."));
+
 
             List<MultipartFile> files = dto.getFiles();
 
-            Post post = team.getPost();
             String uploadDir = post.getSlideUrl();
             File directory = new File(uploadDir);
             cleanDirectory(directory);

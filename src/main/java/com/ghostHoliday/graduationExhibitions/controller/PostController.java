@@ -33,7 +33,6 @@ public class PostController {
             @RequestHeader("Authorization") String token
     ) throws Exception {
         try {
-
             postService.updateSlideImage(dto, jwtUtility.getEmailFromToken(token));
             return ResponseEntity.ok("파일 업로드에 성공했습니다.");
         } catch (IllegalStateException e) {
