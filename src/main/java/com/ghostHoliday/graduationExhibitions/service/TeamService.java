@@ -102,6 +102,19 @@ public class TeamService {
         return findTeamInfoByYearDTOs;
     }
 
+    public List<String> findTeamProfileImageByYear(int year){
+        List<String> response = new ArrayList<>();
+        List<Team> teams = teamRepository.findAllByExhibitionYear(year);
+        for (Team team : teams) {
+            String teamProfileUrl = team.getPost().getTeamProfileUrl();
+            String image = base64Utility.encodeFileToBase64(teamProfileUrl);
+            if (image != null){
+                response.add(teamProfileUrl);
+            }
+        }
+        return response;
+    }
+
 
 
 
