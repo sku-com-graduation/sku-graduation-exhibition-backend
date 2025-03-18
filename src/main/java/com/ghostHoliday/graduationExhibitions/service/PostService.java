@@ -239,7 +239,14 @@ public class PostService {
 
     @Transactional
     public void updateStudentProfileByPost(UpdateStudentProfileByPostDTO dto, String userEmail) throws Exception {
-        Long requestedTeamId  = encryptionService.decryptPrimaryKey(dto.getEncryptedTeamId());
+        String requestedTeamUuId  = dto.getTeamUuId();
+
+        Post post = postRepository.findByUuid(requestedTeamUuId).get();
+
+        Team reqestedTeam = teamRepository.findByPostId(post.getId())
+                .orElseThrow(() -> new IllegalStateException("해당 팀을 찾을 수 없습니다."));
+
+
         Long requestedStudentId  = encryptionService.decryptPrimaryKey(dto.getEncryptedStudentId());
 
 
@@ -248,16 +255,13 @@ public class PostService {
 
         Team userTeam = account.getTeam();
         Student student = studentRepository.findById(requestedStudentId).get();
-        if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(requestedTeamId))) {
+        if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(reqestedTeam.getId()))) {
             throw new IllegalStateException("해당 팀의 포스트를 수정할 권한이 없습니다.");
         }
 
         if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(student.getTeam().getId()))) {
             throw new IllegalStateException("해당 팀의 포스트를 수정할 권한이 없습니다.");
         }
-
-        Team team = teamRepository.findById(requestedTeamId)
-                .orElseThrow(() -> new IllegalStateException("해당 팀을 찾을 수 없습니다."));
 
         StudentProfile studentProfile = studentRepository.findById(requestedStudentId).get().getStudentProfile();
         studentProfile.setGithubUrl(dto.getGithubUrl());
