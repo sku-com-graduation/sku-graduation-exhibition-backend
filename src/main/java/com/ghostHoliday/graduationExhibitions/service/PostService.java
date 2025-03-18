@@ -112,24 +112,26 @@ public class PostService {
 
     @Transactional
     public void updatePostInfo(UpdateTeamPostDTO dto, String userEmail) throws Exception {
-        Long requestedTeamId  = encryptionService.decryptPrimaryKey(dto.getEncryptedTeamId());
+        String requestedTeamUuId  = dto.getTeamUuId();
+
+        Post post = postRepository.findByUuid(requestedTeamUuId).get();
+
+        Team reqestedTeam = teamRepository.findByPostId(post.getId())
+                .orElseThrow(() -> new IllegalStateException("해당 팀을 찾을 수 없습니다."));
+
+
 
         Account account = accountRepository.findAccountByUserEmail(userEmail)
                 .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
 
         Team userTeam = account.getTeam();
-        if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(requestedTeamId))) {
+        if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(reqestedTeam.getId()))) {
             throw new IllegalStateException("해당 팀의 포스트를 수정할 권한이 없습니다.");
         }
 
-        Team team = teamRepository.findById(requestedTeamId)
-                .orElseThrow(() -> new IllegalStateException("해당 팀을 찾을 수 없습니다."));
-
-        Post post = team.getPost();
-
         post.setTitle(dto.getTitle());
         post.setContent(dto.getContent());
-        team.setCategory(dto.getCategory());
+        reqestedTeam.setCategory(dto.getCategory());
 
         // 팀 프로필 이미지 업로드
         String teamProfileExtension = fileUtility.getImageFileExtension(dto.getTeamProfileImage().getOriginalFilename());
