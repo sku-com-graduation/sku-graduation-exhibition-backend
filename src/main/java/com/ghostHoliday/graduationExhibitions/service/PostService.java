@@ -112,7 +112,7 @@ public class PostService {
 
     @Transactional
     public void updatePostInfo(UpdateTeamPostDTO dto, String userEmail) throws Exception {
-        String requestedTeamUuId  = dto.getTeamUuId();
+        String requestedTeamUuId  = dto.getTeamUuid();
 
         Post post = postRepository.findByUuid(requestedTeamUuId).get();
 
@@ -239,7 +239,7 @@ public class PostService {
 
     @Transactional
     public void updateStudentProfileByPost(UpdateStudentProfileByPostDTO dto, String userEmail) throws Exception {
-        String requestedTeamUuId  = dto.getTeamUuId();
+        String requestedTeamUuId  = dto.getTeamUuid();
 
         Post post = postRepository.findByUuid(requestedTeamUuId).get();
 

@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateStudentProfileByPostDTO {
-    private String teamUuId;
+    private String teamUuid;
     private String encryptedStudentId;
     private String githubUrl;
     private String studentEmail;

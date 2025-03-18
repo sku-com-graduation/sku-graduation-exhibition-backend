@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateTeamPostDTO {
-    private String teamUuId;
+    private String teamUuid;
     private String title;
     private String content;
     private Category category;
