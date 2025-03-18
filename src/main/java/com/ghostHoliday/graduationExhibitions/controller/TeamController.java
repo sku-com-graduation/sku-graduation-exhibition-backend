@@ -2,10 +2,7 @@ package com.ghostHoliday.graduationExhibitions.controller;
 
 
 import com.ghostHoliday.graduationExhibitions.domain.Account;
-import com.ghostHoliday.graduationExhibitions.dto.FindPostInfoByYearDTO;
-import com.ghostHoliday.graduationExhibitions.dto.FindTeamInfoByYearDTO;
-import com.ghostHoliday.graduationExhibitions.dto.ResponseTeamInfoDTO;
-import com.ghostHoliday.graduationExhibitions.dto.UpdateTeamInfoDTO;
+import com.ghostHoliday.graduationExhibitions.dto.*;
 import com.ghostHoliday.graduationExhibitions.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +69,13 @@ public class TeamController {
 
         List<FindTeamInfoByYearDTO> teamInfo = teamService.findTeamInfoByYear(year);
         return ResponseEntity.ok(teamInfo);
+    }
+
+    @GetMapping("public/team/search/teamProflie")
+    public ResponseEntity<?> findTeamProfileImageByYear(@RequestParam int year) throws Exception {
+
+        List<String> response = teamService.findTeamProfileImageByYear(year);
+        return ResponseEntity.ok(response);
     }
 
 }
