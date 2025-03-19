@@ -14,15 +14,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.lang.model.element.NestingKind;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +40,59 @@ public class PostService {
 
     public Long save(Post post) {
         return postRepository.save(post).getId();
+    }
+
+
+    @Transactional
+    public List<EditStudentInfoResponseDTO> searchEditPostInfo(String token, String uuid) throws Exception {
+        String userEmail = jwtUtility.getEmailFromToken(token);
+        Account account = accountRepository.findAccountByUserEmail(userEmail)
+                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
+
+        Team team;
+
+        Post post = postRepository.findByUuid(uuid).get();
+        team = teamRepository.findByPostId(post.getId()).get();
+        if (account.getRole().equals(Role.USER)){
+            if (!Objects.equals(account.getTeam().getId(), team.getId()))
+                throw new AccessDeniedException("해당 팀 수정 권한이 없습니다.");
+        }
+
+
+        List<EditStudentInfoResponseDTO> editStudentInfoResponseDTOS = new ArrayList<>();
+
+        for (Student student : studentRepository.findAllByTeamId(team.getId())) {
+            EditStudentInfoResponseDTO editStudentInfoResponseDTO = new EditStudentInfoResponseDTO();
+            StudentProfile studentProfile = student.getStudentProfile();
+
+            editStudentInfoResponseDTO.setEncryptedStudentProfileId(encryptionService.encryptPrimaryKey(student.getId()));
+            // 이름 (null 체크)
+            editStudentInfoResponseDTO.setName(student.getName() != null ? student.getName() : "이름 없음");
+
+            // 정보 (null 체크)
+            editStudentInfoResponseDTO.setInfo(editStudentInfoResponseDTO.getInfo() != null ? editStudentInfoResponseDTO.getInfo() : "정보 없음");
+
+            // 역할 (null 체크)
+            editStudentInfoResponseDTO.setRole(student.getRole() != null ? student.getRole() : null);
+
+            // Github URL (null 체크)
+            editStudentInfoResponseDTO.setGithubUrl(editStudentInfoResponseDTO.getGithubUrl() != null ? editStudentInfoResponseDTO.getGithubUrl() : "Github URL 없음");
+
+            // 이메일 (null 체크)
+            editStudentInfoResponseDTO.setStudentEmail(editStudentInfoResponseDTO.getStudentEmail() != null ? editStudentInfoResponseDTO.getStudentEmail() : "이메일 없음");
+
+            // 블로그 (null 체크)
+            editStudentInfoResponseDTO.setStudentBlog(editStudentInfoResponseDTO.getStudentBlog() != null ? editStudentInfoResponseDTO.getStudentBlog() : "블로그 없음");
+
+            // 프로필 이미지 URL (null 체크)
+            String profileImageUrl = studentProfile.getStudentProfileUrl();
+            editStudentInfoResponseDTO.setProfileImage(profileImageUrl != null && !profileImageUrl.isEmpty()
+                    ? base64Utility.encodeFileToBase64(profileImageUrl)
+                    : ""); // 기본값은 빈 문자열로 설정 (혹은 기본 이미지를 설정할 수 있음)
+            editStudentInfoResponseDTOS.add(editStudentInfoResponseDTO);
+        }
+        return editStudentInfoResponseDTOS;
+
     }
 
     @Transactional
