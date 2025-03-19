@@ -109,7 +109,7 @@ public class TeamService {
             String teamProfileUrl = team.getPost().getTeamProfileUrl();
             String image = base64Utility.encodeFileToBase64(teamProfileUrl);
             if (image != null){
-                response.add(teamProfileUrl);
+                response.add(image);
             }
         }
         return response;
