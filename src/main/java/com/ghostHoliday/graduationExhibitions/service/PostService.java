@@ -8,6 +8,7 @@ import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
 import com.ghostHoliday.graduationExhibitions.utility.Base64Utility;
 import com.ghostHoliday.graduationExhibitions.utility.FileUtility;
+import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,7 @@ public class PostService {
     private final TeamRepository teamRepository;
     private final AccountRepository accountRepository;
     private final AccountService accountService;
+    private final JwtUtility jwtUtility;
 
 
     public Long save(Post post) {
@@ -44,7 +46,19 @@ public class PostService {
 
 
     @Transactional
-    public SearchPostInfoDTO searchPostInfo(String uuid) throws Exception {
+    public SearchPostInfoDTO searchPostInfo(String token, String uuid) throws Exception {
+        boolean isPublic = false;
+        if(token == null){
+            isPublic = true;
+        }else{
+            String email = jwtUtility.getEmailFromToken(token);
+            if ( !accountRepository.existsAccountByUserEmail(email) ){
+                throw new Exception();
+            }
+
+        }
+
+
         Post post = postRepository.findByUuid(uuid).get();
         Team team = teamRepository.findByPostId(post.getId()).get();
         Long requestTeamId = team.getId();
@@ -55,6 +69,12 @@ public class PostService {
         for (Student student : students) {
             StudentInfoDTO studentInfoDTO = new StudentInfoDTO();
             StudentProfile studentProfile = student.getStudentProfile();
+
+            if (isPublic){
+                studentInfoDTO.setEncryptedStudentId(encryptionService.encryptPrimaryKey(studentProfile.getId()) );
+            }else{
+                studentInfoDTO.setEncryptedStudentId(null);
+            }
 
             // 이름 (null 체크)
             studentInfoDTO.setName(student.getName() != null ? student.getName() : "이름 없음");
