@@ -9,6 +9,7 @@ import org.hibernate.sql.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -72,18 +73,24 @@ public class PostController {
         }
     }
 
-
     @PostMapping("public/post/search")
-    public ResponseEntity<?> searchPost(@RequestBody SearchPostRequestDTO dto) throws Exception {
+    public ResponseEntity<?> searchPost(
+            @RequestHeader ("Authentication" ) String token,
+            @RequestBody SearchPostRequestDTO dto) throws Exception {
         try {
-            SearchPostInfoDTO result = postService.searchPostInfo(dto.getUuid());
+
+            SearchPostInfoDTO result = postService.searchPostInfo(token, dto.getUuid());
             return ResponseEntity.ok(result);
+
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+
+
+
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     @PostMapping("user/post/update/verify")
     public ResponseEntity<String> verifyEditPermission(@RequestBody verifyEditPermissionRequestDTO dto) throws Exception {
