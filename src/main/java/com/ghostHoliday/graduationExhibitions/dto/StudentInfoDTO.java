@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StudentInfoDTO {
-    private String encryptedStudentId;
+
     private String name;
     private String info;
     private Role role;

@@ -75,11 +75,9 @@ public class PostController {
 
     @PostMapping("public/post/search")
     public ResponseEntity<?> searchPost(
-            @RequestHeader ("Authentication" ) String token,
             @RequestBody SearchPostRequestDTO dto) throws Exception {
         try {
-
-            SearchPostInfoDTO result = postService.searchPostInfo(token, dto.getUuid());
+            SearchPostInfoDTO result = postService.searchPostInfo(dto.getUuid());
             return ResponseEntity.ok(result);
 
         } catch (Exception e) {
