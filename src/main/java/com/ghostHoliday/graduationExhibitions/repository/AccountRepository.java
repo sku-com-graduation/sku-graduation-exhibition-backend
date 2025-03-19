@@ -24,6 +24,8 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     @Query("SELECT a FROM Account a WHERE a.role <> 'ADMIN' AND a.team.exhibitionYear = :year")
     List<Account> findNonAdminAccountsByExhibitionYear(@Param("year") int exhibitionYear);
 
+    boolean existsAccountByUserEmail(String userEmail);
+
 
 
 }
