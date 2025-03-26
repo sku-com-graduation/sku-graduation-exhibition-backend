@@ -20,7 +20,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("admin/professor")
+@RequestMapping("api/admin/professor")
 public class ProfessorController {
     private final ProfessorService professorService;
     private final JwtUtility jwtUtility;
