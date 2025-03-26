@@ -75,7 +75,7 @@ public class StudentProfileService {
 
     private String saveProfileImage(MultipartFile profileImage, String studentNumber) {
         // 프로필 이미지 저장 경로 설정
-        String uploadDir = "StudentProfileImage";  // 현재 작업 디렉토리 내 'StudentProfileImage' 폴더
+        String uploadDir = Paths.get("StudentProfileImage").toString();  // 현재 작업 디렉토리 내 'StudentProfileImage' 폴더
 
         // 디렉토리가 존재하지 않으면 생성
         File dir = new File(uploadDir);
@@ -110,7 +110,7 @@ public class StudentProfileService {
         }
 
         // 상대 경로를 반환
-        return "/" + fileName;  // 상대 경로 반환
+        return Paths.get(fileName).toString();  // 상대 경로 반환
     }
 
 }

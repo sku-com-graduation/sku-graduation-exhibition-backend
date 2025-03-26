@@ -282,7 +282,7 @@ public class PostService {
 
                 // 파일 저장
                 String fileName = "slide" + fileIndex + "." + extention;
-                Path filePath = Paths.get(uploadDir +"\\"+ fileName);
+                Path filePath = Paths.get(uploadDir,fileName);
                 Files.write(filePath, file.getBytes());
                 fileIndex++;
             }
@@ -348,7 +348,7 @@ public class PostService {
 
     private String saveStudentProfileImage(MultipartFile studentImage, String number) throws IOException {
         // 저장할 디렉토리 경로
-        String uploadDir = "studentProfileImage";
+        String uploadDir = Paths.get("studentProfileImage").toString();
         File dir = new File(uploadDir);
 
         // 디렉토리가 없으면 생성
