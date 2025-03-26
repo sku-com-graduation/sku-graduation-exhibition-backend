@@ -50,7 +50,7 @@ public class ProfessorService {
 
 
         // 교수 이미지 저장 경로 설정
-        String uploadDir = "ProfessorImage";
+        String uploadDir = Paths.get("ProfessorImage").toString();
 
         File dir = new File(uploadDir);
         if (!dir.exists()) {
@@ -105,7 +105,7 @@ public class ProfessorService {
     // 프로필 이미지 저장 메소드
     private String saveProfessorImage(MultipartFile professorImage) throws IOException {
         // 저장할 디렉토리 경로
-        String uploadDir = "ProfessorImage";
+        String uploadDir = Paths.get("ProfessorImage").toString();
         File dir = new File(uploadDir);
 
         // 디렉토리가 없으면 생성
