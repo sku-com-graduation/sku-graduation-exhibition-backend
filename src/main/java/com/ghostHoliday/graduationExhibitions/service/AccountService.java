@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +79,7 @@ public class AccountService {
             // 해당 팀의 post 생성
             Post post = createNewPost();
             //포스트 저장폴더 생성
-            String uploadDir = "teamPost" + "\\" + post.getUuid();
+            String uploadDir = Paths.get("teamPost",post.getUuid()).toString();
             File directory = new File(uploadDir);
             if(!directory.exists()){
                 directory.mkdirs();
@@ -158,7 +159,7 @@ public class AccountService {
         post.setTitle(null);
         post.setContent(null);
         // 슬라이드 저장 폴더 생성
-        String uploadSlideDir = "teamPost" + "\\" + post.getUuid() + "\\" + "slideImage";
+        String uploadSlideDir = Paths.get("teamPost",post.getUuid(),"slideImage").toString();
         File slideDir = new File(uploadSlideDir);
         if(!slideDir.exists()){
             slideDir.mkdirs();
@@ -166,14 +167,14 @@ public class AccountService {
         post.setSlideUrl(uploadSlideDir);
 
         //포스트 저장폴더 생성
-        String uploadPostDir = "teamPost" + "\\" + post.getUuid();
+        String uploadPostDir = Paths.get("teamPost",post.getUuid()).toString();
         File postDir = new File(uploadPostDir);
         if(!postDir.exists()){
             postDir.mkdirs();
         }
-        post.setPosterUrl(uploadPostDir + "\\" + "poster");
-        post.setDemoUrl(uploadPostDir + "\\" + "demo");
-        post.setTeamProfileUrl(uploadPostDir + "\\" + "teamProfile");
+        post.setPosterUrl(Paths.get(uploadPostDir,"poster").toString());
+        post.setDemoUrl(Paths.get(uploadPostDir,"demo").toString());
+        post.setTeamProfileUrl(Paths.get(uploadPostDir,"teamProfile").toString());
 
         return post;
     }
