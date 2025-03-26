@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentInfoDTO {
-
+public class EditStudentInfoResponseDTO {
+    private String encryptedStudentProfileId;
     private String name;
     private String info;
     private Role role;
