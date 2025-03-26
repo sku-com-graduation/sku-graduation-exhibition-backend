@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("admin/student")
+@RequestMapping("api/admin/student")
 public class StudentController {
     private final StudentService studentService;
     private final EncryptionService encryptionService;

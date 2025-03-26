@@ -26,14 +26,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        return path.startsWith("/public/");  // ✅ /public/** 경로는 필터 제외
+        return path.startsWith("/api/public")  // /public/** 경로는 필터 제외
+        || path.equals("/");
     }
 
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-
         String requestURI = request.getRequestURI();
 
         String token = extractToken(request);
@@ -44,9 +44,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            Claims claims = jwtUtility.validateToken(token); // 🔥 토큰 검증 및 파싱 수행
+            Claims claims = jwtUtility.validateToken(token); // 토큰 검증 및 파싱 수행
 
-            if (jwtUtility.isTokenExpired(token)) { // 🔥 만료 여부 확인
+            if (jwtUtility.isTokenExpired(token)) { // 만료 여부 확인
                 sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "토큰이 만료되었습니다.");
                 return;
             }

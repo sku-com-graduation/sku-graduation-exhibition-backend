@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.*;
 
 @RestController
+@RequestMapping("api/")
 @RequiredArgsConstructor
 public class AccountController {
     private final AccountService accountService;
