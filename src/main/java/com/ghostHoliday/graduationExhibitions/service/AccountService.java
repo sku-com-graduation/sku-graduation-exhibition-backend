@@ -4,15 +4,14 @@ import com.ghostHoliday.graduationExhibitions.domain.*;
 import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearDTO;
 import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearResponseDTO;
 import com.ghostHoliday.graduationExhibitions.dto.LoginDTO;
-import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
-import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
-import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
-import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
+import com.ghostHoliday.graduationExhibitions.repository.*;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,29 +39,52 @@ public class AccountService {
     private final StudentRepository studentRepository;
     private final EncryptionService encryptionService;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenRepository refreshTokenRepository;
+
 
     @Transactional
     public LoginDTO login(String userEmail, String password) {
         Account account = accountRepository.findAccountByUserEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("아이디가 잘못되었습니다."));
-        if (!passwordEncoder.matches(password,account.getPwd())){
+
+        if (!passwordEncoder.matches(password, account.getPwd())) {
             throw new RuntimeException("비밀번호가 잘못되었습니다.");
         }
+
         account.setRecent(LocalDateTime.now());
+
+        // JWT 토큰 생성
+        String accessToken = jwtUtility.generateToken(userEmail, account.getRole());
+        String refreshToken = jwtUtility.generateRefreshToken(userEmail);
+
+
+        // 기존 리프레시 토큰 삭제 (같은 유저의 이전 토큰 제거)
+        refreshTokenRepository.deleteByAccount(account);
+
+        // 새로운 리프레시 토큰 저장
+        RefreshToken newRefreshToken = new RefreshToken();
+        newRefreshToken.setAccount(account);
+        newRefreshToken.setRefreshToken(refreshToken);
+        newRefreshToken.setExpiryDate(LocalDateTime.now().plusDays(30));  // 30일 유효
+        refreshTokenRepository.save(newRefreshToken);
+
+        // LoginDTO 생성
         LoginDTO loginDTO = new LoginDTO();
-        loginDTO.setAccessToken(jwtUtility.generateToken(userEmail,account.getRole()));
+        loginDTO.setAccessToken(accessToken);  // 클라이언트에는 액세스 토큰만 제공
         loginDTO.setRole(account.getRole());
         loginDTO.setRecent(account.getRecent());
+
         if (account.getRole().equals(Role.ADMIN)) {
             loginDTO.setTeamName("ADMIN");
             loginDTO.setUuid(null);
-        }
-        else {
+        } else {
             loginDTO.setTeamName(account.getTeam().getName());
             loginDTO.setUuid(account.getTeam().getPost().getUuid());
         }
+
         return loginDTO;
     }
+
 
     @Transactional
     public void registAccount(MultipartFile file) throws IOException, CsvException {
