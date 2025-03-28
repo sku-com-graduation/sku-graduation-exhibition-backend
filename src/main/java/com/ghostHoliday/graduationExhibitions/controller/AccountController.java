@@ -3,11 +3,14 @@ package com.ghostHoliday.graduationExhibitions.controller;
 
 import com.ghostHoliday.graduationExhibitions.domain.Account;
 import com.ghostHoliday.graduationExhibitions.dto.*;
+import com.ghostHoliday.graduationExhibitions.exception.UnauthorizedException;
 import com.ghostHoliday.graduationExhibitions.service.AccountService;
 import com.ghostHoliday.graduationExhibitions.service.EncryptionService;
+import com.ghostHoliday.graduationExhibitions.service.HttpOnlyService;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.exceptions.CsvException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,6 +30,7 @@ import java.util.*;
 public class AccountController {
     private final AccountService accountService;
     private final EncryptionService encryptionService;
+    private final HttpOnlyService httpOnlyService;
     private final JwtUtility jwtUtility;
 
 
@@ -59,17 +63,22 @@ public class AccountController {
     @PostMapping("admin/account/regist")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<String> registAccountAndTeam(
-            @RequestHeader("Authorization") String authorizationHeader,
+            HttpServletRequest request,
+            HttpServletResponse response,  // accessToken 재발급을 위해 추가
             @RequestBody MultipartFile file) {
 
         try {
-            // Access Token 추출 (Bearer 제거)
-            String accessToken = authorizationHeader.replace("Bearer ", "");
+
+            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
 
+            // ✅ accessToken이 유효하면 요청 처리
             accountService.registAccount(file);
             return ResponseEntity.status(HttpStatus.CREATED).body("계정 및 팀 정보가 성공적으로 등록되었습니다.");
 
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
         } catch (CsvException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CSV 파일 처리 중 오류가 발생했습니다: " + e.getMessage());
 
@@ -89,7 +98,6 @@ public class AccountController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(accounts);
-
     }
 
     @DeleteMapping("admin/account/delete")
