@@ -88,13 +88,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+//    private String extractToken(HttpServletRequest request) {
+//        String bearerToken = request.getHeader("Authorization");
+//        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+//            return bearerToken.substring(7);
+//        }
+//        return null;
+//    }
+
     private String extractToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        // 쿠키에서 토큰을 찾기
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {  // jakarta.servlet.http.Cookie 사용
+                if ("accessToken".equals(cookie.getName())) {  // "accessToken" 쿠키가 있는지 확인
+                    return cookie.getValue();  // 토큰 반환
+                }
+            }
         }
-        return null;
+        return null;  // 쿠키에 토큰이 없으면 null 반환
     }
+
 
     private void sendErrorResponse(HttpServletResponse response, int status, String message) throws IOException {
         response.setStatus(status);
