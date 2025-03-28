@@ -9,7 +9,9 @@ import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.exceptions.CsvException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,27 +27,46 @@ import java.util.*;
 public class AccountController {
     private final AccountService accountService;
     private final EncryptionService encryptionService;
+    private final JwtUtility jwtUtility;
 
 
     @PostMapping("public/account/login")
     public ResponseEntity<Object> login(@RequestBody LoginRequestDTO request) {
         try {
-            LoginDTO dto = accountService.login(request.getUserName(), request.getPassword());
+            LoginDTO loginDTO = accountService.login(request.getUserName(), request.getPassword());
 
-            return ResponseEntity.ok(dto);
-        }catch (IllegalArgumentException e) {
+            // Refresh Token을 HTTP-Only 쿠키에 저장
+            ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", loginDTO.getAccessToken())
+                    .httpOnly(true)
+                    .secure(true)  // HTTPS 환경에서만 전송 (테스트 시 false 가능)
+                    .path("/")
+                    .maxAge(60 * 60 * 24)  // 24시간 유지
+                    .sameSite("Strict")
+                    .build();
+
+            loginDTO.setAccessToken(null);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                    .body(loginDTO);
+        } catch (IllegalArgumentException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "아이디 혹은 비밀번호가 잘못되었습니다.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
-
     }
+
 
     @PostMapping("admin/account/regist")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public ResponseEntity<String> registAccountAndTeam(@RequestBody MultipartFile file) {
+    public ResponseEntity<String> registAccountAndTeam(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody MultipartFile file) {
 
         try {
+            // Access Token 추출 (Bearer 제거)
+            String accessToken = authorizationHeader.replace("Bearer ", "");
+
+
             accountService.registAccount(file);
             return ResponseEntity.status(HttpStatus.CREATED).body("계정 및 팀 정보가 성공적으로 등록되었습니다.");
 

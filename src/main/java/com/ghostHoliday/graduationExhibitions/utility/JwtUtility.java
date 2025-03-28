@@ -17,20 +17,24 @@ public class JwtUtility {
         this.secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     }
 
-    private static final long EXPIRATION_TIME = 1000L * 60 * 60; // 1시간
+    // ⏳ Access Token 만료 시간 (30분)
+    private static final long ACCESS_TOKEN_EXPIRATION = 1000L * 60 * 2; // 2분
 
-    //토큰 생성 (role 포함)
+    // ⏳ Refresh Token 만료 시간 (24시간)
+    private static final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60; // 1시간
+
+    // 토큰 생성 (role 포함)
     public String generateToken(String userEmail, Role role) {
         return Jwts.builder()
                 .setSubject(userEmail)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .addClaims(Map.of("role", role.name())) // 🔥 role의 문자열 값을 저장
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION)) // 30분
+                .addClaims(Map.of("role", role.name()))
                 .signWith(secretKey)
                 .compact();
     }
 
-    //토큰 검증 및 파싱
+    // 토큰 검증 및 파싱
     public Claims validateToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)
@@ -43,15 +47,27 @@ public class JwtUtility {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
-                .parseClaimsJws(token.replace("Bearer ", "")) // "Bearer " 제거
+                .parseClaimsJws(token.replace("Bearer ", ""))
                 .getBody();
 
         return claims.getSubject(); // 이메일 반환
     }
 
-
-    //토큰 만료 여부 확인
+    // 토큰 만료 여부 확인
     public boolean isTokenExpired(String token) {
         return validateToken(token).getExpiration().before(new Date());
     }
+
+    // Refresh Token 생성
+    public String generateRefreshToken(String userEmail) {
+        return Jwts.builder()
+                .setSubject(userEmail)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION)) // 24시간
+                .signWith(secretKey)
+                .compact();
+    }
+
+
+
 }
