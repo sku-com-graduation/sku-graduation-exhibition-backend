@@ -11,6 +11,7 @@ public class Home {
     @Id @GeneratedValue
     private Long id;
 
-    private String year;
-    private String month;
+    private String exhibitionYear;
+    private String exhibitionDate;
+    private String exhibitionHour;
 }
