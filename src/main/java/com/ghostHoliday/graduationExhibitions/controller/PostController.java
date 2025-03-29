@@ -31,14 +31,13 @@ public class PostController {
     public ResponseEntity<String> updateSlideImages(
             HttpServletRequest request,
             HttpServletResponse response,  // accessToken 재발급을 위해 추가
-            @ModelAttribute UpdateSlideImageDTO dto,
-            @RequestHeader("Authorization") String token
+            @ModelAttribute UpdateSlideImageDTO dto
     ) throws Exception {
         try {
 
             // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
-
+            String token = jwtUtility.extractAccessTokenFromCookie(request);
 
             postService.updateSlideImage(dto, jwtUtility.getEmailFromToken(token));
             return ResponseEntity.ok("파일 업로드에 성공했습니다.");
@@ -56,13 +55,14 @@ public class PostController {
     public ResponseEntity<String> updateTeamPost(
             HttpServletRequest request,
             HttpServletResponse response,  // accessToken 재발급을 위해 추가
-            @ModelAttribute UpdateTeamPostDTO dto,
-            @RequestHeader("Authorization") String token
+            @ModelAttribute UpdateTeamPostDTO dto
     ) throws Exception {
         try {
 
             // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
+            String token = jwtUtility.extractAccessTokenFromCookie(request);
+
 
             postService.updatePostInfo(dto, jwtUtility.getEmailFromToken(token));
             return ResponseEntity.ok("파일 업로드에 성공했습니다.");
@@ -80,12 +80,12 @@ public class PostController {
     public ResponseEntity<String> updateStudentProfile(
             HttpServletRequest request,
             HttpServletResponse response,  // accessToken 재발급을 위해 추가
-            @ModelAttribute UpdateStudentProfileByPostDTO dto,
-            @RequestHeader("Authorization") String token
+            @ModelAttribute UpdateStudentProfileByPostDTO dto
             ) throws Exception {
         try {
             // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
+            String token = jwtUtility.extractAccessTokenFromCookie(request);
 
             postService.updateStudentProfileByPost(dto, jwtUtility.getEmailFromToken(token));
             return ResponseEntity.ok("학생 정보를 수정했습니다.");
