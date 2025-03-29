@@ -37,7 +37,7 @@ public class ProfessorController {
             HttpServletResponse response,  // accessToken 재발급을 위해 추가
             @ModelAttribute RegistProfessorDTO dto){
                 try {
-                    // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+                    // 서비스 계층에서 accessToken 검증 및 재발급 처리
                     String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
 
@@ -66,7 +66,7 @@ public class ProfessorController {
 
         try {
 
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
             // 교수 정보 업데이트
@@ -90,7 +90,7 @@ public class ProfessorController {
             HttpServletResponse response )
     {
         try {
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
             List<FindProfessorDTO> professors = professorService.findAllProfessors();
@@ -119,7 +119,7 @@ public class ProfessorController {
             @RequestBody List<String> encryptedProfessorIds) {
         try {
 
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
             // 학생 삭제 로직 호출

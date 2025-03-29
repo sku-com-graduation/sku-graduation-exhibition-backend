@@ -35,7 +35,7 @@ public class StudentProfileController {
         ObjectMapper objectMapper = new ObjectMapper();
         UpdateStudentProfileDTO dto;
         try {
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
             dto = objectMapper.readValue(dtoJson, UpdateStudentProfileDTO.class);
