@@ -4,9 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ghostHoliday.graduationExhibitions.domain.Student;
 import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentProfileDTO;
+import com.ghostHoliday.graduationExhibitions.exception.UnauthorizedException;
 import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
+import com.ghostHoliday.graduationExhibitions.service.HttpOnlyService;
 import com.ghostHoliday.graduationExhibitions.service.StudentProfileService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,9 +22,12 @@ import org.springframework.web.multipart.MultipartFile;
 public class StudentProfileController {
 
     private final StudentProfileService studentProfileService;
+    private final HttpOnlyService httpOnlyService;
 
     @PutMapping("/updateProfile")
     public ResponseEntity<String> updateStudentProfile(
+            HttpServletRequest request,
+            HttpServletResponse response,  // accessToken 재발급을 위해 추가
             @RequestParam("dto") String dtoJson,  // JSON 데이터를 String으로 받기
             @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) {
 
@@ -27,7 +35,12 @@ public class StudentProfileController {
         ObjectMapper objectMapper = new ObjectMapper();
         UpdateStudentProfileDTO dto;
         try {
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
+            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
+
             dto = objectMapper.readValue(dtoJson, UpdateStudentProfileDTO.class);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
         } catch (JsonProcessingException e) {
             return ResponseEntity.status(400).body("Invalid JSON format");
         }

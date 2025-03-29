@@ -3,13 +3,18 @@ package com.ghostHoliday.graduationExhibitions.controller;
 
 import com.ghostHoliday.graduationExhibitions.domain.Account;
 import com.ghostHoliday.graduationExhibitions.dto.*;
+import com.ghostHoliday.graduationExhibitions.exception.UnauthorizedException;
 import com.ghostHoliday.graduationExhibitions.service.AccountService;
 import com.ghostHoliday.graduationExhibitions.service.EncryptionService;
+import com.ghostHoliday.graduationExhibitions.service.HttpOnlyService;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.exceptions.CsvException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,30 +30,55 @@ import java.util.*;
 public class AccountController {
     private final AccountService accountService;
     private final EncryptionService encryptionService;
+    private final HttpOnlyService httpOnlyService;
+    private final JwtUtility jwtUtility;
 
 
     @PostMapping("public/account/login")
     public ResponseEntity<Object> login(@RequestBody LoginRequestDTO request) {
         try {
-            LoginDTO dto = accountService.login(request.getUserName(), request.getPassword());
+            LoginDTO loginDTO = accountService.login(request.getUserName(), request.getPassword());
 
-            return ResponseEntity.ok(dto);
-        }catch (IllegalArgumentException e) {
+            // Refresh Token을 HTTP-Only 쿠키에 저장
+            ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", loginDTO.getAccessToken())
+                    .httpOnly(true)
+                    .secure(true)  // HTTPS 환경에서만 전송 (테스트 시 false 가능)
+                    .path("/")
+                    .maxAge(60 * 60 * 24)  // 24시간 유지
+                    .sameSite("Strict")
+                    .build();
+
+            loginDTO.setAccessToken(null);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                    .body(loginDTO);
+        } catch (IllegalArgumentException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "아이디 혹은 비밀번호가 잘못되었습니다.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
-
     }
+
 
     @PostMapping("admin/account/regist")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public ResponseEntity<String> registAccountAndTeam(@RequestBody MultipartFile file) {
+    public ResponseEntity<String> registAccountAndTeam(
+            HttpServletRequest request,
+            HttpServletResponse response,  // accessToken 재발급을 위해 추가
+            @RequestBody MultipartFile file) {
 
         try {
+
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
+            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
+
+
+            // accessToken이 유효하면 요청 처리
             accountService.registAccount(file);
             return ResponseEntity.status(HttpStatus.CREATED).body("계정 및 팀 정보가 성공적으로 등록되었습니다.");
 
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
         } catch (CsvException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CSV 파일 처리 중 오류가 발생했습니다: " + e.getMessage());
 
@@ -68,7 +98,6 @@ public class AccountController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(accounts);
-
     }
 
     @DeleteMapping("admin/account/delete")
