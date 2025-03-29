@@ -24,6 +24,7 @@ public class DataInitializer {
     @Transactional
     public void initializeData() {
 
+
         Account adminAccount = new Account();
         adminAccount.setTeam(null);
         adminAccount.setUserEmail("admin");
