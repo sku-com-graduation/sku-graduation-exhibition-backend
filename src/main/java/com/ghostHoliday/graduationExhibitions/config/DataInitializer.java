@@ -1,4 +1,4 @@
-package com.ghostHoliday.graduationExhibitions.Config;
+package com.ghostHoliday.graduationExhibitions.config;
 
 import com.ghostHoliday.graduationExhibitions.domain.*;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
@@ -23,6 +23,7 @@ public class DataInitializer {
 
     @Transactional
     public void initializeData() {
+
 
         Account adminAccount = new Account();
         adminAccount.setTeam(null);
