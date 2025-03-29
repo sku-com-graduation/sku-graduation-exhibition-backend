@@ -35,7 +35,7 @@ public class PostController {
     ) throws Exception {
         try {
 
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
             String token = jwtUtility.extractAccessTokenFromCookie(request);
 
@@ -59,7 +59,7 @@ public class PostController {
     ) throws Exception {
         try {
 
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
             String token = jwtUtility.extractAccessTokenFromCookie(request);
 
@@ -83,7 +83,7 @@ public class PostController {
             @ModelAttribute UpdateStudentProfileByPostDTO dto
             ) throws Exception {
         try {
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
             String token = jwtUtility.extractAccessTokenFromCookie(request);
 
@@ -103,7 +103,7 @@ public class PostController {
             @RequestBody SearchPostRequestDTO dto) throws Exception {
         try {
 
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
             SearchPostInfoDTO result = postService.searchPostInfo(dto.getUuid());
@@ -126,7 +126,7 @@ public class PostController {
             @RequestBody EditStudentInfoRequestDTO dto) throws Exception {
         try {
 
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
             String token = jwtUtility.extractAccessTokenFromCookie(request);
@@ -155,7 +155,7 @@ public class PostController {
             @RequestBody verifyEditPermissionRequestDTO dto) throws Exception {
         try {
 
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
             boolean result = postService.verifyEditPermission(dto.getToken(), dto.getUuid());
 

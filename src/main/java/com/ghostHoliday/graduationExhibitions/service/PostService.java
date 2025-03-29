@@ -99,7 +99,6 @@ public class PostService {
     public SearchPostInfoDTO searchPostInfo(String uuid) throws Exception {
 
 
-
         Post post = postRepository.findByUuid(uuid).get();
         Team team = teamRepository.findByPostId(post.getId()).get();
         Long requestTeamId = team.getId();
