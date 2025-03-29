@@ -44,7 +44,7 @@ public class StudentController {
             @RequestParam("file") MultipartFile file) {
         try {
 
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
 
@@ -83,7 +83,7 @@ public class StudentController {
         ArrayList<Long> teamIds = new ArrayList<>();
         try {
 
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
 
@@ -112,7 +112,7 @@ public class StudentController {
             @RequestBody List<UpdateStudentDTO> dto) {
         try {
 
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
             // 학생들 리스트를 서비스로 전달하여 처리
@@ -136,7 +136,7 @@ public class StudentController {
             @RequestParam("year") String year) {
 
         try {
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
             // 학생 리스트를 조회하는 로직 (Service 호출)

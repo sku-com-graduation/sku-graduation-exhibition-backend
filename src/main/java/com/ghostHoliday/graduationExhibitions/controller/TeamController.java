@@ -34,7 +34,7 @@ public class TeamController {
 
         try{
 
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -55,7 +55,7 @@ public class TeamController {
             @RequestBody List<String> encryptionTeamIds) throws Exception {
         try {
 
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
             teamService.deleteTeam(encryptionTeamIds);
@@ -75,7 +75,7 @@ public class TeamController {
             @RequestBody List<UpdateTeamInfoDTO> updateTeamInfoDTOS) throws Exception {
 
         try {
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
             List<ResponseTeamInfoDTO> updatedTeams = teamService.updateTeamInfo(updateTeamInfoDTOS);
@@ -107,7 +107,7 @@ public class TeamController {
             @RequestParam int year) throws Exception {
 
         try{
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
         }catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
@@ -125,7 +125,7 @@ public class TeamController {
             @RequestParam int year) throws Exception {
 
         try{
-            // 1️⃣ 서비스 계층에서 accessToken 검증 및 재발급 처리
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
