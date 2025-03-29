@@ -3,6 +3,7 @@ package com.ghostHoliday.graduationExhibitions.service;
 import com.ghostHoliday.graduationExhibitions.domain.Account;
 import com.ghostHoliday.graduationExhibitions.domain.Home;
 import com.ghostHoliday.graduationExhibitions.domain.Role;
+import com.ghostHoliday.graduationExhibitions.dto.home.UpdateExhibitionDateRequest;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import com.ghostHoliday.graduationExhibitions.repository.HomeRepository;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
@@ -22,8 +23,8 @@ public class HomeService {
     private final AccountRepository accountRepository;
     private final JwtUtility jwtUtility;
 
-
-    public void updateExhibitionDate(String token, int year) throws AccessDeniedException {
+    @Transactional
+    public void updateExhibitionDate(String token, UpdateExhibitionDateRequest request) throws AccessDeniedException {
 
         String userEmail = jwtUtility.getEmailFromToken(token);
         Account account = accountRepository.findAccountByUserEmail(userEmail)
@@ -33,7 +34,13 @@ public class HomeService {
             throw new AccessDeniedException("권한이 없습니다.");
         }
 
-        Home home = homeRepository.findByExhibitionYear(year).get();
+        if (!homeRepository.existsByExhibitionYear(request.getYear())){
+            throw new IllegalStateException("해당 년도의 정보를 찾을 수 없습니다.");
+        }
+
+        Home home = homeRepository.findByExhibitionYear(request.getYear()).get();
+        home.setExhibitionDate(request.getExhibitionDate());
+        home.setExhibitionHour(request.getExhibitionHour());
 
     }
 }
