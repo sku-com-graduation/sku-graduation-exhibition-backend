@@ -39,6 +39,7 @@ public class AccountService {
     private final StudentRepository studentRepository;
     private final EncryptionService encryptionService;
     private final PasswordEncoder passwordEncoder;
+    private final HomeRepository homeRepository;
     private final RefreshTokenRepository refreshTokenRepository;
 
 
@@ -93,6 +94,13 @@ public class AccountService {
         List<String []> rows = csvReader.readAll();
         ArrayList<Account> accounts = new ArrayList<>();
         int year = LocalDateTime.now().getYear();
+        if (!homeRepository.existsByExhibitionYear(String.valueOf(year))){
+            Home home = new Home();
+            home.setExhibitionYear(String.valueOf(year));
+            home.setExhibitionDate("");
+            home.setExhibitionHour("");
+            homeRepository.save(home);
+        }
         for (String[] row : rows) {
             String teamName = row[0];
             Category category = Category.valueOf(row[1]);
