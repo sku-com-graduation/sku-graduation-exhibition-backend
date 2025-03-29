@@ -4,10 +4,7 @@ import com.ghostHoliday.graduationExhibitions.domain.*;
 import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearDTO;
 import com.ghostHoliday.graduationExhibitions.dto.FindAccountByYearResponseDTO;
 import com.ghostHoliday.graduationExhibitions.dto.LoginDTO;
-import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
-import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
-import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
-import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
+import com.ghostHoliday.graduationExhibitions.repository.*;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
@@ -40,6 +37,7 @@ public class AccountService {
     private final StudentRepository studentRepository;
     private final EncryptionService encryptionService;
     private final PasswordEncoder passwordEncoder;
+    private final HomeRepository homeRepository;
 
     @Transactional
     public LoginDTO login(String userEmail, String password) {
@@ -71,6 +69,13 @@ public class AccountService {
         List<String []> rows = csvReader.readAll();
         ArrayList<Account> accounts = new ArrayList<>();
         int year = LocalDateTime.now().getYear();
+        if (!homeRepository.existsByExhibitionYear(String.valueOf(year))){
+            Home home = new Home();
+            home.setExhibitionYear(String.valueOf(year));
+            home.setExhibitionDate("");
+            home.setExhibitionHour("");
+            homeRepository.save(home);
+        }
         for (String[] row : rows) {
             String teamName = row[0];
             Category category = Category.valueOf(row[1]);
