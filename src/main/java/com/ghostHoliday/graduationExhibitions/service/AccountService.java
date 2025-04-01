@@ -116,6 +116,11 @@ public class AccountService {
         return refreshTokenRepository.deleteByAccount(account);
     }
 
+
+
+    /**
+     * csv로 받은 파일을 전부 저장
+     */
     @Transactional
     public void registAccount(MultipartFile file) throws IOException, CsvException {
 
