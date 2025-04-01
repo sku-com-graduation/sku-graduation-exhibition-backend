@@ -23,7 +23,7 @@ public class JwtUtility {
     }
 
     // ⏳ Access Token 만료 시간 (30분)
-    private static final long ACCESS_TOKEN_EXPIRATION = 1000L * 60 * 2; // 2분
+    private static final long ACCESS_TOKEN_EXPIRATION = 1000L * 60 * 1; // 2분
 
     // ⏳ Refresh Token 만료 시간 (24시간)
     private static final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60; // 1시간
@@ -47,11 +47,20 @@ public class JwtUtility {
      * 토큰 검증 및 파싱 메서드
      */
     public Claims validateToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+
+        try{
+            return Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            // 만료된 토큰에서도 클레임을 가져오기 위해 getClaims() 사용
+            return e.getClaims();
+        } catch (JwtException e) {
+            throw new RuntimeException("유효하지 않은 토큰입니다.", e);
+        }
+
     }
 
 
