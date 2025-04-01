@@ -163,7 +163,7 @@ public class PostService {
         }
 
         PostTeamInfoDTO postTeamInfoDTO = new PostTeamInfoDTO();
-        postTeamInfoDTO.setUuid(post.getUuid());
+        postTeamInfoDTO.setTeamUuid(post.getUuid());
         postTeamInfoDTO.setTitle(post != null ? post.getTitle() : null);
         postTeamInfoDTO.setContent(post != null ? post.getContent() : null);
         postTeamInfoDTO.setCategory(team.getCategory());
