@@ -4,6 +4,7 @@ package com.ghostHoliday.graduationExhibitions.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ghostHoliday.graduationExhibitions.dto.professor.FindProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.professor.RegistProfessorDTO;
+import com.ghostHoliday.graduationExhibitions.dto.professor.UpdateProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.exception.UnauthorizedException;
 import com.ghostHoliday.graduationExhibitions.service.HttpOnlyService;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
@@ -139,15 +140,5 @@ public class ProfessorController {
     }
 
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class UpdateProfessorDTO{
-        private String encryptedProfessorId;
-        private String name;
-        private String email;
-        private boolean tenure;
-        private MultipartFile profileImage;
 
-    }
 }
