@@ -35,23 +35,13 @@ public class AccountController {
 
 
     @PostMapping("public/account/login")
-    public ResponseEntity<Object> login(@RequestBody LoginRequestDTO request) {
+    public ResponseEntity<Object> login(
+            @RequestBody LoginRequestDTO request
+            ) {
         try {
-            LoginDTO loginDTO = accountService.login(request.getUserName(), request.getPassword());
+            return accountService.login(request);
 
-            // Refresh Token을 HTTP-Only 쿠키에 저장
-            ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", loginDTO.getAccessToken())
-                    .httpOnly(true)
-                    .secure(true)  // HTTPS 환경에서만 전송 (테스트 시 false 가능)
-                    .path("/")
-                    .maxAge(60 * 60 * 24)  // 24시간 유지
-                    .sameSite("Strict")
-                    .build();
 
-            loginDTO.setAccessToken(null);
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
-                    .body(loginDTO);
         } catch (IllegalArgumentException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "아이디 혹은 비밀번호가 잘못되었습니다.");
