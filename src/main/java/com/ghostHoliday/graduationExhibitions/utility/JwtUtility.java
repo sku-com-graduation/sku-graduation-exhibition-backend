@@ -48,20 +48,29 @@ public class JwtUtility {
      */
     public Claims validateToken(String token) {
 
-        try{
+        try {
+            // JWT 토큰 파싱 및 유효성 검증
             return Jwts.parserBuilder()
                     .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e) {
-            // 만료된 토큰에서도 클레임을 가져오기 위해 getClaims() 사용
+            // 만료된 토큰일 경우 클레임을 반환
             return e.getClaims();
-        } catch (JwtException e) {
-            throw new RuntimeException("유효하지 않은 토큰입니다.", e);
-        }
 
+        } catch (MalformedJwtException e) {
+            throw new RuntimeException("유효하지 않은 토큰입니다_1", e);
+
+        } catch (SignatureException e) {
+            throw new RuntimeException("유효하지 않은 토큰입니다_2", e);
+
+        } catch (JwtException e) {
+            throw new RuntimeException("유효하지 않은 토큰입니다_3", e);
+
+        }
     }
+
 
 
 
