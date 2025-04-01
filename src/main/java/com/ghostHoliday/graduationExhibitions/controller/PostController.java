@@ -98,20 +98,11 @@ public class PostController {
 
     @PostMapping("public/post/search")
     public ResponseEntity<?> searchPost(
-            HttpServletRequest request,
-            HttpServletResponse response,  // accessToken 재발급을 위해 추가
             @RequestBody SearchPostRequestDTO dto) throws Exception {
         try {
-
-            // 서비스 계층에서 accessToken 검증 및 재발급 처리
-            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
-
             SearchPostInfoDTO result = postService.searchPostInfo(dto.getUuid());
             return ResponseEntity.ok(result);
-
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
-        }  catch (Exception e) {
+        } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
