@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostTeamInfoDTO {
-    private String uuid;
+    private String teamUuid;
     private String title;
     private String content;
     private Category category;
