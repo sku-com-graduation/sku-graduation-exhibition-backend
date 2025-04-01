@@ -78,13 +78,20 @@ public class JwtUtility {
 
 
     public String getEmailFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token.replace("Bearer ", ""))
-                .getBody();
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
 
-        return claims.getSubject(); // 이메일 반환
+            return claims.getSubject(); // 이메일 반환
+        } catch (ExpiredJwtException e) {
+            // 만료된 토큰에서도 클레임을 가져오기 위해 getClaims() 사용
+            return e.getClaims().getSubject();
+        } catch (JwtException e) {
+            throw new RuntimeException("유효하지 않은 토큰입니다.", e);
+        }
     }
 
 
