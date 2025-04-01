@@ -2,10 +2,7 @@ package com.ghostHoliday.graduationExhibitions.service;
 
 import com.ghostHoliday.graduationExhibitions.domain.*;
 import com.ghostHoliday.graduationExhibitions.dto.post.*;
-import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
-import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
-import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
-import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
+import com.ghostHoliday.graduationExhibitions.repository.*;
 import com.ghostHoliday.graduationExhibitions.utility.Base64Utility;
 import com.ghostHoliday.graduationExhibitions.utility.FileUtility;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
@@ -36,6 +33,8 @@ public class PostService {
     private final AccountRepository accountRepository;
     private final AccountService accountService;
     private final JwtUtility jwtUtility;
+    private final ProfessorRepository professorRepository;
+    private final TeamService teamService;
 
 
     public Long save(Post post) {
@@ -123,13 +122,13 @@ public class PostService {
     @Transactional
     public SearchPostInfoDTO searchPostInfo(String uuid) throws Exception {
 
-
         Post post = postRepository.findByUuid(uuid).get();
         Team team = teamRepository.findByPostId(post.getId()).get();
         Long requestTeamId = team.getId();
 
         List<StudentInfoDTO> studentInfoDTOS = new ArrayList<>();
         List<Student> students = studentRepository.findAllByTeamId(requestTeamId);
+
 
         for (Student student : students) {
             StudentInfoDTO studentInfoDTO = new StudentInfoDTO();
@@ -186,7 +185,25 @@ public class PostService {
                 post != null && post.getDemoUrl() != null && !post.getDemoUrl().isEmpty() ? base64Utility.encodeFileToBase64(post.getDemoUrl()) : null
         );
 
-        return new SearchPostInfoDTO(studentInfoDTOS, postTeamInfoDTO);
+
+        Professor professor = team.getProfessor();
+        ProfessorInfoDTO professorInfoDTO = new ProfessorInfoDTO();
+
+        if (professor != null) {
+            professorInfoDTO.setProfessorImage(
+                    professor.getImageUrl() != null && !professor.getImageUrl().isEmpty()
+                            ? base64Utility.encodeFileToBase64(professor.getImageUrl())
+                            : ""
+            );
+            professorInfoDTO.setProfessorName(professor.getName() != null ? professor.getName() : "이름 없음");
+            professorInfoDTO.setProfessorEmail(professor.getEmail() != null ? professor.getEmail() : "이메일 없음");
+            professorInfoDTO.setProfessorTenure(professor.isTenure());
+        } else {
+            professorInfoDTO.setProfessorName("이름 없음");
+            professorInfoDTO.setProfessorEmail("이메일 없음");
+            professorInfoDTO.setProfessorTenure(false); // 교수 정보가 없으면 tenure 기본값 false
+        }
+        return new SearchPostInfoDTO(studentInfoDTOS, postTeamInfoDTO, professorInfoDTO);
     }
 
     @Transactional
