@@ -46,14 +46,9 @@ public class TeamController {
             @RequestBody List<String> encryptionTeamIds) throws Exception {
         try {
 
-            // 서비스 계층에서 accessToken 검증 및 재발급 처리
-            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
-
             teamService.deleteTeam(encryptionTeamIds);
             return ResponseEntity.ok("성공적으로 팀 정보를 삭제했습니다.");
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
-        } catch (Exception e) {
+        }catch (Exception e) {
             return ResponseEntity.noContent().build();
         }
     }
@@ -66,15 +61,11 @@ public class TeamController {
             @RequestBody List<UpdateTeamInfoDTO> updateTeamInfoDTOS) throws Exception {
 
         try {
-            // 서비스 계층에서 accessToken 검증 및 재발급 처리
-            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
             List<ResponseTeamInfoDTO> updatedTeams = teamService.updateTeamInfo(updateTeamInfoDTOS);
             return ResponseEntity.ok(updatedTeams);
 
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
-        }  catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .header("Error", e.getMessage())
                     .build();

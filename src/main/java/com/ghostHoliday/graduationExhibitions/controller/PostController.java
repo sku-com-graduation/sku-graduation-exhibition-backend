@@ -35,14 +35,11 @@ public class PostController {
     ) throws Exception {
         try {
 
-            // 서비스 계층에서 accessToken 검증 및 재발급 처리
-            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
+
             String token = jwtUtility.extractAccessTokenFromCookie(request);
 
             postService.updateSlideImage(dto, jwtUtility.getEmailFromToken(token));
             return ResponseEntity.ok("파일 업로드에 성공했습니다.");
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -59,16 +56,13 @@ public class PostController {
     ) throws Exception {
         try {
 
-            // 서비스 계층에서 accessToken 검증 및 재발급 처리
-            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
+
             String token = jwtUtility.extractAccessTokenFromCookie(request);
 
 
             postService.updatePostInfo(dto, jwtUtility.getEmailFromToken(token));
             return ResponseEntity.ok("파일 업로드에 성공했습니다.");
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
-        }  catch (IllegalStateException e) {
+        } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("파일 업로드 실패: " + e.getMessage());
@@ -83,15 +77,12 @@ public class PostController {
             @ModelAttribute UpdateStudentProfileByPostDTO dto
             ) throws Exception {
         try {
-            // 서비스 계층에서 accessToken 검증 및 재발급 처리
-            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
-            String token = jwtUtility.extractAccessTokenFromCookie(request);
 
+            // 서비스 계층에서 accessToken 검증 및 재발급 처리
+            String token = jwtUtility.extractAccessTokenFromCookie(request);
             postService.updateStudentProfileByPost(dto, jwtUtility.getEmailFromToken(token));
             return ResponseEntity.ok("학생 정보를 수정했습니다.");
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
-        }  catch (Exception e){
+        }catch (Exception e){
             return ResponseEntity.status(500).body("학생 정보 수정에 실패했습니다." + e.getMessage());
         }
     }
@@ -117,17 +108,13 @@ public class PostController {
             @RequestBody EditStudentInfoRequestDTO dto) throws Exception {
         try {
 
-            // 서비스 계층에서 accessToken 검증 및 재발급 처리
-            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
             String token = jwtUtility.extractAccessTokenFromCookie(request);
 
 
             List<EditStudentInfoResponseDTO> result = postService.searchEditPostInfo(token, dto.getUuid());
             return ResponseEntity.ok(result);
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
-        }  catch (Exception e) {
+        } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
@@ -146,17 +133,12 @@ public class PostController {
             @RequestBody verifyEditPermissionRequestDTO dto) throws Exception {
         try {
 
-            // 서비스 계층에서 accessToken 검증 및 재발급 처리
-            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
-            boolean result = postService.verifyEditPermission(dto.getToken(), dto.getUuid());
+             boolean result = postService.verifyEditPermission(dto.getToken(), dto.getUuid());
 
             return ResponseEntity.ok("인증 성공");
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         }
     }
-
 
 }
