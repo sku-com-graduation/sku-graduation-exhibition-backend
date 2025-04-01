@@ -12,7 +12,7 @@ public class FindProfessorDTO{
     private String encryptedProfessorId;
     private String name;
     private String email;
-    private String profileImg;
+    private String profileImage;
     private Boolean tenure;
 
 }
