@@ -112,7 +112,7 @@ public class PostController {
             String token = jwtUtility.extractAccessTokenFromCookie(request);
 
 
-            List<EditStudentInfoResponseDTO> result = postService.searchEditPostInfo(token, dto.getUuid());
+            EditPostInfoResponseDTO result = postService.searchEditPostInfo(token, dto.getUuid());
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
