@@ -6,6 +6,7 @@ import com.ghostHoliday.graduationExhibitions.dto.team.FindTeamInfoByYearDTO;
 import com.ghostHoliday.graduationExhibitions.dto.team.ResponseTeamInfoDTO;
 import com.ghostHoliday.graduationExhibitions.dto.team.UpdateTeamInfoDTO;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
+import com.ghostHoliday.graduationExhibitions.repository.ProfessorRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
 import com.ghostHoliday.graduationExhibitions.utility.Base64Utility;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class TeamService {
     private final EncryptionService encryptionService;
     private final AccountRepository accountRepository;
     private final Base64Utility base64Utility;
+    private final ProfessorRepository professorRepository;
 
     public Long save(Team team){
         return teamRepository.save(team).getId();
@@ -70,8 +72,10 @@ public class TeamService {
         List<ResponseTeamInfoDTO> teams = new ArrayList<>();
         for (UpdateTeamInfoDTO updateTeamInfoDTO : updateTeamInfoDTOS) {
             Long teamId = encryptionService.decryptPrimaryKey(updateTeamInfoDTO.getEncryptedTeamId());
+            Long professorId = encryptionService.decryptPrimaryKey(updateTeamInfoDTO.getEncryptedProfessorId());
             Team team = teamRepository.findById(teamId).get();
-            ResponseTeamInfoDTO teamInfo = updateTeam(team, teamId, null,
+            Professor professor = professorRepository.getReferenceById(professorId);
+            ResponseTeamInfoDTO teamInfo = updateTeam(team, teamId, professor, professor.getName(),
                     updateTeamInfoDTO.getName(),
                     updateTeamInfoDTO.getExhibitionYear(),
                     updateTeamInfoDTO.getCategory());
@@ -113,11 +117,11 @@ public class TeamService {
 
 
 
-    static ResponseTeamInfoDTO updateTeam(Team team, Long teamId, Long professorId, String name, int year, Category category){
+    static ResponseTeamInfoDTO updateTeam(Team team, Long teamId, Professor professor, String professorName, String name, int year, Category category){
         ResponseTeamInfoDTO teamInfo = new ResponseTeamInfoDTO();
 
-        team.setProfessor(null);
-        teamInfo.setProfessor(null);
+        team.setProfessor(professor);
+        teamInfo.setProfessor(professorName);
         team.setName(name);
         teamInfo.setName(name);
         team.setExhibitionYear(year);
