@@ -97,14 +97,6 @@ public class TeamController {
             HttpServletResponse response,  // accessToken 재발급을 위해 추가
             @RequestParam int year) throws Exception {
 
-        try{
-            // 서비스 계층에서 accessToken 검증 및 재발급 처리
-            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
-        }catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
-        }
-
-
         List<FindTeamInfoByYearDTO> teamInfo = teamService.findTeamInfoByYear(year);
         return ResponseEntity.ok(teamInfo);
     }
