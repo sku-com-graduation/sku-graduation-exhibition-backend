@@ -1,8 +1,9 @@
 package com.ghostHoliday.graduationExhibitions.controller;
 
 
-import com.ghostHoliday.graduationExhibitions.domain.Account;
-import com.ghostHoliday.graduationExhibitions.dto.*;
+import com.ghostHoliday.graduationExhibitions.dto.account.FindAccountByYearResponseDTO;
+import com.ghostHoliday.graduationExhibitions.dto.account.LoginDTO;
+import com.ghostHoliday.graduationExhibitions.dto.account.LoginRequestDTO;
 import com.ghostHoliday.graduationExhibitions.exception.UnauthorizedException;
 import com.ghostHoliday.graduationExhibitions.service.AccountService;
 import com.ghostHoliday.graduationExhibitions.service.EncryptionService;
@@ -16,7 +17,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;

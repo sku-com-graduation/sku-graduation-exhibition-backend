@@ -1,4 +1,4 @@
-package com.ghostHoliday.graduationExhibitions.dto;
+package com.ghostHoliday.graduationExhibitions.dto.post;
 
 import com.ghostHoliday.graduationExhibitions.domain.Category;
 import lombok.AllArgsConstructor;

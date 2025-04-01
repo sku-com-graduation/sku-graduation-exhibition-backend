@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateExhibitionDateRequest {
+public class SearchExhitibitionDateResponse {
     private String encryptedHomeId;
     private String exhibitionYear;
     private String exhibitionDate;
