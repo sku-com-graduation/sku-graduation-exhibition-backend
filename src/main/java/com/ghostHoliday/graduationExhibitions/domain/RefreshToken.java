@@ -19,6 +19,7 @@ public class RefreshToken {
     private Account account;
 
     private String refreshToken;
+
     private LocalDateTime expiryDate;
 
 
