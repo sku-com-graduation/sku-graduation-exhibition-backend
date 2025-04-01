@@ -44,7 +44,7 @@ public class PostService {
 
 
     @Transactional
-    public List<EditStudentInfoResponseDTO> searchEditPostInfo(String token, String uuid) throws Exception {
+    public EditPostInfoResponseDTO searchEditPostInfo(String token, String uuid) throws Exception {
         String userEmail = jwtUtility.getEmailFromToken(token);
         Account account = accountRepository.findAccountByUserEmail(userEmail)
                 .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
@@ -58,40 +58,65 @@ public class PostService {
                 throw new AccessDeniedException("해당 팀 수정 권한이 없습니다.");
         }
 
+        EditPostInfoResponseDTO response = new EditPostInfoResponseDTO();
 
-        List<EditStudentInfoResponseDTO> editStudentInfoResponseDTOS = new ArrayList<>();
 
+        response.setTitle(post != null ? post.getTitle() : null);
+        response.setContent(post != null ? post.getContent() : null);
+        response.setCategory(team.getCategory());
+
+        response.setTeamProfileImage(
+                post != null && post.getTeamProfileUrl() != null && !post.getTeamProfileUrl().isEmpty() ? base64Utility.encodeFileToBase64(post.getTeamProfileUrl()) : null
+        );
+
+        response.setSlideImages(
+                post != null && post.getSlideUrl() != null && !post.getSlideUrl().isEmpty() && !Files.list(Paths.get(post.getSlideUrl())).findAny().isEmpty()
+                        ? base64Utility.ImagesToBase64(post.getSlideUrl())
+                        : null
+        );
+
+        response.setPosterImage(
+                post != null && post.getPosterUrl() != null && !post.getPosterUrl().isEmpty() ? base64Utility.encodeFileToBase64(post.getPosterUrl()) : null
+        );
+
+        response.setDemoVideo(
+                post != null && post.getDemoUrl() != null && !post.getDemoUrl().isEmpty() ? base64Utility.encodeFileToBase64(post.getDemoUrl()) : null
+        );
+
+
+        List<EditStudentResponse> editStudentResponses = new ArrayList<>();
         for (Student student : studentRepository.findAllByTeamId(team.getId())) {
-            EditStudentInfoResponseDTO editStudentInfoResponseDTO = new EditStudentInfoResponseDTO();
+            EditStudentResponse editStudentResponse = new EditStudentResponse();
             StudentProfile studentProfile = student.getStudentProfile();
 
-            editStudentInfoResponseDTO.setEncryptedStudentProfileId(encryptionService.encryptPrimaryKey(student.getId()));
+            editStudentResponse.setEncryptedStudentProfileId(encryptionService.encryptPrimaryKey(student.getId()));
             // 이름 (null 체크)
-            editStudentInfoResponseDTO.setName(student.getName() != null ? student.getName() : "이름 없음");
+            editStudentResponse.setName(student.getName() != null ? student.getName() : "이름 없음");
 
             // 정보 (null 체크)
-            editStudentInfoResponseDTO.setInfo(editStudentInfoResponseDTO.getInfo() != null ? editStudentInfoResponseDTO.getInfo() : "정보 없음");
+            editStudentResponse.setInfo(editStudentResponse.getInfo() != null ? editStudentResponse.getInfo() : "정보 없음");
 
             // 역할 (null 체크)
-            editStudentInfoResponseDTO.setRole(student.getRole() != null ? student.getRole() : null);
+            editStudentResponse.setRole(student.getRole() != null ? student.getRole() : null);
 
             // Github URL (null 체크)
-            editStudentInfoResponseDTO.setGithubUrl(editStudentInfoResponseDTO.getGithubUrl() != null ? editStudentInfoResponseDTO.getGithubUrl() : "Github URL 없음");
+            editStudentResponse.setGithubUrl(editStudentResponse.getGithubUrl() != null ? editStudentResponse.getGithubUrl() : "Github URL 없음");
 
             // 이메일 (null 체크)
-            editStudentInfoResponseDTO.setStudentEmail(editStudentInfoResponseDTO.getStudentEmail() != null ? editStudentInfoResponseDTO.getStudentEmail() : "이메일 없음");
+            editStudentResponse.setStudentEmail(editStudentResponse.getStudentEmail() != null ? editStudentResponse.getStudentEmail() : "이메일 없음");
 
             // 블로그 (null 체크)
-            editStudentInfoResponseDTO.setStudentBlog(editStudentInfoResponseDTO.getStudentBlog() != null ? editStudentInfoResponseDTO.getStudentBlog() : "블로그 없음");
+            editStudentResponse.setStudentBlog(editStudentResponse.getStudentBlog() != null ? editStudentResponse.getStudentBlog() : "블로그 없음");
 
             // 프로필 이미지 URL (null 체크)
             String profileImageUrl = studentProfile.getStudentProfileUrl();
-            editStudentInfoResponseDTO.setProfileImage(profileImageUrl != null && !profileImageUrl.isEmpty()
+            editStudentResponse.setProfileImage(profileImageUrl != null && !profileImageUrl.isEmpty()
                     ? base64Utility.encodeFileToBase64(profileImageUrl)
                     : ""); // 기본값은 빈 문자열로 설정 (혹은 기본 이미지를 설정할 수 있음)
-            editStudentInfoResponseDTOS.add(editStudentInfoResponseDTO);
+            editStudentResponses.add(editStudentResponse);
         }
-        return editStudentInfoResponseDTOS;
+        response.setStudents(editStudentResponses);
+        return response;
 
     }
 
@@ -139,8 +164,8 @@ public class PostService {
 
         PostTeamInfoDTO postTeamInfoDTO = new PostTeamInfoDTO();
         postTeamInfoDTO.setUuid(post.getUuid());
-        postTeamInfoDTO.setProjectName(post != null ? post.getTitle() : null);
-        postTeamInfoDTO.setExplanation(post != null ? post.getContent() : null);
+        postTeamInfoDTO.setTitle(post != null ? post.getTitle() : null);
+        postTeamInfoDTO.setContent(post != null ? post.getContent() : null);
         postTeamInfoDTO.setCategory(team.getCategory());
 
         postTeamInfoDTO.setTeamProfileImage(

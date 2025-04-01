@@ -6,9 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class EditStudentInfoResponseDTO {
+@NoArgsConstructor
+public class EditStudentResponse {
     private String encryptedStudentProfileId;
     private String name;
     private String info;
