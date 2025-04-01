@@ -40,9 +40,6 @@ public class StudentController {
             @RequestParam("file") MultipartFile file) {
         try {
 
-            // 서비스 계층에서 accessToken 검증 및 재발급 처리
-            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
-
 
             // CSV 파일을 OpenCSV로 읽음
             try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream() , StandardCharsets.UTF_8))) {
@@ -60,10 +57,7 @@ public class StudentController {
             // 저장 완료 메시지 반환
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body("학생 정보가 성공적으로 저장되었습니다.");
-        } catch (UnauthorizedException e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
-        }
-        catch (Exception e) {
+        }  catch (Exception e) {
             // 예외 발생 시 실패 메시지 반환
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("학생 정보 저장 중 오류가 발생했습니다. 파일 형식 또는 내용 확인을 해주세요.");
@@ -79,10 +73,6 @@ public class StudentController {
         ArrayList<Long> teamIds = new ArrayList<>();
         try {
 
-            // 서비스 계층에서 accessToken 검증 및 재발급 처리
-            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
-
-
             // 학생 삭제 로직 호출
             for (String encryptedTeamId : encryptedStudentIds) {
                 Long accountId = encryptionService.decryptPrimaryKey(encryptedTeamId);
@@ -92,8 +82,6 @@ public class StudentController {
 
             // 성공적인 처리 후 응답
             return ResponseEntity.ok("학생들이 성공적으로 삭제되었습니다.");
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
         }catch (Exception e) {
             // 예외 발생 시, 에러 메시지와 함께 500 응답
             return ResponseEntity.status(500).body("학생 삭제 중 오류가 발생했습니다: " + e.getMessage());
@@ -108,16 +96,11 @@ public class StudentController {
             @RequestBody List<UpdateStudentDTO> dto) {
         try {
 
-            // 서비스 계층에서 accessToken 검증 및 재발급 처리
-            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
-
             // 학생들 리스트를 서비스로 전달하여 처리
             studentService.updateStudents(dto);
             // 정상 처리되었으면 성공 메시지 반환
             return ResponseEntity.ok("학생 정보 업데이트 성공");
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
-        } catch (Exception e) {
+        }catch (Exception e) {
             // 예외가 발생하면 적절한 에러 메시지 반환
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("학생 정보 업데이트 실패: " + e.getMessage());
@@ -132,8 +115,6 @@ public class StudentController {
             @RequestParam("year") String year) {
 
         try {
-            // 서비스 계층에서 accessToken 검증 및 재발급 처리
-            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
             // 학생 리스트를 조회하는 로직 (Service 호출)
             List<SearchStudentDTO> students = studentService.searchStudentsByYear(year);
@@ -146,15 +127,10 @@ public class StudentController {
             // 결과가 있으면 200 OK와 함께 응답
             return ResponseEntity.ok(students);
 
-        } catch (UnauthorizedException e) {
-            // 오류 메시지를 ErrorResponse 객체로 래핑하여 반환
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage()));
-        } catch (Exception e) {
+        }catch (Exception e) {
             // 예기치 않은 오류 처리
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(("서버 내부 오류가 발생했습니다."));
         }
     }
-
-
 
 }

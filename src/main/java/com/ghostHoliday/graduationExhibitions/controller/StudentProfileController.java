@@ -33,13 +33,9 @@ public class StudentProfileController {
         ObjectMapper objectMapper = new ObjectMapper();
         UpdateStudentProfileDTO dto;
         try {
-            // 서비스 계층에서 accessToken 검증 및 재발급 처리
-            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
 
             dto = objectMapper.readValue(dtoJson, UpdateStudentProfileDTO.class);
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
-        } catch (JsonProcessingException e) {
+        }catch (JsonProcessingException e) {
             return ResponseEntity.status(400).body("Invalid JSON format");
         }
 
