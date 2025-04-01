@@ -44,6 +44,7 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
     private final HomeRepository homeRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final HttpOnlyService httpOnlyService;
 
 
     @Transactional
@@ -102,6 +103,18 @@ public class AccountService {
 
     }
 
+
+
+    @Transactional
+    public int logout(HttpServletRequest request ) {
+        String token = jwtUtility.extractAccessTokenFromCookie(request);
+        String email = jwtUtility.getEmailFromToken(token);
+
+        Account account = accountRepository.findAccountByUserEmail(email).get();
+
+
+        return refreshTokenRepository.deleteByAccount(account);
+    }
 
     @Transactional
     public void registAccount(MultipartFile file) throws IOException, CsvException {
