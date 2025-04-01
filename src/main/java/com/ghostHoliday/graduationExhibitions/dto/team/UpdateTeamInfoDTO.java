@@ -1,19 +1,17 @@
-package com.ghostHoliday.graduationExhibitions.dto;
+package com.ghostHoliday.graduationExhibitions.dto.team;
 
 import com.ghostHoliday.graduationExhibitions.domain.Category;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class FindTeamInfoByYearDTO {
+public class UpdateTeamInfoDTO {
     private String encryptedTeamId;
     private String encryptedProfessorId;
     private String name;
-    private String professor;
+    private int exhibitionYear;
     private Category category;
 }

@@ -1,4 +1,4 @@
-package com.ghostHoliday.graduationExhibitions.dto;
+package com.ghostHoliday.graduationExhibitions.dto.post;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,6 +10,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SearchPostInfoDTO {
-    List<StudentInfoDTO> students;
-    PostTeamInfoDTO teamInfo;
+    private List<StudentInfoDTO> students;
+    private PostTeamInfoDTO teamInfo;
 }

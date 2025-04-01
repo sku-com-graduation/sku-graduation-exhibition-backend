@@ -1,4 +1,4 @@
-package com.ghostHoliday.graduationExhibitions.dto;
+package com.ghostHoliday.graduationExhibitions.dto.post;
 
 import com.ghostHoliday.graduationExhibitions.domain.Category;
 import lombok.AllArgsConstructor;
@@ -8,12 +8,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdatePostByTeamDTO {
-    private String token;
+public class FindPostInfoByYearDTO {
+    private String uuid;
+    private String teamName;
     private String title;
-    private String content;
-    private String teamProfileUrl;
-    private String demoUrl;
-    private String posterUrl;
+    private String teamProfileImage;
     private Category category;
 }

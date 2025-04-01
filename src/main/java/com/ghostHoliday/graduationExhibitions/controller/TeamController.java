@@ -1,8 +1,10 @@
 package com.ghostHoliday.graduationExhibitions.controller;
 
 
-import com.ghostHoliday.graduationExhibitions.domain.Account;
-import com.ghostHoliday.graduationExhibitions.dto.*;
+import com.ghostHoliday.graduationExhibitions.dto.post.FindPostInfoByYearDTO;
+import com.ghostHoliday.graduationExhibitions.dto.team.FindTeamInfoByYearDTO;
+import com.ghostHoliday.graduationExhibitions.dto.team.ResponseTeamInfoDTO;
+import com.ghostHoliday.graduationExhibitions.dto.team.UpdateTeamInfoDTO;
 import com.ghostHoliday.graduationExhibitions.exception.UnauthorizedException;
 import com.ghostHoliday.graduationExhibitions.service.HttpOnlyService;
 import com.ghostHoliday.graduationExhibitions.service.TeamService;

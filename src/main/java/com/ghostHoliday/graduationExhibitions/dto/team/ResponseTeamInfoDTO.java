@@ -1,4 +1,4 @@
-package com.ghostHoliday.graduationExhibitions.dto;
+package com.ghostHoliday.graduationExhibitions.dto.team;
 
 import com.ghostHoliday.graduationExhibitions.domain.Category;
 import lombok.AllArgsConstructor;
@@ -8,10 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class FindPostInfoByYearDTO {
-    private String uuid;
-    private String teamName;
-    private String title;
-    private String teamProfileImage;
+public class ResponseTeamInfoDTO {
+    private String name;
+    private String professor;
     private Category category;
 }

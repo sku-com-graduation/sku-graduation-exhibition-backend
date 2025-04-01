@@ -2,10 +2,8 @@ package com.ghostHoliday.graduationExhibitions.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ghostHoliday.graduationExhibitions.domain.Student;
-import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentProfileDTO;
+import com.ghostHoliday.graduationExhibitions.dto.studentProfile.UpdateStudentProfileDTO;
 import com.ghostHoliday.graduationExhibitions.exception.UnauthorizedException;
-import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
 import com.ghostHoliday.graduationExhibitions.service.HttpOnlyService;
 import com.ghostHoliday.graduationExhibitions.service.StudentProfileService;
 import jakarta.servlet.http.HttpServletRequest;
