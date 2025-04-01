@@ -21,6 +21,7 @@ public class Account {
     @JoinColumn(name = "teamId")
     private Team team;
 
+    @Column(unique = true)
     private String userEmail;
 
     private String defaultPwd;
