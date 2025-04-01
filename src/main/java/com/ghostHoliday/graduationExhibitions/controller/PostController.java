@@ -1,6 +1,6 @@
 package com.ghostHoliday.graduationExhibitions.controller;
 
-import com.ghostHoliday.graduationExhibitions.dto.*;
+import com.ghostHoliday.graduationExhibitions.dto.post.*;
 import com.ghostHoliday.graduationExhibitions.exception.UnauthorizedException;
 import com.ghostHoliday.graduationExhibitions.service.HttpOnlyService;
 import com.ghostHoliday.graduationExhibitions.service.PostService;

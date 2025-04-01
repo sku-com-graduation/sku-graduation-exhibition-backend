@@ -2,10 +2,8 @@ package com.ghostHoliday.graduationExhibitions.controller;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ghostHoliday.graduationExhibitions.dto.FindProfessorDTO;
-import com.ghostHoliday.graduationExhibitions.dto.RegistProfessorDTO;
-import com.ghostHoliday.graduationExhibitions.dto.UpdateProfessorDTO;
+import com.ghostHoliday.graduationExhibitions.dto.professor.FindProfessorDTO;
+import com.ghostHoliday.graduationExhibitions.dto.professor.RegistProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.exception.UnauthorizedException;
 import com.ghostHoliday.graduationExhibitions.service.HttpOnlyService;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
@@ -13,6 +11,9 @@ import com.ghostHoliday.graduationExhibitions.service.ProfessorService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -138,4 +139,15 @@ public class ProfessorController {
     }
 
 
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UpdateProfessorDTO{
+        private String encryptedProfessorId;
+        private String name;
+        private String email;
+        private boolean tenure;
+        private MultipartFile profileImage;
+
+    }
 }

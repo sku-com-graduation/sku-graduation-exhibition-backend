@@ -3,7 +3,7 @@ package com.ghostHoliday.graduationExhibitions.service;
 
 import com.ghostHoliday.graduationExhibitions.domain.Student;
 import com.ghostHoliday.graduationExhibitions.domain.StudentProfile;
-import com.ghostHoliday.graduationExhibitions.dto.UpdateStudentProfileDTO;
+import com.ghostHoliday.graduationExhibitions.dto.studentProfile.UpdateStudentProfileDTO;
 import com.ghostHoliday.graduationExhibitions.repository.StudentProfileRepository;
 import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
 import com.ghostHoliday.graduationExhibitions.utility.FileUtility;

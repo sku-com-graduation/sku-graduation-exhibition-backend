@@ -1,24 +1,19 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
 import com.ghostHoliday.graduationExhibitions.domain.*;
-import com.ghostHoliday.graduationExhibitions.dto.*;
+import com.ghostHoliday.graduationExhibitions.dto.post.FindPostInfoByYearDTO;
+import com.ghostHoliday.graduationExhibitions.dto.team.FindTeamInfoByYearDTO;
+import com.ghostHoliday.graduationExhibitions.dto.team.ResponseTeamInfoDTO;
+import com.ghostHoliday.graduationExhibitions.dto.team.UpdateTeamInfoDTO;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
-import com.ghostHoliday.graduationExhibitions.repository.PostRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
 import com.ghostHoliday.graduationExhibitions.utility.Base64Utility;
-import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

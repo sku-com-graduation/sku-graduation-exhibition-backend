@@ -1,9 +1,9 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
+import com.ghostHoliday.graduationExhibitions.controller.ProfessorController;
 import com.ghostHoliday.graduationExhibitions.domain.Professor;
-import com.ghostHoliday.graduationExhibitions.dto.FindProfessorDTO;
-import com.ghostHoliday.graduationExhibitions.dto.RegistProfessorDTO;
-import com.ghostHoliday.graduationExhibitions.dto.UpdateProfessorDTO;
+import com.ghostHoliday.graduationExhibitions.dto.professor.FindProfessorDTO;
+import com.ghostHoliday.graduationExhibitions.dto.professor.RegistProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.repository.ProfessorRepository;
 import com.ghostHoliday.graduationExhibitions.utility.FileUtility;
 import lombok.RequiredArgsConstructor;
@@ -67,7 +67,7 @@ public class ProfessorService {
 
 
     @Transactional
-    public void updateProfessor(UpdateProfessorDTO dto) throws Exception {
+    public void updateProfessor(ProfessorController.UpdateProfessorDTO dto) throws Exception {
         // 기존 교수 정보를 찾아옵니다.
         Professor professor = professorRepository.findById(encryptionService.decryptPrimaryKey(dto.getEncryptedProfessorId()))
                 .orElseThrow(() -> new RuntimeException("교수 정보를 찾을 수 없습니다."));
