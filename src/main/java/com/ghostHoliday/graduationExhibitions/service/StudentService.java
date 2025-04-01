@@ -30,6 +30,27 @@ public class StudentService {
     private final TeamRepository teamRepository;
     private final EncryptionService encryptionService;
 
+
+
+
+    @Transactional
+    public void saveStudent( SaveStudentDTO dto){
+
+        // 빈 StudentProfile 생성
+        StudentProfile studentProfile = studentProfileService.saveStudentProfile();
+
+        // SaveStudentDTO를 Student로 변환
+        Student student = new Student();
+        student.setName(dto.getStudentName());
+        student.setStudentNumber(dto.getStudentNumber());
+        student.setStudentProfile(studentProfile); // Student와 StudentProfile 연관 설정
+
+        studentRepository.save(student);
+    }
+
+
+
+
     @Transactional
     public void saveStudents( List<SaveStudentDTO> dto) {
 

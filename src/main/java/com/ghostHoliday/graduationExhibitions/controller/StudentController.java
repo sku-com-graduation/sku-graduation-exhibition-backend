@@ -3,7 +3,6 @@ package com.ghostHoliday.graduationExhibitions.controller;
 import com.ghostHoliday.graduationExhibitions.dto.student.SaveStudentDTO;
 import com.ghostHoliday.graduationExhibitions.dto.student.SearchStudentDTO;
 import com.ghostHoliday.graduationExhibitions.dto.student.UpdateStudentDTO;
-import com.ghostHoliday.graduationExhibitions.exception.UnauthorizedException;
 import com.ghostHoliday.graduationExhibitions.service.EncryptionService;
 import com.ghostHoliday.graduationExhibitions.service.HttpOnlyService;
 import com.ghostHoliday.graduationExhibitions.service.StudentService;
@@ -31,8 +30,34 @@ public class StudentController {
     private final EncryptionService encryptionService;
     private final HttpOnlyService httpOnlyService;
 
+
+
+
     // CSV 파일을 받아서 처리하는 메소드
     @PostMapping("/save")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity<String> saveStudent(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @RequestBody SaveStudentDTO dto) {
+
+        try {
+
+                studentService.saveStudent(dto);
+
+            // 저장 완료 메시지 반환
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body("학생 정보가 성공적으로 저장되었습니다.");
+        }  catch (Exception e) {
+            // 예외 발생 시 실패 메시지 반환
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("학생 정보 저장 중 오류가 발생했습니다. 파일 형식 또는 내용 확인을 해주세요.");
+        }
+    }
+
+
+    // CSV 파일을 받아서 처리하는 메소드
+    @PostMapping("s/save")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<String> saveStudents(
             HttpServletRequest request,
