@@ -73,7 +73,6 @@ public class AccountController {
     }
 
 
-
     @PostMapping("admin/account/regist")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<String> registAccountAndTeam(
