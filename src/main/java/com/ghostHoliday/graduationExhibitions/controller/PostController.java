@@ -55,10 +55,7 @@ public class PostController {
             @ModelAttribute UpdateTeamPostDTO dto
     ) throws Exception {
         try {
-
-
             String token = jwtUtility.extractAccessTokenFromCookie(request);
-
 
             postService.updatePostInfo(dto, jwtUtility.getEmailFromToken(token));
             return ResponseEntity.ok("파일 업로드에 성공했습니다.");
@@ -91,7 +88,7 @@ public class PostController {
     public ResponseEntity<?> searchPost(
             @RequestBody SearchPostRequestDTO dto) throws Exception {
         try {
-            SearchPostInfoDTO result = postService.searchPostInfo(dto.getUuid());
+            SearchPostInfoDTO result = postService.searchPostInfo(dto.getTeamUuid());
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -112,7 +109,7 @@ public class PostController {
             String token = jwtUtility.extractAccessTokenFromCookie(request);
 
 
-            EditPostInfoResponseDTO result = postService.searchEditPostInfo(token, dto.getUuid());
+            EditPostInfoResponseDTO result = postService.searchEditPostInfo(token, dto.getTeamUuid());
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();

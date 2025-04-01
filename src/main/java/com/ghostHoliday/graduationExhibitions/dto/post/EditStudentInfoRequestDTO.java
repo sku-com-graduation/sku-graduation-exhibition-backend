@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EditStudentInfoRequestDTO {
-    private String uuid;
+    private String teamUuid;
 }

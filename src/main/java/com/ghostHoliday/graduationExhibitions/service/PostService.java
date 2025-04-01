@@ -228,9 +228,9 @@ public class PostService {
         Files.write(teamProfileFilePath, dto.getTeamProfileImage().getBytes());
 
         // 데모 영상 업로드
-        String demoExtension = fileUtility.getVideoFileExtension(dto.getDemo().getOriginalFilename());
+        String demoExtension = fileUtility.getVideoFileExtension(dto.getDemoVideo().getOriginalFilename());
         if (demoExtension == null) {
-            throw new IllegalStateException("avi, mp4, mkv 파일만 업로드 가능합니다. " + dto.getDemo().getOriginalFilename());
+            throw new IllegalStateException("avi, mp4, mkv 파일만 업로드 가능합니다. " + dto.getDemoVideo().getOriginalFilename());
         }
         String demoFileName = "demo."+demoExtension;
         Path demoFilePath = Paths.get("teamPost",post.getUuid(),demoFileName);
@@ -240,12 +240,12 @@ public class PostService {
             Files.delete(demoFilePath);
         }
 
-        Files.write(demoFilePath, dto.getDemo().getBytes());
+        Files.write(demoFilePath, dto.getDemoVideo().getBytes());
 
         // 포스터 이미지 업로드
-        String posterExtension = fileUtility.getImageFileExtension(dto.getPosterImg().getOriginalFilename());
+        String posterExtension = fileUtility.getImageFileExtension(dto.getPosterImage().getOriginalFilename());
         if (posterExtension == null) {
-            throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + dto.getPosterImg().getOriginalFilename());
+            throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + dto.getPosterImage().getOriginalFilename());
         }
         String posterFileName = "poster." + posterExtension;
         Path posterFilePath = Paths.get("teamPost",post.getUuid(),posterFileName);
@@ -255,7 +255,7 @@ public class PostService {
             Files.delete(posterFilePath);
         }
 
-        Files.write(posterFilePath, dto.getPosterImg().getBytes());
+        Files.write(posterFilePath, dto.getPosterImage().getBytes());
     }
 
 
