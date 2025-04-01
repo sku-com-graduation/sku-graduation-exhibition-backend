@@ -123,7 +123,7 @@ public class PostController {
             String token = jwtUtility.extractAccessTokenFromCookie(request);
 
 
-            List<EditStudentInfoResponseDTO> result = postService.searchEditPostInfo(token, dto.getUuid());
+            EditPostInfoResponseDTO result = postService.searchEditPostInfo(token, dto.getUuid());
             return ResponseEntity.ok(result);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
