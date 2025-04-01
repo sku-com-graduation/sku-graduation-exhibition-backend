@@ -1,5 +1,6 @@
 package com.ghostHoliday.graduationExhibitions.config;
 
+import com.ghostHoliday.graduationExhibitions.service.HttpOnlyService;
 import com.ghostHoliday.graduationExhibitions.utility.JwtAuthenticationFilter;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import org.springframework.context.annotation.Bean;
@@ -23,14 +24,16 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtUtility jwtUtility;
+    private final HttpOnlyService httpOnlyService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    public SecurityConfig(JwtUtility jwtUtility) {
+    public SecurityConfig(JwtUtility jwtUtility, HttpOnlyService httpOnlyService) {
         this.jwtUtility = jwtUtility;
+        this.httpOnlyService = httpOnlyService;
     }
 
     @Bean
@@ -45,7 +48,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN") // USER 이상 접근 가능
                         .anyRequest().permitAll() // 그 외 모든 요청은 인증 필요
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtility), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtility, httpOnlyService), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

@@ -1,5 +1,7 @@
 package com.ghostHoliday.graduationExhibitions.utility;
 
+import com.ghostHoliday.graduationExhibitions.exception.UnauthorizedException;
+import com.ghostHoliday.graduationExhibitions.service.HttpOnlyService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,65 +20,53 @@ import java.util.Collections;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtility jwtUtility;
+    private final HttpOnlyService httpOnlyService;
 
-    public JwtAuthenticationFilter(JwtUtility jwtUtility) {
+    public JwtAuthenticationFilter(JwtUtility jwtUtility, HttpOnlyService httpOnlyService) {
         this.jwtUtility = jwtUtility;
+        this.httpOnlyService = httpOnlyService;
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
         return path.startsWith("/api/public")  // /public/** 경로는 필터 제외
-        || path.equals("/");
+                || path.equals("/");
     }
 
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        String requestURI = request.getRequestURI();
 
+        String requestURI = request.getRequestURI();
         String token = extractToken(request);
+
 
         if (token == null) {
             sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "토큰이 제공되지 않았습니다.");
             return;
         }
 
+        Claims claims = null;
+
         try {
-            Claims claims = jwtUtility.validateToken(token); // 토큰 검증 및 파싱 수행
-
-            if (jwtUtility.isTokenExpired(token)) { // 만료 여부 확인
-                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "토큰이 만료되었습니다.");
-                return;
-            }
-
-            String role = claims.get("role", String.class);
-
-            if (role == null) {
-                sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "유효한 역할이 없습니다.");
-                return;
-            }
-
-            // 🔹 사용자 인증 정보 설정 (ADMIN, USER에 따라)
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    claims.getSubject(),
-                    null,
-                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
-            );
-            SecurityContextHolder.getContext().setAuthentication(auth);
-
-            // 🔹 관리자 전용 API 접근 권한 확인 (일반 사용자가 ADMIN API 접근 시 차단)
-            if (requestURI.startsWith("/account/admin")) {
-                if (!role.equals("ADMIN")) {
-                    sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "관리자 권한이 필요합니다.");
-                    return;
-                }
-            }
-
+            claims = jwtUtility.validateToken(token);
         } catch (ExpiredJwtException e) {
-            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "토큰이 만료되었습니다.");
-            return;
+
+
+            // 🔹 RefreshToken을 이용하여 새 AccessToken 발급
+            token = httpOnlyService.refreshTokenIfNeeded(request, response);
+
+            if (token == null) {
+                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "AccessToken 및 RefreshToken이 만료되었습니다.");
+                return;
+            }
+
+
+            // 새 AccessToken으로 다시 Claims 검증
+            claims = jwtUtility.validateToken(token);
+
         } catch (JwtException e) {
             sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 JWT 토큰입니다.");
             return;
@@ -85,8 +75,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+        authenticateUser(claims);
+
+        if (requestURI.startsWith("/account/admin") && !claims.get("role", String.class).equals("ADMIN")) {
+            sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "관리자 권한이 필요합니다.");
+            return;
+        }
+
         filterChain.doFilter(request, response);
     }
+
+
+
+
 
 //    private String extractToken(HttpServletRequest request) {
 //        String bearerToken = request.getHeader("Authorization");
@@ -114,5 +115,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.setContentType("application/json; charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write("{\"error\": \"" + message + "\"}");
+    }
+
+
+
+    private void authenticateUser(Claims claims) {
+        String role = claims.get("role", String.class);
+
+        if (role == null) {
+            throw new JwtException("유효한 역할이 없습니다.");
+        }
+
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                claims.getSubject(),
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 }
