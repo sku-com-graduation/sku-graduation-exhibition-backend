@@ -1,4 +1,4 @@
-package com.ghostHoliday.graduationExhibitions.dto;
+package com.ghostHoliday.graduationExhibitions.dto.account;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.ghostHoliday.graduationExhibitions.dto;
+package com.ghostHoliday.graduationExhibitions.dto.post;
 
 
 import lombok.AllArgsConstructor;
@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SearchPostRequestDTO {
+public class EditStudentInfoRequestDTO {
     private String uuid;
-
 }

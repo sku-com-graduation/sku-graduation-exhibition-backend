@@ -1,4 +1,4 @@
-package com.ghostHoliday.graduationExhibitions.dto;
+package com.ghostHoliday.graduationExhibitions.dto.post;
 
 import com.ghostHoliday.graduationExhibitions.domain.Role;
 import lombok.AllArgsConstructor;
@@ -8,13 +8,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateStudentProfileDTO {
-    private String token;
+public class EditStudentInfoResponseDTO {
+    private String encryptedStudentProfileId;
     private String name;
-    private String studentNumber;
     private String info;
     private Role role;
     private String githubUrl;
     private String studentEmail;
     private String studentBlog;
+    private String profileImage;
 }
