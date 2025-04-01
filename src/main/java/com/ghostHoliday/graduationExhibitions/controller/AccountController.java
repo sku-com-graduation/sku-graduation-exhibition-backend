@@ -83,17 +83,11 @@ public class AccountController {
 
         try {
 
-            // 서비스 계층에서 accessToken 검증 및 재발급 처리
-            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
-
-
             // accessToken이 유효하면 요청 처리
             accountService.registAccount(file);
             return ResponseEntity.status(HttpStatus.CREATED).body("계정 및 팀 정보가 성공적으로 등록되었습니다.");
 
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
-        } catch (CsvException e) {
+        }catch (CsvException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CSV 파일 처리 중 오류가 발생했습니다: " + e.getMessage());
 
         } catch (IOException e) {
