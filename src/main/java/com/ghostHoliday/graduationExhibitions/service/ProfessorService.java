@@ -157,11 +157,11 @@ public class ProfessorService {
 
             // 이미지 경로가 있다면 Base64 변환
             if (professor.getImageUrl() != null) {
-                dto.setProfileImg(convertImageToBase64(professor.getImageUrl()));
+                dto.setProfileImage(convertImageToBase64(professor.getImageUrl()));
             }
         } catch (Exception e) {
             e.printStackTrace(); // 예외 발생 시 로그 기록
-            dto.setProfileImg(null); // 예외 발생 시 기본값 설정
+            dto.setProfileImage(null); // 예외 발생 시 기본값 설정
         }
 
         return dto;
