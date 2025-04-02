@@ -72,8 +72,6 @@ public class JwtUtility {
     }
 
 
-
-
     /**
      * Token 유효 여부 확인 메소드
      * 기존 vaildationToken을 재사용 함
@@ -114,8 +112,6 @@ public class JwtUtility {
 
 
 
-
-
     /**
      * Refresh Token 생성 메서드
      */
@@ -142,6 +138,10 @@ public class JwtUtility {
 //        return null;
 //    }
 
+
+    /**
+     * 쿠키에서 accessToken
+     */
     public String extractAccessTokenFromCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -154,8 +154,6 @@ public class JwtUtility {
         }
         return null;
     }
-
-
 
 
 }
