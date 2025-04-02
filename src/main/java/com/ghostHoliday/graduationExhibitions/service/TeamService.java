@@ -84,6 +84,10 @@ public class TeamService {
         return teams;
     }
 
+
+    /**
+     * 해당 년도 정보 조회 후 리턴
+     */
     public List<FindTeamInfoByYearDTO> findTeamInfoByYear(int year) throws Exception {
 
         List<Team> teams = teamRepository.findAllByExhibitionYear(year);
@@ -92,15 +96,22 @@ public class TeamService {
         for (Team team : teams) {
             FindTeamInfoByYearDTO findTeamInfoByYearDTO = new FindTeamInfoByYearDTO();
             findTeamInfoByYearDTO.setEncryptedTeamId(encryptionService.encryptPrimaryKey(team.getId()));
-            findTeamInfoByYearDTO.setEncryptedProfessorId(null);
+            String encrptionProfessorId = null;
+            if (team.getProfessor() != null) {
+                encrptionProfessorId = (encryptionService.encryptPrimaryKey(team.getProfessor().getId()));
+                findTeamInfoByYearDTO.setProfessor( team.getProfessor().getName());
+            }
+            findTeamInfoByYearDTO.setEncryptedProfessorId(encrptionProfessorId);
             findTeamInfoByYearDTO.setName(team.getName());
             findTeamInfoByYearDTO.setCategory(team.getCategory());
+
 
             findTeamInfoByYearDTOs.add(findTeamInfoByYearDTO);
         }
         return findTeamInfoByYearDTOs;
     }
 
+    
     public List<String> findTeamProfileImageByYear(int year){
         List<String> response = new ArrayList<>();
         List<Team> teams = teamRepository.findAllByExhibitionYear(year);
