@@ -47,22 +47,24 @@ public class ProfessorService {
         if (profileImage != null && !profileImage.isEmpty()) {
             String profileImagePath = saveProfessorImage(profileImage);
             professor.setImageUrl(profileImagePath);
-        }
 
 
         // 교수 이미지 저장 경로 설정
         String uploadDir = Paths.get("professorImage").toString();
 
-        File dir = new File(uploadDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
+            File dir = new File(uploadDir);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            // 파일 확장자 추출 (jpg 또는 png)
+            String extension = fileUtility.getImageFileExtension(profileImage.getOriginalFilename());
+            if (extension == null) {
+                throw new RuntimeException("지원되지 않는 파일 형식입니다.");
+            }
         }
 
-        // 파일 확장자 추출 (jpg 또는 png)
-        String extension = fileUtility.getImageFileExtension(profileImage .getOriginalFilename());
-        if (extension == null) {
-            throw new RuntimeException("지원되지 않는 파일 형식입니다.");
-        }
+
         professorRepository.save(professor);
     }
 
