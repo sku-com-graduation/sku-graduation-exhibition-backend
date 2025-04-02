@@ -3,13 +3,12 @@ package com.ghostHoliday.graduationExhibitions.service;
 import com.ghostHoliday.graduationExhibitions.domain.Account;
 import com.ghostHoliday.graduationExhibitions.domain.Home;
 import com.ghostHoliday.graduationExhibitions.domain.Role;
+import com.ghostHoliday.graduationExhibitions.dto.home.CreateExhibitionDateRequest;
 import com.ghostHoliday.graduationExhibitions.dto.home.SearchExhitibitionDateResponse;
 import com.ghostHoliday.graduationExhibitions.dto.home.UpdateExhibitionDateRequest;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import com.ghostHoliday.graduationExhibitions.repository.HomeRepository;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
-import io.jsonwebtoken.Jwt;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +26,33 @@ public class HomeService {
     private final JwtUtility jwtUtility;
     private final EncryptionService encryptionService;
 
+
     @Transactional
-    public List<SearchExhitibitionDateResponse> searchExhitibitionDate(String token) throws Exception {
+    public void createExhibitionDates(List<CreateExhibitionDateRequest> requests, String token) throws AccessDeniedException {
+        String userEmail = jwtUtility.getEmailFromToken(token);
+        Account account = accountRepository.findAccountByUserEmail(userEmail)
+                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
+
+        if (!account.getRole().equals(Role.ADMIN)){
+            throw new AccessDeniedException("권한이 없습니다.");
+        }
+
+        for (CreateExhibitionDateRequest request : requests) {
+            if (homeRepository.existsByExhibitionYear(request.getExhibitionYear())){
+                throw new IllegalStateException("이미 존재하는 연도는 생성할 수 없습니다.");
+            }
+            Home home = new Home();
+            home.setExhibitionYear(request.getExhibitionYear());
+            home.setExhibitionDate(request.getExhibitionDate());
+            home.setExhibitionHour(request.getExhibitionHour());
+
+            homeRepository.save(home);
+        }
+
+    }
+
+    @Transactional
+    public List<SearchExhitibitionDateResponse> searchExhibitionDates(String token) throws Exception {
         String userEmail = jwtUtility.getEmailFromToken(token);
         Account account = accountRepository.findAccountByUserEmail(userEmail)
                 .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
@@ -49,6 +73,18 @@ public class HomeService {
         }
 
         return responses;
+    }
+
+    @Transactional
+    public SearchExhitibitionDateResponse searchExhibitionDate(String year) throws Exception {
+        Home home = homeRepository.findByExhibitionYear(year).orElseThrow(() -> new IllegalStateException("해당 년도에 정보가 없습니다."));
+        SearchExhitibitionDateResponse response = new SearchExhitibitionDateResponse();
+        response.setEncryptedHomeId(encryptionService.encryptPrimaryKey(home.getId()));
+        response.setExhibitionYear(home.getExhibitionYear());
+        response.setExhibitionDate(home.getExhibitionDate());
+        response.setExhibitionHour(home.getExhibitionHour());
+
+        return response;
     }
 
 
