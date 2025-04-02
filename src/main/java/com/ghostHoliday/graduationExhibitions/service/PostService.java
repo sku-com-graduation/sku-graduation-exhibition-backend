@@ -90,22 +90,22 @@ public class PostService {
 
             editStudentResponse.setEncryptedStudentProfileId(encryptionService.encryptPrimaryKey(student.getId()));
             // 이름 (null 체크)
-            editStudentResponse.setName(student.getName() != null ? student.getName() : "이름 없음");
+            editStudentResponse.setName(student.getName() != null ? student.getName() : "");
 
             // 정보 (null 체크)
-            editStudentResponse.setInfo(editStudentResponse.getInfo() != null ? editStudentResponse.getInfo() : "정보 없음");
+            editStudentResponse.setInfo(editStudentResponse.getInfo() != null ? editStudentResponse.getInfo() : "");
 
             // 역할 (null 체크)
             editStudentResponse.setRole(student.getRole() != null ? student.getRole() : null);
 
             // Github URL (null 체크)
-            editStudentResponse.setGithubUrl(editStudentResponse.getGithubUrl() != null ? editStudentResponse.getGithubUrl() : "Github URL 없음");
+            editStudentResponse.setGithubUrl(editStudentResponse.getGithubUrl() != null ? editStudentResponse.getGithubUrl() : "");
 
             // 이메일 (null 체크)
-            editStudentResponse.setStudentEmail(editStudentResponse.getStudentEmail() != null ? editStudentResponse.getStudentEmail() : "이메일 없음");
+            editStudentResponse.setStudentEmail(editStudentResponse.getStudentEmail() != null ? editStudentResponse.getStudentEmail() : "");
 
             // 블로그 (null 체크)
-            editStudentResponse.setStudentBlog(editStudentResponse.getStudentBlog() != null ? editStudentResponse.getStudentBlog() : "블로그 없음");
+            editStudentResponse.setStudentBlog(editStudentResponse.getStudentBlog() != null ? editStudentResponse.getStudentBlog() : "");
 
             // 프로필 이미지 URL (null 체크)
             String profileImageUrl = studentProfile.getStudentProfileUrl();
@@ -135,22 +135,22 @@ public class PostService {
             StudentProfile studentProfile = student.getStudentProfile();
 
             // 이름 (null 체크)
-            studentInfoDTO.setName(student.getName() != null ? student.getName() : "이름 없음");
+            studentInfoDTO.setName(student.getName() != null ? student.getName() : "");
 
             // 정보 (null 체크)
-            studentInfoDTO.setInfo(studentProfile.getInfo() != null ? studentProfile.getInfo() : "정보 없음");
+            studentInfoDTO.setInfo(studentProfile.getInfo() != null ? studentProfile.getInfo() : "");
 
             // 역할 (null 체크)
             studentInfoDTO.setRole(student.getRole() != null ? student.getRole() : null);
 
             // Github URL (null 체크)
-            studentInfoDTO.setGithubUrl(studentProfile.getGithubUrl() != null ? studentProfile.getGithubUrl() : "Github URL 없음");
+            studentInfoDTO.setGithubUrl(studentProfile.getGithubUrl() != null ? studentProfile.getGithubUrl() : "");
 
             // 이메일 (null 체크)
-            studentInfoDTO.setStudentEmail(studentProfile.getStudentEmail() != null ? studentProfile.getStudentEmail() : "이메일 없음");
+            studentInfoDTO.setStudentEmail(studentProfile.getStudentEmail() != null ? studentProfile.getStudentEmail() : "");
 
             // 블로그 (null 체크)
-            studentInfoDTO.setStudentBlog(studentProfile.getStudentBlog() != null ? studentProfile.getStudentBlog() : "블로그 없음");
+            studentInfoDTO.setStudentBlog(studentProfile.getStudentBlog() != null ? studentProfile.getStudentBlog() : "");
 
             // 프로필 이미지 URL (null 체크)
             String profileImageUrl = studentProfile.getStudentProfileUrl();
@@ -195,12 +195,12 @@ public class PostService {
                             ? base64Utility.encodeFileToBase64(professor.getImageUrl())
                             : ""
             );
-            professorInfoDTO.setProfessorName(professor.getName() != null ? professor.getName() : "이름 없음");
-            professorInfoDTO.setProfessorEmail(professor.getEmail() != null ? professor.getEmail() : "이메일 없음");
+            professorInfoDTO.setProfessorName(professor.getName() != null ? professor.getName() : "");
+            professorInfoDTO.setProfessorEmail(professor.getEmail() != null ? professor.getEmail() : "");
             professorInfoDTO.setProfessorTenure(professor.isTenure());
         } else {
-            professorInfoDTO.setProfessorName("이름 없음");
-            professorInfoDTO.setProfessorEmail("이메일 없음");
+            professorInfoDTO.setProfessorName("");
+            professorInfoDTO.setProfessorEmail("");
             professorInfoDTO.setProfessorTenure(false); // 교수 정보가 없으면 tenure 기본값 false
         }
         return new SearchPostInfoDTO(studentInfoDTOS, postTeamInfoDTO, professorInfoDTO);
