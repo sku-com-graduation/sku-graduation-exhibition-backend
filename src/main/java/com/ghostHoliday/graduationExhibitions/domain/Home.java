@@ -14,6 +14,7 @@ public class Home {
     @Column(name = "homeId")
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String exhibitionYear;
 
     private String exhibitionDate;
