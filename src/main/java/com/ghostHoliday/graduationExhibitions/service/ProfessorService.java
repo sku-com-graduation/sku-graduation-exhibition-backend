@@ -51,7 +51,7 @@ public class ProfessorService {
 
 
         // 교수 이미지 저장 경로 설정
-        String uploadDir = Paths.get("ProfessorImage").toString();
+        String uploadDir = Paths.get("professorImage").toString();
 
         File dir = new File(uploadDir);
         if (!dir.exists()) {

@@ -8,8 +8,6 @@ import com.ghostHoliday.graduationExhibitions.dto.home.UpdateExhibitionDateReque
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import com.ghostHoliday.graduationExhibitions.repository.HomeRepository;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
-import io.jsonwebtoken.Jwt;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +26,7 @@ public class HomeService {
     private final EncryptionService encryptionService;
 
     @Transactional
-    public List<SearchExhitibitionDateResponse> searchExhitibitionDate(String token) throws Exception {
+    public List<SearchExhitibitionDateResponse> searchExhibitionDates(String token) throws Exception {
         String userEmail = jwtUtility.getEmailFromToken(token);
         Account account = accountRepository.findAccountByUserEmail(userEmail)
                 .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
@@ -49,6 +47,17 @@ public class HomeService {
         }
 
         return responses;
+    }
+
+    public SearchExhitibitionDateResponse searchExhibitionDate(String year) throws Exception {
+        Home home = homeRepository.findByExhibitionYear(year).orElseThrow(() -> new IllegalStateException("해당 년도에 정보가 없습니다."));
+        SearchExhitibitionDateResponse response = new SearchExhitibitionDateResponse();
+        response.setEncryptedHomeId(encryptionService.encryptPrimaryKey(home.getId()));
+        response.setExhibitionYear(home.getExhibitionYear());
+        response.setExhibitionDate(home.getExhibitionDate());
+        response.setExhibitionHour(home.getExhibitionHour());
+
+        return response;
     }
 
 

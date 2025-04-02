@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProfessorInfoDTO {
 
-    String professorImage;
-    String professorName;
-    String professorEmail;
-    boolean ProfessorTenure;
+    private String professorImage;
+    private String professorName;
+    private String professorEmail;
+    private boolean ProfessorTenure;
 
 }
