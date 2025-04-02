@@ -33,7 +33,6 @@ public class StudentProfileController {
         ObjectMapper objectMapper = new ObjectMapper();
         UpdateStudentProfileDTO dto;
         try {
-
             dto = objectMapper.readValue(dtoJson, UpdateStudentProfileDTO.class);
         }catch (JsonProcessingException e) {
             return ResponseEntity.status(400).body("Invalid JSON format");
