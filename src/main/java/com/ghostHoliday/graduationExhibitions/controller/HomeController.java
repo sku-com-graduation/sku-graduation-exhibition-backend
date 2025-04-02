@@ -40,15 +40,33 @@ public class HomeController {
         }
     }
 
-    @GetMapping("admin/home/search/info")
-    public ResponseEntity<?> searchExhibitionDate(
+    @GetMapping("admin/home/search/infos")
+    public ResponseEntity<?> searchExhibitionDates(
             HttpServletRequest request,
             HttpServletResponse response) {
         try {
             String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
             String token = jwtUtility.extractAccessTokenFromCookie(request);
-            List<SearchExhitibitionDateResponse> responses = homeService.searchExhitibitionDate(token);
+            List<SearchExhitibitionDateResponse> responses = homeService.searchExhibitionDates(token);
             return ResponseEntity.ok(responses);
+        }catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("public/home/search/info")
+    public ResponseEntity<?> searchExhibitionDate(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @RequestParam String year
+    ) {
+        try {
+            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
+            String token = jwtUtility.extractAccessTokenFromCookie(request);
+            SearchExhitibitionDateResponse result = homeService.searchExhibitionDate(year);
+            return ResponseEntity.ok(result);
         }catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
         } catch (Exception e) {
