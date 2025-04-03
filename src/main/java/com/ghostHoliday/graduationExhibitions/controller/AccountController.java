@@ -78,9 +78,7 @@ public class AccountController {
             HttpServletRequest request,
             HttpServletResponse response,  // accessToken 재발급을 위해 추가
             @RequestBody List<RegistAccountRequest> requestDTO) {
-
         try {
-
             // accessToken이 유효하면 요청 처리
             accountService.registAccount(requestDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body("계정 및 팀 정보가 성공적으로 등록되었습니다.");
