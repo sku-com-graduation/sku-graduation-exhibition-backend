@@ -70,15 +70,14 @@ public class TeamService {
     @Transactional
     public List<ResponseTeamInfoDTO> updateTeamInfo(List<UpdateTeamInfoDTO> updateTeamInfoDTOS) throws Exception {
         List<ResponseTeamInfoDTO> teams = new ArrayList<>();
+
         for (UpdateTeamInfoDTO updateTeamInfoDTO : updateTeamInfoDTOS) {
             Long teamId = encryptionService.decryptPrimaryKey(updateTeamInfoDTO.getEncryptedTeamId());
             Long professorId = encryptionService.decryptPrimaryKey(updateTeamInfoDTO.getEncryptedProfessorId());
             Team team = teamRepository.findById(teamId).get();
-            Professor professor = professorRepository.getReferenceById(professorId);
-            ResponseTeamInfoDTO teamInfo = updateTeam(team, teamId, professor, professor.getName(),
-                    updateTeamInfoDTO.getName(),
-                    updateTeamInfoDTO.getExhibitionYear(),
-                    updateTeamInfoDTO.getCategory());
+            Professor professor = professorRepository.findById(professorId).get();
+
+            ResponseTeamInfoDTO teamInfo = updateTeam(team, professor, updateTeamInfoDTO.getName(), updateTeamInfoDTO.getCategory());
             teams.add(teamInfo);
         }
         return teams;
@@ -88,6 +87,7 @@ public class TeamService {
     /**
      * 해당 년도 정보 조회 후 리턴
      */
+    @Transactional
     public List<FindTeamInfoByYearDTO> findTeamInfoByYear(int year) throws Exception {
 
         List<Team> teams = teamRepository.findAllByExhibitionYear(year);
@@ -111,7 +111,7 @@ public class TeamService {
         return findTeamInfoByYearDTOs;
     }
 
-    
+    @Transactional
     public List<String> findTeamProfileImageByYear(int year){
         List<String> response = new ArrayList<>();
         List<Team> teams = teamRepository.findAllByExhibitionYear(year);
@@ -128,17 +128,18 @@ public class TeamService {
 
 
 
-    static ResponseTeamInfoDTO updateTeam(Team team, Long teamId, Professor professor, String professorName, String name, int year, Category category){
+    static ResponseTeamInfoDTO updateTeam(Team team, Professor professor, String requestedName, Category requestedCategory){
         ResponseTeamInfoDTO teamInfo = new ResponseTeamInfoDTO();
 
         team.setProfessor(professor);
-        teamInfo.setProfessor(professorName);
-        team.setName(name);
-        teamInfo.setName(name);
-        team.setExhibitionYear(year);
-        teamInfo.setCategory(category);
-        team.setCategory(category);
-        teamInfo.setCategory(category);
+        teamInfo.setProfessor(professor.getName());
+
+        team.setName(requestedName);
+        teamInfo.setName(requestedName);
+
+        team.setCategory(requestedCategory);
+        teamInfo.setCategory(requestedCategory);
+
         return teamInfo;
     }
 

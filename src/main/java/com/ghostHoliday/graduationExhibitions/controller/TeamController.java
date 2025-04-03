@@ -61,7 +61,6 @@ public class TeamController {
             @RequestBody List<UpdateTeamInfoDTO> updateTeamInfoDTOS) throws Exception {
 
         try {
-
             List<ResponseTeamInfoDTO> updatedTeams = teamService.updateTeamInfo(updateTeamInfoDTOS);
             return ResponseEntity.ok(updatedTeams);
 
