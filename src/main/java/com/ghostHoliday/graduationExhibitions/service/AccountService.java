@@ -1,9 +1,7 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
 import com.ghostHoliday.graduationExhibitions.domain.*;
-import com.ghostHoliday.graduationExhibitions.dto.account.FindAccountByYearResponseDTO;
-import com.ghostHoliday.graduationExhibitions.dto.account.LoginDTO;
-import com.ghostHoliday.graduationExhibitions.dto.account.LoginRequestDTO;
+import com.ghostHoliday.graduationExhibitions.dto.account.*;
 import com.ghostHoliday.graduationExhibitions.repository.*;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.CSVReader;
@@ -122,10 +120,8 @@ public class AccountService {
      * csv로 받은 파일을 전부 저장
      */
     @Transactional
-    public void registAccount(MultipartFile file) throws IOException, CsvException {
+    public void registAccount(List<RegistAccountRequest> accountInfos) throws IOException, CsvException {
 
-        CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
-        List<String []> rows = csvReader.readAll();
         ArrayList<Account> accounts = new ArrayList<>();
         int year = LocalDateTime.now().getYear();
         if (!homeRepository.existsByExhibitionYear(String.valueOf(year))){
@@ -135,44 +131,39 @@ public class AccountService {
             home.setExhibitionHour("");
             homeRepository.save(home);
         }
-        for (String[] row : rows) {
-            String teamName = row[0];
-            Category category = Category.valueOf(row[1]);
-            String professorName = row[2];
+        for (RegistAccountRequest accountInfo : accountInfos) {
 
             // 해당 팀의 post 생성
             Post post = createNewPost();
             //포스트 저장폴더 생성
-            String uploadDir = Paths.get("teamPost",post.getUuid()).toString();
+            String uploadDir = Paths.get("teamPost", post.getUuid()).toString();
             File directory = new File(uploadDir);
-            if(!directory.exists()){
+            if (!directory.exists()) {
                 directory.mkdirs();
             }
 
             postRepository.save(post);
+
             // 팀 생성
-            Team team = createTeam(teamName, category, year, post);
+            Team team = createTeam(accountInfo.getTeamName(), accountInfo.getCategory(), year, post);
             teamRepository.save(team);
-            int total = (row.length / 3);
-            for(int i = 1; i < total; i++) {
-                String name = row[3*i];
-                String number = row[3*i+1];
-                String email = row[3*i+2];
-                Student student = studentRepository.findByStudentNumber(number);
-                if (i == 1){
-                    // 팀장이라면 계정 생성
+            boolean isLeader = true;
+            for (StudentInfoByAccountDTO studentInfo : accountInfo.getStudentInfos()) {
+                Student student = studentRepository.findByStudentNumber(studentInfo.getStudentNumber());
+                if (isLeader) {
                     student.setRole(Role.LEADER);
-                    Account account = createAccount(email, passwordEncoder.encode(number), team);
+                    Account account = createAccount(studentInfo.getStudentEmail(), passwordEncoder.encode(studentInfo.getStudentNumber()), team);
                     accounts.add(account);
-                }
-                else {
+                    isLeader = false;
+                } else {
                     student.setRole(Role.MEMBER);
                 }
                 student.setTeam(team);
-                student.getStudentProfile().setStudentEmail(email);
+                student.getStudentProfile().setStudentEmail(studentInfo.getStudentEmail());
             }
+            accountRepository.saveAll(accounts);
+
         }
-        accountRepository.saveAll(accounts);
 
     }
 
