@@ -49,7 +49,6 @@ public class PostService {
                 .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
 
         Team team;
-
         Post post = postRepository.findByUuid(uuid).get();
         team = teamRepository.findByPostId(post.getId()).get();
         if (account.getRole().equals(Role.USER)){
