@@ -311,7 +311,7 @@ public class PostService {
 
     @Transactional
     public void updateSlideImage(UpdateSlideImageDTO dto, String userEmail) throws Exception {
-        try{
+        try {
             String requestedTeamUuId  = dto.getTeamUuid();
 
             Account account = accountRepository.findAccountByUserEmail(userEmail)
@@ -319,19 +319,17 @@ public class PostService {
 
             Post post = postRepository.findByUuid(requestedTeamUuId).get();
 
-            Team reqestedTeam = teamRepository.findByPostId(post.getId())
+            Team requestedTeam = teamRepository.findByPostId(post.getId())
                     .orElseThrow(() -> new IllegalStateException("해당 팀을 찾을 수 없습니다."));
 
-
             Team userTeam = account.getTeam();
-            if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(reqestedTeam.getId()))) {
+            if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(requestedTeam.getId()))) {
                 throw new IllegalStateException("해당 팀의 슬라이드를 수정할 권한이 없습니다.");
             }
 
-
-
             List<MultipartFile> files = dto.getFiles();
 
+            // 슬라이드 디렉토리 초기화
             String uploadDir = post.getSlideUrl();
             File directory = new File(uploadDir);
             cleanDirectory(directory);
@@ -340,22 +338,27 @@ public class PostService {
                     .filter(path -> !Files.isDirectory(path))
                     .count();
 
+            // 업로드된 파일 개수와 기존 파일 개수를 합쳤을 때 최대 개수를 초과하는지 체크
             if (currentFileCount + files.size() > MAX_IMAGES) {
                 throw new IllegalStateException("최대 파일 업로드 제한(" + MAX_IMAGES + "개)을 초과합니다.");
             }
 
-
             int fileIndex = 1;
             for (MultipartFile file : files) {
-                String extention = fileUtility.getImageFileExtension(file.getOriginalFilename());
+                // 파일이 null이거나 비어있으면 건너뛰기
+                if (file == null || file.isEmpty()) {
+                    continue;
+                }
+
+                String extension = fileUtility.getImageFileExtension(file.getOriginalFilename());
                 // 이미지 파일 여부 확인
-                if (extention == null) {
+                if (extension == null) {
                     throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + file.getOriginalFilename());
                 }
 
                 // 파일 저장
-                String fileName = "slide" + fileIndex + "." + extention;
-                Path filePath = Paths.get(uploadDir,fileName);
+                String fileName = "slide" + fileIndex + "." + extension;
+                Path filePath = Paths.get(uploadDir, fileName);
                 Files.write(filePath, file.getBytes());
                 fileIndex++;
             }
@@ -365,25 +368,28 @@ public class PostService {
         }
     }
 
+
     @Transactional
     public void updateStudentProfileByPost(UpdateStudentProfileByPostDTO dto, String userEmail) throws Exception {
-        String requestedTeamUuId  = dto.getTeamUuid();
+        String requestedTeamUuId = dto.getTeamUuid();
 
-        Post post = postRepository.findByUuid(requestedTeamUuId).get();
+        Post post = postRepository.findByUuid(requestedTeamUuId)
+                .orElseThrow(() -> new IllegalStateException("해당 포스트를 찾을 수 없습니다."));
 
-        Team reqestedTeam = teamRepository.findByPostId(post.getId())
+        Team requestedTeam = teamRepository.findByPostId(post.getId())
                 .orElseThrow(() -> new IllegalStateException("해당 팀을 찾을 수 없습니다."));
 
-
-        Long requestedStudentId  = encryptionService.decryptPrimaryKey(dto.getEncryptedStudentId());
-
+        Long requestedStudentId = encryptionService.decryptPrimaryKey(dto.getEncryptedStudentId());
 
         Account account = accountRepository.findAccountByUserEmail(userEmail)
                 .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
 
         Team userTeam = account.getTeam();
-        Student student = studentRepository.findById(requestedStudentId).get();
-        if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(reqestedTeam.getId()))) {
+        Student student = studentRepository.findById(requestedStudentId)
+                .orElseThrow(() -> new IllegalStateException("학생을 찾을 수 없습니다."));
+
+        // 권한 체크
+        if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(requestedTeam.getId()))) {
             throw new IllegalStateException("해당 팀의 포스트를 수정할 권한이 없습니다.");
         }
 
@@ -391,14 +397,30 @@ public class PostService {
             throw new IllegalStateException("해당 팀의 포스트를 수정할 권한이 없습니다.");
         }
 
-        StudentProfile studentProfile = studentRepository.findById(requestedStudentId).get().getStudentProfile();
+        // 학생 프로필 업데이트
+        StudentProfile studentProfile = student.getStudentProfile();
         studentProfile.setGithubUrl(dto.getGithubUrl());
         studentProfile.setStudentEmail(dto.getStudentEmail());
         studentProfile.setStudentBlog(dto.getStudentBlog());
         studentProfile.setInfo(dto.getInfo());
-        String url = saveStudentProfileImage(dto.getProfileImage(), student.getStudentNumber());
-        studentProfile.setStudentProfileUrl(url);
+
+        // 프로필 이미지 처리
+        if (dto.getProfileImage() == null || dto.getProfileImage().isEmpty()) {
+            // 이미지가 null 이면 기존 이미지를 삭제
+            if (studentProfile.getStudentProfileUrl() != null) {
+                Path existingProfileImagePath = Paths.get(studentProfile.getStudentProfileUrl());
+                if (Files.exists(existingProfileImagePath)) {
+                    Files.delete(existingProfileImagePath);  // 기존 이미지 삭제
+                }
+            }
+            studentProfile.setStudentProfileUrl(null);  // 기존 이미지 URL을 null로 설정
+        } else {
+            // 새로운 이미지가 있다면 저장
+            String url = saveStudentProfileImage(dto.getProfileImage(), student.getStudentNumber());
+            studentProfile.setStudentProfileUrl(url);
+        }
     }
+
 
     public boolean verifyEditPermission(String token, String requestedUuid){
         Account account = accountService.tokenToAccount(token);
