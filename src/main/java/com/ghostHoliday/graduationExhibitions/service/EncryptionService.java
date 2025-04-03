@@ -1,6 +1,8 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
 import com.ghostHoliday.graduationExhibitions.utility.AESUtility;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -8,11 +10,14 @@ import javax.crypto.SecretKey;
 @Service
 public class EncryptionService {
 
-    private final SecretKey secretKey;
+    private SecretKey secretKey;
 
-    // AES 키 생성
-    public EncryptionService() throws Exception {
-        this.secretKey = AESUtility.generateKey();
+    @Value("${encryption.aes-secret-key}")
+    private String encodedKey;
+
+    @PostConstruct
+    public void init() {
+        this.secretKey = AESUtility.decodeKey(encodedKey);
     }
 
     public String encryptPrimaryKey(Long primaryKey) throws Exception {
@@ -22,10 +27,5 @@ public class EncryptionService {
     public Long decryptPrimaryKey(String encryptedKey) throws Exception {
         String decryptedKey = AESUtility.decrypt(encryptedKey, secretKey);
         return Long.parseLong(decryptedKey);
-    }
-
-    // AES 키를 Base64로 인코딩하여 외부에 전달
-    public String getEncodedSecretKey() {
-        return AESUtility.encodeKey(secretKey);
     }
 }
