@@ -215,8 +215,6 @@ public class PostService {
         Team reqestedTeam = teamRepository.findByPostId(post.getId())
                 .orElseThrow(() -> new IllegalStateException("해당 팀을 찾을 수 없습니다."));
 
-
-
         Account account = accountRepository.findAccountByUserEmail(userEmail)
                 .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
 
@@ -230,50 +228,84 @@ public class PostService {
         reqestedTeam.setCategory(dto.getCategory());
 
         // 팀 프로필 이미지 업로드
-        String teamProfileExtension = fileUtility.getImageFileExtension(dto.getTeamProfileImage().getOriginalFilename());
-        if (teamProfileExtension == null) {
-            throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + dto.getTeamProfileImage().getOriginalFilename());
-        }
-        String teamProfilefileName = "teamProfile." + teamProfileExtension;
-        Path teamProfileFilePath = Paths.get("teamPost",post.getUuid(),teamProfilefileName);
-        post.setTeamProfileUrl(teamProfileFilePath.toString());
-        // 기존 파일 삭제
-        if (Files.exists(teamProfileFilePath)) {
-            Files.delete(teamProfileFilePath);
-        }
+        if (dto.getTeamProfileImage() != null && !dto.getTeamProfileImage().isEmpty()) {  // 파일이 null이 아니고 비어있지 않으면 업로드
+            String teamProfileExtension = fileUtility.getImageFileExtension(dto.getTeamProfileImage().getOriginalFilename());
+            if (teamProfileExtension == null || (!teamProfileExtension.equalsIgnoreCase("jpg") && !teamProfileExtension.equalsIgnoreCase("png"))) {
+                throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + dto.getTeamProfileImage().getOriginalFilename());
+            }
+            String teamProfilefileName = "teamProfile." + teamProfileExtension;
+            Path teamProfileFilePath = Paths.get("teamPost", post.getUuid(), teamProfilefileName);
+            post.setTeamProfileUrl(teamProfileFilePath.toString());
+            // 기존 파일 삭제
+            if (Files.exists(teamProfileFilePath)) {
+                Files.delete(teamProfileFilePath);
+            }
 
-        Files.write(teamProfileFilePath, dto.getTeamProfileImage().getBytes());
+            Files.write(teamProfileFilePath, dto.getTeamProfileImage().getBytes());
+        } else {
+            // 팀 프로필 이미지가 null이거나 비어 있으면 기존 파일 삭제
+            if (post.getTeamProfileUrl() != null) {
+                Path existingProfileImagePath = Paths.get(post.getTeamProfileUrl());
+                if (Files.exists(existingProfileImagePath)) {
+                    Files.delete(existingProfileImagePath);
+                }
+                post.setTeamProfileUrl(null);  // 기존 이미지 URL을 null로 설정
+            }
+        }
 
         // 데모 영상 업로드
-        String demoExtension = fileUtility.getVideoFileExtension(dto.getDemoVideo().getOriginalFilename());
-        if (demoExtension == null) {
-            throw new IllegalStateException("avi, mp4, mkv 파일만 업로드 가능합니다. " + dto.getDemoVideo().getOriginalFilename());
-        }
-        String demoFileName = "demo."+demoExtension;
-        Path demoFilePath = Paths.get("teamPost",post.getUuid(),demoFileName);
-        post.setDemoUrl(demoFilePath.toString());
-        // 기존 파일 삭제
-        if (Files.exists(demoFilePath)) {
-            Files.delete(demoFilePath);
-        }
+        if (dto.getDemoVideo() != null && !dto.getDemoVideo().isEmpty()) {  // 영상이 null이 아니고 비어있지 않으면 업로드
+            String demoExtension = fileUtility.getVideoFileExtension(dto.getDemoVideo().getOriginalFilename());
+            if (demoExtension == null || (!demoExtension.equalsIgnoreCase("avi") && !demoExtension.equalsIgnoreCase("mp4") && !demoExtension.equalsIgnoreCase("mkv"))) {
+                throw new IllegalStateException("avi, mp4, mkv 파일만 업로드 가능합니다. " + dto.getDemoVideo().getOriginalFilename());
+            }
+            String demoFileName = "demo." + demoExtension;
+            Path demoFilePath = Paths.get("teamPost", post.getUuid(), demoFileName);
+            post.setDemoUrl(demoFilePath.toString());
+            // 기존 파일 삭제
+            if (Files.exists(demoFilePath)) {
+                Files.delete(demoFilePath);
+            }
 
-        Files.write(demoFilePath, dto.getDemoVideo().getBytes());
+            Files.write(demoFilePath, dto.getDemoVideo().getBytes());
+        } else {
+            // 데모 영상이 null이거나 비어 있으면 기존 파일 삭제
+            if (post.getDemoUrl() != null) {
+                Path existingDemoVideoPath = Paths.get(post.getDemoUrl());
+                if (Files.exists(existingDemoVideoPath)) {
+                    Files.delete(existingDemoVideoPath);
+                }
+                post.setDemoUrl(null);  // 기존 데모 영상 URL을 null로 설정
+            }
+        }
 
         // 포스터 이미지 업로드
-        String posterExtension = fileUtility.getImageFileExtension(dto.getPosterImage().getOriginalFilename());
-        if (posterExtension == null) {
-            throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + dto.getPosterImage().getOriginalFilename());
-        }
-        String posterFileName = "poster." + posterExtension;
-        Path posterFilePath = Paths.get("teamPost",post.getUuid(),posterFileName);
-        post.setPosterUrl(posterFilePath.toString());
-        // 기존 파일 삭제
-        if (Files.exists(posterFilePath)) {
-            Files.delete(posterFilePath);
-        }
+        if (dto.getPosterImage() != null && !dto.getPosterImage().isEmpty()) {  // 이미지가 null이 아니고 비어있지 않으면 업로드
+            String posterExtension = fileUtility.getImageFileExtension(dto.getPosterImage().getOriginalFilename());
+            if (posterExtension == null || (!posterExtension.equalsIgnoreCase("jpg") && !posterExtension.equalsIgnoreCase("png"))) {
+                throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + dto.getPosterImage().getOriginalFilename());
+            }
+            String posterFileName = "poster." + posterExtension;
+            Path posterFilePath = Paths.get("teamPost", post.getUuid(), posterFileName);
+            post.setPosterUrl(posterFilePath.toString());
+            // 기존 파일 삭제
+            if (Files.exists(posterFilePath)) {
+                Files.delete(posterFilePath);
+            }
 
-        Files.write(posterFilePath, dto.getPosterImage().getBytes());
+            Files.write(posterFilePath, dto.getPosterImage().getBytes());
+        } else {
+            // 포스터 이미지가 null이거나 비어 있으면 기존 파일 삭제
+            if (post.getPosterUrl() != null) {
+                Path existingPosterImagePath = Paths.get(post.getPosterUrl());
+                if (Files.exists(existingPosterImagePath)) {
+                    Files.delete(existingPosterImagePath);
+                }
+                post.setPosterUrl(null);  // 기존 포스터 이미지 URL을 null로 설정
+            }
+        }
     }
+
 
 
 
