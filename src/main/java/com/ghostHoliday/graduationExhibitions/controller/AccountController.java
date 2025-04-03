@@ -4,6 +4,7 @@ package com.ghostHoliday.graduationExhibitions.controller;
 import com.ghostHoliday.graduationExhibitions.dto.account.FindAccountByYearResponseDTO;
 import com.ghostHoliday.graduationExhibitions.dto.account.LoginDTO;
 import com.ghostHoliday.graduationExhibitions.dto.account.LoginRequestDTO;
+import com.ghostHoliday.graduationExhibitions.dto.account.RegistAccountRequest;
 import com.ghostHoliday.graduationExhibitions.exception.UnauthorizedException;
 import com.ghostHoliday.graduationExhibitions.service.AccountService;
 import com.ghostHoliday.graduationExhibitions.service.EncryptionService;
@@ -27,8 +28,6 @@ import java.util.*;
 public class AccountController {
     private final AccountService accountService;
     private final EncryptionService encryptionService;
-    private final HttpOnlyService httpOnlyService;
-    private final JwtUtility jwtUtility;
 
 
     @PostMapping("public/account/login")
@@ -78,12 +77,12 @@ public class AccountController {
     public ResponseEntity<String> registAccountAndTeam(
             HttpServletRequest request,
             HttpServletResponse response,  // accessToken 재발급을 위해 추가
-            @RequestBody MultipartFile file) {
+            @RequestBody List<RegistAccountRequest> requestDTO) {
 
         try {
 
             // accessToken이 유효하면 요청 처리
-            accountService.registAccount(file);
+            accountService.registAccount(requestDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body("계정 및 팀 정보가 성공적으로 등록되었습니다.");
 
         }catch (CsvException e) {
