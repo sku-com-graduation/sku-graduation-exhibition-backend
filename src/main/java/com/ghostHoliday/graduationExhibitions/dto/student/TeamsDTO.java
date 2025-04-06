@@ -4,12 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class SearchStudentDTO{
-    List<StudentsDTO> students;
-    List<TeamsDTO> teams;
+@NoArgsConstructor
+public class TeamsDTO {
+    private String encryptedTeamId;
+    private String teamName;
 }
