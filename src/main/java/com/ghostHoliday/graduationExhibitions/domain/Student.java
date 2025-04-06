@@ -18,7 +18,7 @@ public class Student {
     private StudentProfile studentProfile;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name= "teamId")
+    @JoinColumn(name= "teamId", nullable = true)
     private Team team = null;
 
     @Column(name = "name", columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")

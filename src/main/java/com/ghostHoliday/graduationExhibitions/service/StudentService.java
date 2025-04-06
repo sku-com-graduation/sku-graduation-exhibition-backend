@@ -94,6 +94,8 @@ public class StudentService {
                 String imagePath = student.getStudentProfile().getStudentProfileUrl();
                 deleteProfileImage(imagePath); // 이미지 삭제
             }
+
+            student.setTeam(null);
         });
 
 

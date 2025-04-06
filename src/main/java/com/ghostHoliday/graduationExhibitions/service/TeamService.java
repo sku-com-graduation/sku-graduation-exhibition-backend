@@ -7,6 +7,7 @@ import com.ghostHoliday.graduationExhibitions.dto.team.ResponseTeamInfoDTO;
 import com.ghostHoliday.graduationExhibitions.dto.team.UpdateTeamInfoDTO;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import com.ghostHoliday.graduationExhibitions.repository.ProfessorRepository;
+import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
 import com.ghostHoliday.graduationExhibitions.utility.Base64Utility;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class TeamService {
     private final AccountRepository accountRepository;
     private final Base64Utility base64Utility;
     private final ProfessorRepository professorRepository;
+    private final StudentRepository studentRepository;
 
     public Long save(Team team){
         return teamRepository.save(team).getId();
@@ -60,10 +62,17 @@ public class TeamService {
 
         for (String encryptionTeamId : encryptionTeamIds) {
             Long teamId = encryptionService.decryptPrimaryKey(encryptionTeamId);
+
+            // teamId를 참조하는 학생들의 team을 null로 설정
+            List<Student> students = studentRepository.findAllByTeamId(teamId);  // 팀 ID로 학생 찾기
+            for (Student student : students) {
+                student.setTeam(null);  // 해당 학생의 team을 null로 설정
+                studentRepository.save(student);  // 학생 정보 저장
+            }
+
+
             accountRepository.deleteByTeamId(teamId);
             teamRepository.deleteById(teamId);
-
-
         }
     }
 
