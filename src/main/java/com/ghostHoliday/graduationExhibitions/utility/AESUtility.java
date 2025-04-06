@@ -6,7 +6,10 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Base64;
 
 public class AESUtility {
@@ -69,6 +72,36 @@ public class AESUtility {
         cipher.init(Cipher.DECRYPT_MODE, secretKey, iv);
 
         byte[] decrypted = cipher.doFinal(encryptedBytes);
+        return new String(decrypted);
+    }
+
+    public static String encryptDeterministic(String data, SecretKey secretKey) throws Exception {
+        // data 기반으로 IV 생성
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hash = digest.digest(data.getBytes(StandardCharsets.UTF_8));
+        byte[] ivBytes = Arrays.copyOf(hash, IV_SIZE);  // 16바이트 자르기
+        IvParameterSpec iv = new IvParameterSpec(ivBytes);
+
+        Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey, iv);
+        byte[] encrypted = cipher.doFinal(data.getBytes());
+
+        return Base64.getEncoder().encodeToString(encrypted);  // IV는 포함하지 않음
+    }
+
+    // 복호화 (deterministic 버전에 맞게 IV를 다시 만들어야 함)
+    public static String decryptDeterministic(String encryptedData, SecretKey secretKey, String originalData) throws Exception {
+        // originalData 기반으로 다시 같은 IV 생성
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hash = digest.digest(originalData.getBytes(StandardCharsets.UTF_8));
+        byte[] ivBytes = Arrays.copyOf(hash, IV_SIZE);
+        IvParameterSpec iv = new IvParameterSpec(ivBytes);
+
+        Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+        cipher.init(Cipher.DECRYPT_MODE, secretKey, iv);
+        byte[] decodedEncrypted = Base64.getDecoder().decode(encryptedData);
+        byte[] decrypted = cipher.doFinal(decodedEncrypted);
+
         return new String(decrypted);
     }
 }
