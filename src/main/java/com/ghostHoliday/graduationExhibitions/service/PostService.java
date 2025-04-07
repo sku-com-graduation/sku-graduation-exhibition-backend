@@ -92,25 +92,26 @@ public class PostService {
             editStudentResponse.setName(student.getName() != null ? student.getName() : "");
 
             // 정보 (null 체크)
-            editStudentResponse.setInfo(editStudentResponse.getInfo() != null ? editStudentResponse.getInfo() : "");
+            editStudentResponse.setInfo(studentProfile.getInfo() != null ? studentProfile.getInfo() : "");
 
             // 역할 (null 체크)
             editStudentResponse.setRole(student.getRole() != null ? student.getRole() : null);
 
             // Github URL (null 체크)
-            editStudentResponse.setGithubUrl(editStudentResponse.getGithubUrl() != null ? editStudentResponse.getGithubUrl() : "");
+            editStudentResponse.setGithubUrl(studentProfile.getGithubUrl() != null ? studentProfile.getGithubUrl() : "");
 
             // 이메일 (null 체크)
-            editStudentResponse.setStudentEmail(editStudentResponse.getStudentEmail() != null ? editStudentResponse.getStudentEmail() : "");
+            editStudentResponse.setStudentEmail(studentProfile.getStudentEmail() != null ? studentProfile.getStudentEmail() : "");
 
             // 블로그 (null 체크)
-            editStudentResponse.setStudentBlog(editStudentResponse.getStudentBlog() != null ? editStudentResponse.getStudentBlog() : "");
+            editStudentResponse.setStudentBlog(studentProfile.getStudentBlog() != null ? studentProfile.getStudentBlog() : "");
 
             // 프로필 이미지 URL (null 체크)
             String profileImageUrl = studentProfile.getStudentProfileUrl();
             editStudentResponse.setProfileImage(profileImageUrl != null && !profileImageUrl.isEmpty()
                     ? base64Utility.encodeFileToBase64(profileImageUrl)
                     : ""); // 기본값은 빈 문자열로 설정 (혹은 기본 이미지를 설정할 수 있음)
+
             editStudentResponses.add(editStudentResponse);
         }
         response.setStudents(editStudentResponses);
