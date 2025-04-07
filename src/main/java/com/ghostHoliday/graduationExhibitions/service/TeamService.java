@@ -77,8 +77,8 @@ public class TeamService {
     @Transactional
     public List<ResponseTeamInfoDTO> updateTeamInfo(List<UpdateTeamInfoDTO> updateTeamInfoDTOS) throws Exception {
         List<ResponseTeamInfoDTO> teams = new ArrayList<>();
-
         for (UpdateTeamInfoDTO updateTeamInfoDTO : updateTeamInfoDTOS) {
+
             Team team = null;
             Professor professor = null;
 
@@ -99,6 +99,7 @@ public class TeamService {
                     updateTeamInfoDTO.getName(),
                     updateTeamInfoDTO.getCategory()
             );
+
             teams.add(teamInfo);
         }
 
@@ -110,8 +111,10 @@ public class TeamService {
     /**
      * 해당 년도 정보 조회 후 리턴
      */
+
     @Transactional
     public FindTeamInfoByYearDTO findTeamInfoByYear(int year) throws Exception {
+
 
         List<Team> teams = teamRepository.findAllByExhibitionYear(year);
         List<FindTeamInfoByYearTeamsDTO> requestedTeams = new ArrayList<>();
@@ -142,7 +145,7 @@ public class TeamService {
         return new FindTeamInfoByYearDTO(requestedTeams, requestedProfessors);
     }
 
-    @Transactional
+    
     public List<String> findTeamProfileImageByYear(int year){
         List<String> response = new ArrayList<>();
         List<Team> teams = teamRepository.findAllByExhibitionYear(year);
@@ -155,6 +158,7 @@ public class TeamService {
         }
         return response;
     }
+
 
 
 
@@ -175,6 +179,7 @@ public class TeamService {
             team.setCategory(requestedCategory);
             teamInfo.setCategory(requestedCategory);
         }
+
 
         return teamInfo;
     }
