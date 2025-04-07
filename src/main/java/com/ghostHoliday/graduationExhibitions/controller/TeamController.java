@@ -3,9 +3,9 @@ package com.ghostHoliday.graduationExhibitions.controller;
 
 import com.ghostHoliday.graduationExhibitions.dto.post.FindPostInfoByYearDTO;
 import com.ghostHoliday.graduationExhibitions.dto.team.FindTeamInfoByYearDTO;
+import com.ghostHoliday.graduationExhibitions.dto.team.FindTeamInfoByYearTeamsDTO;
 import com.ghostHoliday.graduationExhibitions.dto.team.ResponseTeamInfoDTO;
 import com.ghostHoliday.graduationExhibitions.dto.team.UpdateTeamInfoDTO;
-import com.ghostHoliday.graduationExhibitions.exception.UnauthorizedException;
 import com.ghostHoliday.graduationExhibitions.service.HttpOnlyService;
 import com.ghostHoliday.graduationExhibitions.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
@@ -88,7 +88,7 @@ public class TeamController {
             HttpServletResponse response,  // accessToken 재발급을 위해 추가
             @RequestParam int year) throws Exception {
 
-        List<FindTeamInfoByYearDTO> teamInfo = teamService.findTeamInfoByYear(year);
+        FindTeamInfoByYearDTO teamInfo = teamService.findTeamInfoByYear(year);
         return ResponseEntity.ok(teamInfo);
     }
 
