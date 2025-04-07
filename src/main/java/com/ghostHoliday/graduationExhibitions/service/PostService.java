@@ -51,36 +51,41 @@ public class PostService {
         Team team;
         Post post = postRepository.findByUuid(uuid).get();
         team = teamRepository.findByPostId(post.getId()).get();
-        if (account.getRole().equals(Role.USER)){
+        if (account.getRole().equals(Role.USER)) {
             if (!Objects.equals(account.getTeam().getId(), team.getId()))
                 throw new AccessDeniedException("해당 팀 수정 권한이 없습니다.");
         }
 
         EditPostInfoResponseDTO response = new EditPostInfoResponseDTO();
 
-
-        response.setTitle(post != null ? post.getTitle() : null);
-        response.setContent(post != null ? post.getContent() : null);
-        response.setCategory(team.getCategory());
+        response.setTitle(post != null && post.getTitle() != null && !post.getTitle().equals("null") ? post.getTitle() : null);
+        response.setContent(post != null && post.getContent() != null && !post.getContent().equals("null") ? post.getContent() : null);
+        response.setCategory(team.getCategory() != null && !team.getCategory().equals("null") ? team.getCategory() : null);
 
         response.setTeamProfileImage(
-                post != null && post.getTeamProfileUrl() != null && !post.getTeamProfileUrl().isEmpty() ? base64Utility.encodeFileToBase64(post.getTeamProfileUrl()) : null
+                post != null && post.getTeamProfileUrl() != null && !post.getTeamProfileUrl().isEmpty() && !post.getTeamProfileUrl().equals("null")
+                        ? base64Utility.encodeFileToBase64(post.getTeamProfileUrl())
+                        : null
         );
 
         response.setSlideImages(
-                post != null && post.getSlideUrl() != null && !post.getSlideUrl().isEmpty() && !Files.list(Paths.get(post.getSlideUrl())).findAny().isEmpty()
+                post != null && post.getSlideUrl() != null && !post.getSlideUrl().isEmpty() && !post.getSlideUrl().equals("null")
+                        && !Files.list(Paths.get(post.getSlideUrl())).findAny().isEmpty()
                         ? base64Utility.ImagesToBase64(post.getSlideUrl())
                         : null
         );
 
         response.setPosterImage(
-                post != null && post.getPosterUrl() != null && !post.getPosterUrl().isEmpty() ? base64Utility.encodeFileToBase64(post.getPosterUrl()) : null
+                post != null && post.getPosterUrl() != null && !post.getPosterUrl().isEmpty() && !post.getPosterUrl().equals("null")
+                        ? base64Utility.encodeFileToBase64(post.getPosterUrl())
+                        : null
         );
 
         response.setDemoVideo(
-                post != null && post.getDemoUrl() != null && !post.getDemoUrl().isEmpty() ? base64Utility.encodeFileToBase64(post.getDemoUrl()) : null
+                post != null && post.getDemoUrl() != null && !post.getDemoUrl().isEmpty() && !post.getDemoUrl().equals("null")
+                        ? base64Utility.encodeFileToBase64(post.getDemoUrl())
+                        : null
         );
-
 
         List<EditStudentResponse> editStudentResponses = new ArrayList<>();
         for (Student student : studentRepository.findAllByTeamId(team.getId())) {
@@ -88,36 +93,26 @@ public class PostService {
             StudentProfile studentProfile = student.getStudentProfile();
 
             editStudentResponse.setEncryptedStudentProfileId(encryptionService.encryptPrimaryKey(student.getId()));
-            // 이름 (null 체크)
-            editStudentResponse.setName(student.getName() != null ? student.getName() : "");
 
-            // 정보 (null 체크)
-            editStudentResponse.setInfo(studentProfile.getInfo() != null ? studentProfile.getInfo() : "");
+            editStudentResponse.setName(student.getName() != null && !student.getName().equals("null") ? student.getName() : "");
+            editStudentResponse.setInfo(studentProfile.getInfo() != null && !studentProfile.getInfo().equals("null") ? studentProfile.getInfo() : "");
+            editStudentResponse.setRole(student.getRole() != null && !student.getRole().equals("null") ? student.getRole() : null);
+            editStudentResponse.setGithubUrl(studentProfile.getGithubUrl() != null && !studentProfile.getGithubUrl().equals("null") ? studentProfile.getGithubUrl() : "");
+            editStudentResponse.setStudentEmail(studentProfile.getStudentEmail() != null && !studentProfile.getStudentEmail().equals("null") ? studentProfile.getStudentEmail() : "");
+            editStudentResponse.setStudentBlog(studentProfile.getStudentBlog() != null && !studentProfile.getStudentBlog().equals("null") ? studentProfile.getStudentBlog() : "");
 
-            // 역할 (null 체크)
-            editStudentResponse.setRole(student.getRole() != null ? student.getRole() : null);
-
-            // Github URL (null 체크)
-            editStudentResponse.setGithubUrl(studentProfile.getGithubUrl() != null ? studentProfile.getGithubUrl() : "");
-
-            // 이메일 (null 체크)
-            editStudentResponse.setStudentEmail(studentProfile.getStudentEmail() != null ? studentProfile.getStudentEmail() : "");
-
-            // 블로그 (null 체크)
-            editStudentResponse.setStudentBlog(studentProfile.getStudentBlog() != null ? studentProfile.getStudentBlog() : "");
-
-            // 프로필 이미지 URL (null 체크)
             String profileImageUrl = studentProfile.getStudentProfileUrl();
-            editStudentResponse.setProfileImage(profileImageUrl != null && !profileImageUrl.isEmpty()
+            editStudentResponse.setProfileImage(profileImageUrl != null && !profileImageUrl.isEmpty() && !profileImageUrl.equals("null")
                     ? base64Utility.encodeFileToBase64(profileImageUrl)
-                    : ""); // 기본값은 빈 문자열로 설정 (혹은 기본 이미지를 설정할 수 있음)
+                    : "");
 
             editStudentResponses.add(editStudentResponse);
         }
+
         response.setStudents(editStudentResponses);
         return response;
-
     }
+
 
     @Transactional
     public SearchPostInfoDTO searchPostInfo(String uuid) throws Exception {
@@ -223,12 +218,13 @@ public class PostService {
             throw new IllegalStateException("해당 팀의 포스트를 수정할 권한이 없습니다.");
         }
 
-        post.setTitle(dto.getTitle());
-        post.setContent(dto.getContent());
-        reqestedTeam.setCategory(dto.getCategory());
+        // "null" 문자열 방어 처리 추가
+        post.setTitle(dto.getTitle() != null && !dto.getTitle().equals("null") ? dto.getTitle() : null);
+        post.setContent(dto.getContent() != null && !dto.getContent().equals("null") ? dto.getContent() : null);
+        reqestedTeam.setCategory(dto.getCategory() != null && !dto.getCategory().equals("null") ? dto.getCategory() : null);
 
         // 팀 프로필 이미지 업로드
-        if (dto.getTeamProfileImage() != null && !dto.getTeamProfileImage().isEmpty()) {  // 파일이 null이 아니고 비어있지 않으면 업로드
+        if (dto.getTeamProfileImage() != null && !dto.getTeamProfileImage().isEmpty()) {
             String teamProfileExtension = fileUtility.getImageFileExtension(dto.getTeamProfileImage().getOriginalFilename());
             if (teamProfileExtension == null || (!teamProfileExtension.equalsIgnoreCase("jpg") && !teamProfileExtension.equalsIgnoreCase("png"))) {
                 throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + dto.getTeamProfileImage().getOriginalFilename());
@@ -236,25 +232,22 @@ public class PostService {
             String teamProfilefileName = "teamProfile." + teamProfileExtension;
             Path teamProfileFilePath = Paths.get("teamPost", post.getUuid(), teamProfilefileName);
             post.setTeamProfileUrl(teamProfileFilePath.toString());
-            // 기존 파일 삭제
             if (Files.exists(teamProfileFilePath)) {
                 Files.delete(teamProfileFilePath);
             }
-
             Files.write(teamProfileFilePath, dto.getTeamProfileImage().getBytes());
         } else {
-            // 팀 프로필 이미지가 null이거나 비어 있으면 기존 파일 삭제
             if (post.getTeamProfileUrl() != null) {
                 Path existingProfileImagePath = Paths.get(post.getTeamProfileUrl());
                 if (Files.exists(existingProfileImagePath)) {
                     Files.delete(existingProfileImagePath);
                 }
-                post.setTeamProfileUrl(null);  // 기존 이미지 URL을 null로 설정
+                post.setTeamProfileUrl(null);
             }
         }
 
         // 데모 영상 업로드
-        if (dto.getDemoVideo() != null && !dto.getDemoVideo().isEmpty()) {  // 영상이 null이 아니고 비어있지 않으면 업로드
+        if (dto.getDemoVideo() != null && !dto.getDemoVideo().isEmpty()) {
             String demoExtension = fileUtility.getVideoFileExtension(dto.getDemoVideo().getOriginalFilename());
             if (demoExtension == null || (!demoExtension.equalsIgnoreCase("avi") && !demoExtension.equalsIgnoreCase("mp4") && !demoExtension.equalsIgnoreCase("mkv"))) {
                 throw new IllegalStateException("avi, mp4, mkv 파일만 업로드 가능합니다. " + dto.getDemoVideo().getOriginalFilename());
@@ -262,25 +255,22 @@ public class PostService {
             String demoFileName = "demo." + demoExtension;
             Path demoFilePath = Paths.get("teamPost", post.getUuid(), demoFileName);
             post.setDemoUrl(demoFilePath.toString());
-            // 기존 파일 삭제
             if (Files.exists(demoFilePath)) {
                 Files.delete(demoFilePath);
             }
-
             Files.write(demoFilePath, dto.getDemoVideo().getBytes());
         } else {
-            // 데모 영상이 null이거나 비어 있으면 기존 파일 삭제
             if (post.getDemoUrl() != null) {
                 Path existingDemoVideoPath = Paths.get(post.getDemoUrl());
                 if (Files.exists(existingDemoVideoPath)) {
                     Files.delete(existingDemoVideoPath);
                 }
-                post.setDemoUrl(null);  // 기존 데모 영상 URL을 null로 설정
+                post.setDemoUrl(null);
             }
         }
 
         // 포스터 이미지 업로드
-        if (dto.getPosterImage() != null && !dto.getPosterImage().isEmpty()) {  // 이미지가 null이 아니고 비어있지 않으면 업로드
+        if (dto.getPosterImage() != null && !dto.getPosterImage().isEmpty()) {
             String posterExtension = fileUtility.getImageFileExtension(dto.getPosterImage().getOriginalFilename());
             if (posterExtension == null || (!posterExtension.equalsIgnoreCase("jpg") && !posterExtension.equalsIgnoreCase("png"))) {
                 throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + dto.getPosterImage().getOriginalFilename());
@@ -288,23 +278,21 @@ public class PostService {
             String posterFileName = "poster." + posterExtension;
             Path posterFilePath = Paths.get("teamPost", post.getUuid(), posterFileName);
             post.setPosterUrl(posterFilePath.toString());
-            // 기존 파일 삭제
             if (Files.exists(posterFilePath)) {
                 Files.delete(posterFilePath);
             }
-
             Files.write(posterFilePath, dto.getPosterImage().getBytes());
         } else {
-            // 포스터 이미지가 null이거나 비어 있으면 기존 파일 삭제
             if (post.getPosterUrl() != null) {
                 Path existingPosterImagePath = Paths.get(post.getPosterUrl());
                 if (Files.exists(existingPosterImagePath)) {
                     Files.delete(existingPosterImagePath);
                 }
-                post.setPosterUrl(null);  // 기존 포스터 이미지 URL을 null로 설정
+                post.setPosterUrl(null);
             }
         }
     }
+
 
 
 
@@ -410,7 +398,11 @@ public class PostService {
             if (studentProfile.getStudentProfileUrl() != null) {
                 Path existingProfileImagePath = Paths.get(studentProfile.getStudentProfileUrl());
                 if (Files.exists(existingProfileImagePath)) {
-                    Files.delete(existingProfileImagePath);  // 기존 이미지 삭제
+                    try {
+                        Files.delete(existingProfileImagePath);  // 안전하게 삭제 시도
+                    } catch (IOException e) {
+                        System.out.println(e.getMessage());
+                    }
                 }
             }
             studentProfile.setStudentProfileUrl(null);  // 기존 이미지 URL을 null로 설정
