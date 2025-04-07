@@ -33,8 +33,8 @@ public class EncryptionService {
         return AESUtility.encryptDeterministic(String.valueOf(teamId), secretKey);
     }
 
-    public Long decryptTeamId(String encryptedTeamId, Long originalTeamId) throws Exception {
-        String decrypted = AESUtility.decryptDeterministic(encryptedTeamId, secretKey, String.valueOf(originalTeamId));
+    public Long decryptTeamId(String encryptedTeamId) throws Exception {
+        String decrypted = AESUtility.decryptDeterministic(encryptedTeamId, secretKey);
         return Long.parseLong(decrypted);
     }
 }

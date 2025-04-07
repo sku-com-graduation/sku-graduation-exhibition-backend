@@ -76,32 +76,39 @@ public class AESUtility {
     }
 
     public static String encryptDeterministic(String data, SecretKey secretKey) throws Exception {
-        // data 기반으로 IV 생성
+        // data 기반으로 IV 생성 (계속 결정론적으로 유지)
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hash = digest.digest(data.getBytes(StandardCharsets.UTF_8));
-        byte[] ivBytes = Arrays.copyOf(hash, IV_SIZE);  // 16바이트 자르기
+        byte[] ivBytes = Arrays.copyOf(hash, IV_SIZE);  // 16바이트
         IvParameterSpec iv = new IvParameterSpec(ivBytes);
 
         Cipher cipher = Cipher.getInstance(TRANSFORMATION);
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, iv);
-        byte[] encrypted = cipher.doFinal(data.getBytes());
+        byte[] encrypted = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
 
-        return Base64.getEncoder().encodeToString(encrypted);  // IV는 포함하지 않음
+        // IV + 암호문을 합쳐서 Base64 인코딩
+        byte[] combined = new byte[ivBytes.length + encrypted.length];
+        System.arraycopy(ivBytes, 0, combined, 0, ivBytes.length);
+        System.arraycopy(encrypted, 0, combined, ivBytes.length, encrypted.length);
+
+        return Base64.getEncoder().encodeToString(combined);
     }
 
-    // 복호화 (deterministic 버전에 맞게 IV를 다시 만들어야 함)
-    public static String decryptDeterministic(String encryptedData, SecretKey secretKey, String originalData) throws Exception {
-        // originalData 기반으로 다시 같은 IV 생성
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest(originalData.getBytes(StandardCharsets.UTF_8));
-        byte[] ivBytes = Arrays.copyOf(hash, IV_SIZE);
+    public static String decryptDeterministic(String encryptedData, SecretKey secretKey) throws Exception {
+        byte[] combined = Base64.getDecoder().decode(encryptedData);
+
+        // IV 추출
+        byte[] ivBytes = Arrays.copyOfRange(combined, 0, IV_SIZE);
         IvParameterSpec iv = new IvParameterSpec(ivBytes);
+
+        // 암호문 추출
+        byte[] encrypted = Arrays.copyOfRange(combined, IV_SIZE, combined.length);
 
         Cipher cipher = Cipher.getInstance(TRANSFORMATION);
         cipher.init(Cipher.DECRYPT_MODE, secretKey, iv);
-        byte[] decodedEncrypted = Base64.getDecoder().decode(encryptedData);
-        byte[] decrypted = cipher.doFinal(decodedEncrypted);
+        byte[] decrypted = cipher.doFinal(encrypted);
 
-        return new String(decrypted);
+        return new String(decrypted, StandardCharsets.UTF_8);
     }
+
 }

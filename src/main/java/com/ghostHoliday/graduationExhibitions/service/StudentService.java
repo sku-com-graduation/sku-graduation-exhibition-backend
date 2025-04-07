@@ -138,8 +138,7 @@ public class StudentService {
             if (studentDTO.getEncryptedTeamId() == null)
                 student.setTeam(null);
             else {
-                Team team = teamRepository.findById(encryptionService.decryptPrimaryKey(
-                        studentDTO.getEncryptedTeamId())).get();
+                Team team = teamRepository.findById(encryptionService.decryptTeamId(studentDTO.getEncryptedTeamId())).get();
                 student.setTeam(team);  // Team 객체를 설정
             }
 
