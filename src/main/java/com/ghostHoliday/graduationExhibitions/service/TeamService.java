@@ -2,9 +2,7 @@ package com.ghostHoliday.graduationExhibitions.service;
 
 import com.ghostHoliday.graduationExhibitions.domain.*;
 import com.ghostHoliday.graduationExhibitions.dto.post.FindPostInfoByYearDTO;
-import com.ghostHoliday.graduationExhibitions.dto.team.FindTeamInfoByYearDTO;
-import com.ghostHoliday.graduationExhibitions.dto.team.ResponseTeamInfoDTO;
-import com.ghostHoliday.graduationExhibitions.dto.team.UpdateTeamInfoDTO;
+import com.ghostHoliday.graduationExhibitions.dto.team.*;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import com.ghostHoliday.graduationExhibitions.repository.ProfessorRepository;
 import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
@@ -81,43 +79,67 @@ public class TeamService {
         List<ResponseTeamInfoDTO> teams = new ArrayList<>();
 
         for (UpdateTeamInfoDTO updateTeamInfoDTO : updateTeamInfoDTOS) {
-            Long teamId = encryptionService.decryptPrimaryKey(updateTeamInfoDTO.getEncryptedTeamId());
-            Long professorId = encryptionService.decryptPrimaryKey(updateTeamInfoDTO.getEncryptedProfessorId());
-            Team team = teamRepository.findById(teamId).get();
-            Professor professor = professorRepository.findById(professorId).get();
+            Team team = null;
+            Professor professor = null;
 
-            ResponseTeamInfoDTO teamInfo = updateTeam(team, professor, updateTeamInfoDTO.getName(), updateTeamInfoDTO.getCategory());
+            if (updateTeamInfoDTO.getEncryptedTeamId() != null) {
+                Long teamId = encryptionService.decryptPrimaryKey(updateTeamInfoDTO.getEncryptedTeamId());
+                team = teamRepository.findById(teamId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 팀입니다.")); // 안전하게 조회
+            }
+
+            if (updateTeamInfoDTO.getEncryptedProfessorId() != null) {
+                Long professorId = encryptionService.decryptDeterministic(updateTeamInfoDTO.getEncryptedProfessorId());
+                professor = professorRepository.findById(professorId).orElse(null); // 안전하게 조회
+            }
+
+            // 💡 무조건 updateTeam 호출 (null을 인자로 넘겨도 괜찮도록)
+            ResponseTeamInfoDTO teamInfo = updateTeam(
+                    team,
+                    professor,
+                    updateTeamInfoDTO.getName(),
+                    updateTeamInfoDTO.getCategory()
+            );
             teams.add(teamInfo);
         }
+
         return teams;
     }
+
 
 
     /**
      * 해당 년도 정보 조회 후 리턴
      */
     @Transactional
-    public List<FindTeamInfoByYearDTO> findTeamInfoByYear(int year) throws Exception {
+    public FindTeamInfoByYearDTO findTeamInfoByYear(int year) throws Exception {
 
         List<Team> teams = teamRepository.findAllByExhibitionYear(year);
-        ArrayList<FindTeamInfoByYearDTO> findTeamInfoByYearDTOs = new ArrayList<>();
-
+        List<FindTeamInfoByYearTeamsDTO> requestedTeams = new ArrayList<>();
         for (Team team : teams) {
-            FindTeamInfoByYearDTO findTeamInfoByYearDTO = new FindTeamInfoByYearDTO();
-            findTeamInfoByYearDTO.setEncryptedTeamId(encryptionService.encryptPrimaryKey(team.getId()));
+            FindTeamInfoByYearTeamsDTO requestedTeam = new FindTeamInfoByYearTeamsDTO();
+            requestedTeam.setEncryptedTeamId(encryptionService.encryptPrimaryKey(team.getId()));
             String encrptionProfessorId = null;
             if (team.getProfessor() != null) {
-                encrptionProfessorId = (encryptionService.encryptPrimaryKey(team.getProfessor().getId()));
-                findTeamInfoByYearDTO.setProfessor( team.getProfessor().getName());
+                encrptionProfessorId = (encryptionService.encryptDeterministic(team.getProfessor().getId()));
+                requestedTeam.setProfessor( team.getProfessor().getName());
             }
-            findTeamInfoByYearDTO.setEncryptedProfessorId(encrptionProfessorId);
-            findTeamInfoByYearDTO.setName(team.getName());
-            findTeamInfoByYearDTO.setCategory(team.getCategory());
+            requestedTeam.setEncryptedProfessorId(encrptionProfessorId);
+            requestedTeam.setName(team.getName());
+            requestedTeam.setCategory(team.getCategory());
 
-
-            findTeamInfoByYearDTOs.add(findTeamInfoByYearDTO);
+            requestedTeams.add(requestedTeam);
         }
-        return findTeamInfoByYearDTOs;
+
+        List<FindTeamInfoByYearProfessorsDTO> requestedProfessors = new ArrayList<>();
+        for (Professor professor : professorRepository.findAll()) {
+            FindTeamInfoByYearProfessorsDTO requestedProfessor = new FindTeamInfoByYearProfessorsDTO();
+            requestedProfessor.setEncryptedProfessorId(encryptionService.encryptDeterministic(professor.getId()));
+            requestedProfessor.setProfessorName(professor.getName());
+            requestedProfessors.add(requestedProfessor);
+        }
+
+
+        return new FindTeamInfoByYearDTO(requestedTeams, requestedProfessors);
     }
 
     @Transactional
@@ -137,17 +159,22 @@ public class TeamService {
 
 
 
-    static ResponseTeamInfoDTO updateTeam(Team team, Professor professor, String requestedName, Category requestedCategory){
+    static ResponseTeamInfoDTO updateTeam(Team team, Professor professor, String requestedName, Category requestedCategory) {
         ResponseTeamInfoDTO teamInfo = new ResponseTeamInfoDTO();
 
-        team.setProfessor(professor);
-        teamInfo.setProfessor(professor.getName());
+        if (team != null) {
+            // 교수 설정 (있으면 연결, 없으면 해제)
+            team.setProfessor(professor);  // professor == null이면 연결 끊김
+            teamInfo.setProfessor(professor != null ? professor.getName() : null);
 
-        team.setName(requestedName);
-        teamInfo.setName(requestedName);
+            // 이름 설정 (null이면 이름 제거)
+            team.setName(requestedName);
+            teamInfo.setName(requestedName);
 
-        team.setCategory(requestedCategory);
-        teamInfo.setCategory(requestedCategory);
+            // 카테고리 설정 (null이면 제거)
+            team.setCategory(requestedCategory);
+            teamInfo.setCategory(requestedCategory);
+        }
 
         return teamInfo;
     }

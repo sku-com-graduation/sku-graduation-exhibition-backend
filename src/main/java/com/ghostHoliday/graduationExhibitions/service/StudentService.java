@@ -138,7 +138,7 @@ public class StudentService {
             if (studentDTO.getEncryptedTeamId() == null)
                 student.setTeam(null);
             else {
-                Team team = teamRepository.findById(encryptionService.decryptTeamId(studentDTO.getEncryptedTeamId())).get();
+                Team team = teamRepository.findById(encryptionService.decryptDeterministic(studentDTO.getEncryptedTeamId())).get();
                 student.setTeam(team);  // Team 객체를 설정
             }
 
@@ -172,7 +172,7 @@ public class StudentService {
                 encryptedTeamId = null;
             }
             else{
-                encryptedTeamId = encryptionService.encryptTeamId(student.getTeam().getId());
+                encryptedTeamId = encryptionService.encryptDeterministic(student.getTeam().getId());
             }
 
             requestedStudent.setEncryptedStudentId(encryptionService.encryptPrimaryKey(student.getId()));
@@ -186,7 +186,7 @@ public class StudentService {
         List<Team> teams = teamRepository.findAllByExhibitionYear(Integer.parseInt(exhibitionYear));
         for (Team team : teams) {
             TeamsDTO requestedTeam = new TeamsDTO();
-                requestedTeam.setEncryptedTeamId(encryptionService.encryptTeamId(team.getId()));
+                requestedTeam.setEncryptedTeamId(encryptionService.encryptDeterministic(team.getId()));
                 requestedTeam.setTeamName(team.getName());
                 requestedTeams.add(requestedTeam);
         }
