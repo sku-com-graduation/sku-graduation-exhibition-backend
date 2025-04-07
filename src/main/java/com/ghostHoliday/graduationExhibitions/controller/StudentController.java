@@ -100,8 +100,8 @@ public class StudentController {
             HttpServletRequest request,
             HttpServletResponse response,  // accessToken 재발급을 위해 추가
             @RequestParam("year") String year) throws Exception {
-//
-//        try {
+
+        try {
 
             // 학생 리스트를 조회하는 로직 (Service 호출)
             SearchStudentDTO responses = studentService.searchStudentsByYear(year);
@@ -109,10 +109,10 @@ public class StudentController {
             // 결과가 있으면 200 OK와 함께 응답
             return ResponseEntity.ok(responses);
 
-//        }catch (Exception e) {
-//            // 예기치 않은 오류 처리
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(("서버 내부 오류가 발생했습니다."));
-//        }
+        }catch (Exception e) {
+            // 예기치 않은 오류 처리
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(("서버 내부 오류가 발생했습니다."));
+        }
     }
 
 }
