@@ -26,6 +26,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -198,7 +199,18 @@ public class AccountService {
 
     @Transactional
     public void deleteAccount(ArrayList<Long> accountIds){
-        accountRepository.deleteAllById(accountIds);
+
+        for (Long id : accountIds) {
+            // 각 계정 조회
+            Optional<Account> optionalAccount = accountRepository.findById(id);
+            if (optionalAccount.isPresent()) {
+                Account account = optionalAccount.get();
+                // team 연결 해제
+                account.setTeam(null);
+                accountRepository.save(account);
+                accountRepository.delete(account);
+            }
+        }
     }
 
     @Transactional

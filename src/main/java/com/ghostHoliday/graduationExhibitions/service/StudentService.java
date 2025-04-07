@@ -5,9 +5,7 @@ import com.ghostHoliday.graduationExhibitions.domain.Role;
 import com.ghostHoliday.graduationExhibitions.domain.Student;
 import com.ghostHoliday.graduationExhibitions.domain.StudentProfile;
 import com.ghostHoliday.graduationExhibitions.domain.Team;
-import com.ghostHoliday.graduationExhibitions.dto.student.SaveStudentDTO;
-import com.ghostHoliday.graduationExhibitions.dto.student.SearchStudentDTO;
-import com.ghostHoliday.graduationExhibitions.dto.student.UpdateStudentDTO;
+import com.ghostHoliday.graduationExhibitions.dto.student.*;
 import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -94,6 +93,8 @@ public class StudentService {
                 String imagePath = student.getStudentProfile().getStudentProfileUrl();
                 deleteProfileImage(imagePath); // 이미지 삭제
             }
+
+            student.setTeam(null);
         });
 
 
@@ -137,8 +138,7 @@ public class StudentService {
             if (studentDTO.getEncryptedTeamId() == null)
                 student.setTeam(null);
             else {
-                Team team = teamRepository.findById(encryptionService.decryptPrimaryKey(
-                        studentDTO.getEncryptedTeamId())).get();
+                Team team = teamRepository.findById(encryptionService.decryptDeterministic(studentDTO.getEncryptedTeamId())).get();
                 student.setTeam(team);  // Team 객체를 설정
             }
 
@@ -156,27 +156,46 @@ public class StudentService {
         }
     }
 
-    public List<SearchStudentDTO> searchStudentsByYear(String exhibitionYear) {
+    public SearchStudentDTO searchStudentsByYear(String exhibitionYear) throws Exception {
         // exhibitionYear로 학생 검색
         List<Student> students = studentRepository.findByExhibitionYear(exhibitionYear);
 
-        // Student -> SearchStudentDTO로 변환
-        return students.stream()
-                .map(student -> {
-                    try {
-                        return new SearchStudentDTO(
-                                encryptionService.encryptPrimaryKey(student.getId()),
-                                student.getTeam() != null ? encryptionService.encryptPrimaryKey(student.getTeam().getId()) : null, // 팀 ID
-                                student.getName(),
-                                student.getStudentNumber(),
-                                student.getRole().name(), // Role을 문자열로 변환
-                                student.getExhibitionYear()
-                        );
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.toList());
+        List<StudentsDTO> requestedStudents = new ArrayList<>();
+        List<TeamsDTO> requestedTeams = new ArrayList<>();
+
+
+        for (Student student : students) {
+            StudentsDTO requestedStudent = new StudentsDTO();
+            String encryptedTeamId = "";
+            if (student.getTeam() == null)
+            {
+                encryptedTeamId = null;
+            }
+            else{
+                encryptedTeamId = encryptionService.encryptDeterministic(student.getTeam().getId());
+            }
+
+            requestedStudent.setEncryptedStudentId(encryptionService.encryptPrimaryKey(student.getId()));
+            requestedStudent.setEncryptedTeamId(encryptedTeamId);
+            requestedStudent.setName(student.getName());
+            requestedStudent.setStudentNumber(student.getStudentNumber());
+            requestedStudent.setRole(student.getRole().toString());
+            requestedStudent.setExhibitionYear(exhibitionYear);
+            requestedStudents.add(requestedStudent);
+        }
+        List<Team> teams = teamRepository.findAllByExhibitionYear(Integer.parseInt(exhibitionYear));
+        for (Team team : teams) {
+            TeamsDTO requestedTeam = new TeamsDTO();
+                requestedTeam.setEncryptedTeamId(encryptionService.encryptDeterministic(team.getId()));
+                requestedTeam.setTeamName(team.getName());
+                requestedTeams.add(requestedTeam);
+        }
+
+
+        return new SearchStudentDTO(requestedStudents, requestedTeams);
+
+
+
     }
 
 

@@ -24,14 +24,15 @@ public class DataInitializer {
     @Transactional
     public void initializeData() {
 
-
-        Account adminAccount = new Account();
-        adminAccount.setTeam(null);
-        adminAccount.setUserEmail("admin");
-        adminAccount.setDefaultPwd(passwordEncoder.encode("admin"));
-        adminAccount.setPwd(passwordEncoder.encode("admin"));
-        adminAccount.setRole(Role.ADMIN);
-        accountRepository.save(adminAccount);
+        if (!accountRepository.existsAccountByUserEmail("computeraee@sungkyul.ac.kr")){
+            Account adminAccount = new Account();
+            adminAccount.setTeam(null);
+            adminAccount.setUserEmail("computeraee@sungkyul.ac.kr");
+            adminAccount.setDefaultPwd(passwordEncoder.encode("computeraee@sungkyul.ac.kr"));
+            adminAccount.setPwd(passwordEncoder.encode("computeraee@sungkyul.ac.kr"));
+            adminAccount.setRole(Role.ADMIN);
+            accountRepository.save(adminAccount);
+        }
     }
 }
 

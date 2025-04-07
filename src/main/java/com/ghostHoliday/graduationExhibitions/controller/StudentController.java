@@ -99,20 +99,15 @@ public class StudentController {
     public ResponseEntity<?> searchStudents(
             HttpServletRequest request,
             HttpServletResponse response,  // accessToken 재발급을 위해 추가
-            @RequestParam("year") String year) {
+            @RequestParam("year") String year) throws Exception {
 
         try {
 
             // 학생 리스트를 조회하는 로직 (Service 호출)
-            List<SearchStudentDTO> students = studentService.searchStudentsByYear(year);
-
-            if (students.isEmpty()) {
-                // 학생들이 없을 때는 204 상태 코드와 함께 빈 리스트 반환
-                return ResponseEntity.noContent().build();
-            }
+            SearchStudentDTO responses = studentService.searchStudentsByYear(year);
 
             // 결과가 있으면 200 OK와 함께 응답
-            return ResponseEntity.ok(students);
+            return ResponseEntity.ok(responses);
 
         }catch (Exception e) {
             // 예기치 않은 오류 처리

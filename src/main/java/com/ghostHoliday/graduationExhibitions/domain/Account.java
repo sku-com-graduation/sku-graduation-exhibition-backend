@@ -17,7 +17,7 @@ public class Account {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "teamId")
+    @JoinColumn(name = "teamId", nullable = true)
     private Team team;
 
     @Column(unique = true)

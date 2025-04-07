@@ -38,9 +38,9 @@ out/
 .vscode/
 
 
+
 # Ignore properties and YAML files
 *.properties
-*.yml
 *.yaml
 *.pem
 
