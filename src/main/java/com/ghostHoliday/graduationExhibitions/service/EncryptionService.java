@@ -29,11 +29,11 @@ public class EncryptionService {
         return Long.parseLong(decryptedKey);
     }
 
-    public String encryptTeamId(Long teamId) throws Exception {
+    public String encryptDeterministic(Long teamId) throws Exception {
         return AESUtility.encryptDeterministic(String.valueOf(teamId), secretKey);
     }
 
-    public Long decryptTeamId(String encryptedTeamId) throws Exception {
+    public Long decryptDeterministic(String encryptedTeamId) throws Exception {
         String decrypted = AESUtility.decryptDeterministic(encryptedTeamId, secretKey);
         return Long.parseLong(decrypted);
     }
