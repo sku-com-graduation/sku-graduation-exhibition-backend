@@ -66,13 +66,13 @@ jobs:
         run: ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
 
       - name: 📤 SCP transfer to EC2
-        run: scp -o StrictHostKeyChecking=no *-SNAPSHOT.jar ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/ubuntu/linuxMaster
+        run: scp -o StrictHostKeyChecking=no *-SNAPSHOT.jar ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/ubuntu/sku-graduation/
 
       - name: 🚀 Run app on EC2
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "
             sudo fuser -k 8081/tcp || true
-            cd /home/ubuntu/linuxMaster
+            cd /home/ubuntu/sku-graduation
             nohup java -jar *-SNAPSHOT.jar --spring.profiles.active=build > nohup.out 2>&1 &"
 
   dependency-submission:
