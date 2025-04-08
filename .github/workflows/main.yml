@@ -71,7 +71,7 @@ jobs:
       - name: 🚀 Run app on EC2
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "
-            sudo fuser -k 8081/tcp || true
+            sudo fuser -k 8080/tcp || true
             cd /home/ubuntu/sku-graduation
             nohup java -jar *-SNAPSHOT.jar --spring.profiles.active=build > nohup.out 2>&1 &"
 
