@@ -46,7 +46,7 @@ public class TeamService {
             findTeamPostInfoByYearDTO.setTeamName(team.getName());
             findTeamPostInfoByYearDTO.setUuid(post.getUuid());
             findTeamPostInfoByYearDTO.setTitle(post.getTitle());
-            findTeamPostInfoByYearDTO.setTeamProfileImage(post != null && post.getTeamProfileUrl() != null && !post.getTeamProfileUrl().isEmpty() ? base64Utility.encodeFileToBase64(post.getTeamProfileUrl()) : null);
+            findTeamPostInfoByYearDTO.setTeamProfileImage(post != null && post.getTeamProfileUrl() != null && !post.getTeamProfileUrl().isEmpty() ? post.getTeamProfileUrl() : null);
             findTeamPostInfoByYearDTO.setCategory(team.getCategory());
 
             findTeamPostInfoByYearDTOS.add(findTeamPostInfoByYearDTO);
