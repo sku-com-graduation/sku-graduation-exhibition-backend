@@ -148,9 +148,8 @@ public class TeamService {
         List<Team> teams = teamRepository.findAllByExhibitionYear(year);
         for (Team team : teams) {
             String teamProfileUrl = team.getPost().getTeamProfileUrl();
-            String image = base64Utility.encodeFileToBase64(teamProfileUrl);
-            if (image != null){
-                response.add(image);
+            if (teamProfileUrl != null){
+                response.add(teamProfileUrl);
             }
         }
         return response;

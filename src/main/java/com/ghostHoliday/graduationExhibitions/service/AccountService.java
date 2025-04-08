@@ -189,11 +189,11 @@ public class AccountService {
         s3Uploader.createFolder("teamPost/" + uuid + "/");
         s3Uploader.createFolder("teamPost/" + uuid + "/slideImage/");
 
-        // URL 정보만 설정 (실제 업로드는 나중에 할 때)
-        post.setSlideUrl("teamPost/" + uuid + "/slideImage/");
-        post.setPosterUrl("teamPost/" + uuid + "/poster");
-        post.setDemoUrl("teamPost/" + uuid + "/demo");
-        post.setTeamProfileUrl("teamPost/" + uuid + "/teamProfile");
+        // URL은 초기값 null로 설정 (업로드 시점에 반영)
+        post.setSlideUrl(null);
+        post.setPosterUrl(null);
+        post.setDemoUrl(null);
+        post.setTeamProfileUrl(null);
 
         return post;
     }
