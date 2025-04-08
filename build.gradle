@@ -45,6 +45,9 @@ dependencies {
 
 	// OpenCSV 의존성 추가
 	implementation 'com.opencsv:opencsv:5.7.1'
+
+	implementation platform('software.amazon.awssdk:bom:2.25.4')
+	implementation 'software.amazon.awssdk:s3'
 }
 
 tasks.named('test') {
