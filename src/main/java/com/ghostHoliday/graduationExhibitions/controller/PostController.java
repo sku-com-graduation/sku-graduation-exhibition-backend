@@ -70,7 +70,6 @@ public class PostController {
     @PutMapping("user/post/update/studentProfile")
     public ResponseEntity<String> updateStudentProfile(
             HttpServletRequest request,
-            HttpServletResponse response,  // accessToken 재발급을 위해 추가
             @ModelAttribute UpdateStudentProfileByPostDTO dto
             ) throws Exception {
         try {
