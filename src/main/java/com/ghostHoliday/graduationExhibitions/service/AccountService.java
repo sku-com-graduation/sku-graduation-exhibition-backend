@@ -4,6 +4,7 @@ import com.ghostHoliday.graduationExhibitions.domain.*;
 import com.ghostHoliday.graduationExhibitions.dto.account.*;
 import com.ghostHoliday.graduationExhibitions.repository.*;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
+import com.ghostHoliday.graduationExhibitions.utility.S3Uploader;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,15 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -44,7 +40,7 @@ public class AccountService {
     private final HomeRepository homeRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final HttpOnlyService httpOnlyService;
-
+    private final S3Uploader s3Uploader;
 
     @Transactional
     public ResponseEntity<Object> login(LoginRequestDTO request ) {
@@ -57,33 +53,25 @@ public class AccountService {
 
         account.setRecent(LocalDateTime.now());
 
-        // JWT 토큰 생성
         String accessToken = jwtUtility.generateToken(request.getUserName(), account.getRole());
         String refreshToken = jwtUtility.generateRefreshToken(request.getUserName());
 
-
-        // 기존 리프레시 토큰 삭제 (같은 유저의 이전 토큰 제거)
         refreshTokenRepository.deleteByAccount(account);
 
-        // 새로운 리프레시 토큰 저장
         RefreshToken newRefreshToken = new RefreshToken();
         newRefreshToken.setAccount(account);
         newRefreshToken.setRefreshToken(refreshToken);
-        newRefreshToken.setExpiryDate(LocalDateTime.now().plusDays(30));  // 30일 유효
+        newRefreshToken.setExpiryDate(LocalDateTime.now().plusDays(30));
         refreshTokenRepository.save(newRefreshToken);
 
-
-        // Refresh Token을 HTTP-Only 쿠키에 저장
         ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", accessToken)
                 .httpOnly(true)
-                .secure(true)  // HTTPS 환경에서만 전송 (테스트 시 false 가능)
+                .secure(true)
                 .path("/")
-                .maxAge(60 * 60 * 24)  // 24시간 유지
+                .maxAge(60 * 60 * 24)
                 .sameSite("Strict")
                 .build();
 
-
-        // LoginDTO 생성
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setRole(account.getRole());
         loginDTO.setRecent(account.getRecent());
@@ -99,32 +87,21 @@ public class AccountService {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
                 .body(loginDTO);
-
     }
-
-
 
     @Transactional
     public int logout(HttpServletRequest request ) {
         String token = jwtUtility.extractAccessTokenFromCookie(request);
         String email = jwtUtility.getEmailFromToken(token);
-
         Account account = accountRepository.findAccountByUserEmail(email).get();
-
-
         return refreshTokenRepository.deleteByAccount(account);
     }
 
-
-
-    /**
-     * csv로 받은 파일을 전부 저장
-     */
     @Transactional
     public void registAccount(List<RegistAccountRequest> accountInfos) throws IOException, CsvException {
-
         ArrayList<Account> accounts = new ArrayList<>();
         int year = LocalDateTime.now().getYear();
+
         if (!homeRepository.existsByExhibitionYear(String.valueOf(year))){
             Home home = new Home();
             home.setExhibitionYear(String.valueOf(year));
@@ -132,22 +109,14 @@ public class AccountService {
             home.setExhibitionHour("");
             homeRepository.save(home);
         }
+
         for (RegistAccountRequest accountInfo : accountInfos) {
-
-            // 해당 팀의 post 생성
             Post post = createNewPost();
-            //포스트 저장폴더 생성
-            String uploadDir = Paths.get("teamPost", post.getUuid()).toString();
-            File directory = new File(uploadDir);
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
-
             postRepository.save(post);
 
-            // 팀 생성
             Team team = createTeam(accountInfo.getTeamName(), accountInfo.getCategory(), year, post);
             teamRepository.save(team);
+
             boolean isLeader = true;
             for (StudentInfoByAccountDTO studentInfo : accountInfo.getStudentInfos()) {
                 Student student = studentRepository.findByStudentNumber(studentInfo.getStudentNumber());
@@ -162,50 +131,44 @@ public class AccountService {
                 student.setTeam(team);
                 student.getStudentProfile().setStudentEmail(studentInfo.getStudentEmail());
             }
-            accountRepository.saveAll(accounts);
-
         }
 
+        accountRepository.saveAll(accounts);
     }
 
     @Transactional
     public List<FindAccountByYearResponseDTO> findAllAccountByYear(int year) throws Exception {
         List<Account> accounts = accountRepository.findNonAdminAccountsByExhibitionYear(year);
-        ArrayList<FindAccountByYearResponseDTO> FindAccountByYearResponseDTOS = new ArrayList<>();
+        ArrayList<FindAccountByYearResponseDTO> result = new ArrayList<>();
 
         for (Account account : accounts) {
             String encryptedAccountId = encryptionService.encryptPrimaryKey(account.getId());
-            FindAccountByYearResponseDTO findAccountByYearResponseDTO = new FindAccountByYearResponseDTO();
             Team team = account.getTeam();
 
             if (year == team.getExhibitionYear()){
-                findAccountByYearResponseDTO.setEncryptedAccountId(encryptedAccountId);
-                findAccountByYearResponseDTO.setTeamName(team.getName());
-                findAccountByYearResponseDTO.setUserEmail(account.getUserEmail());
-                findAccountByYearResponseDTO.setRecent(account.getRecent());
-                FindAccountByYearResponseDTOS.add(findAccountByYearResponseDTO);
+                FindAccountByYearResponseDTO dto = new FindAccountByYearResponseDTO();
+                dto.setEncryptedAccountId(encryptedAccountId);
+                dto.setTeamName(team.getName());
+                dto.setUserEmail(account.getUserEmail());
+                dto.setRecent(account.getRecent());
+                result.add(dto);
             }
         }
 
-        return FindAccountByYearResponseDTOS;
-
+        return result;
     }
 
     public Account tokenToAccount(String token) {
         String userEmail = jwtUtility.validateToken(token).getSubject();
         return accountRepository.findAccountByUserEmail(userEmail).get();
-
     }
 
     @Transactional
     public void deleteAccount(ArrayList<Long> accountIds){
-
         for (Long id : accountIds) {
-            // 각 계정 조회
             Optional<Account> optionalAccount = accountRepository.findById(id);
             if (optionalAccount.isPresent()) {
                 Account account = optionalAccount.get();
-                // team 연결 해제
                 account.setTeam(null);
                 accountRepository.save(account);
                 accountRepository.delete(account);
@@ -215,33 +178,22 @@ public class AccountService {
 
     @Transactional
     public void resetAccount(ArrayList<Long> AccountsId){
-         accountRepository.resetPasswordsToDefault(AccountsId);
+        accountRepository.resetPasswordsToDefault(AccountsId);
     }
 
-
-
-
-    public static Post createNewPost(){
+    public Post createNewPost() {
         Post post = new Post();
-        post.setTitle(null);
-        post.setContent(null);
-        // 슬라이드 저장 폴더 생성
-        String uploadSlideDir = Paths.get("teamPost",post.getUuid(),"slideImage").toString();
-        File slideDir = new File(uploadSlideDir);
-        if(!slideDir.exists()){
-            slideDir.mkdirs();
-        }
-        post.setSlideUrl(uploadSlideDir);
+        String uuid = post.getUuid();
 
-        //포스트 저장폴더 생성
-        String uploadPostDir = Paths.get("teamPost",post.getUuid()).toString();
-        File postDir = new File(uploadPostDir);
-        if(!postDir.exists()){
-            postDir.mkdirs();
-        }
-        post.setPosterUrl(Paths.get(uploadPostDir,"poster").toString());
-        post.setDemoUrl(Paths.get(uploadPostDir,"demo").toString());
-        post.setTeamProfileUrl(Paths.get(uploadPostDir,"teamProfile").toString());
+        // S3에 폴더 생성 (빈 객체 업로드)
+        s3Uploader.createFolder("teamPost/" + uuid + "/");
+        s3Uploader.createFolder("teamPost/" + uuid + "/slideImage/");
+
+        // URL은 초기값 null로 설정 (업로드 시점에 반영)
+        post.setSlideUrl(null);
+        post.setPosterUrl(null);
+        post.setDemoUrl(null);
+        post.setTeamProfileUrl(null);
 
         return post;
     }
@@ -250,7 +202,7 @@ public class AccountService {
         Team team = new Team();
         team.setName(teamName);
         team.setCategory(category);
-        team.setProfessor(null); // 추 후 교수 정보로 변경
+        team.setProfessor(null);
         team.setExhibitionYear(year);
         team.setPost(post);
         return team;
@@ -266,6 +218,4 @@ public class AccountService {
         account.setTeam(team);
         return account;
     }
-
 }
-
