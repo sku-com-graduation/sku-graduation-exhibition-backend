@@ -118,24 +118,4 @@ public class PostController {
         }
     }
 
-
-
-
-
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
-    @PostMapping("user/post/update/verify")
-    public ResponseEntity<String> verifyEditPermission(
-            HttpServletRequest request,
-            HttpServletResponse response,  // accessToken 재발급을 위해 추가
-            @RequestBody verifyEditPermissionRequestDTO dto) throws Exception {
-        try {
-
-             boolean result = postService.verifyEditPermission(dto.getToken(), dto.getUuid());
-
-            return ResponseEntity.ok("인증 성공");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
-        }
-    }
-
 }

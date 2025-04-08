@@ -1,5 +1,7 @@
 package com.ghostHoliday.graduationExhibitions.utility;
 
+import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,6 +16,7 @@ import software.amazon.awssdk.services.s3.model.*;
 import java.io.IOException;
 import java.util.UUID;
 
+@Data
 @Component
 @RequiredArgsConstructor
 public class S3Uploader {
@@ -27,15 +30,17 @@ public class S3Uploader {
     @Value("${AWS_REGION}")
     private String region;
 
+    @Getter
     @Value("${BUCKET_NAME}")
     private String bucket;
 
+    @Getter
     @Value("${CLOUDFRONT_URL}")
     private String cloudFrontUrl;
 
     private final FileUtility fileUtility;
 
-    private S3Client getS3Client() {
+    public S3Client getS3Client() {
         return S3Client.builder()
                 .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(
@@ -45,10 +50,21 @@ public class S3Uploader {
 
     public String upload(MultipartFile file, String folder) throws IOException {
         String extension = fileUtility.getImageFileExtension(file.getOriginalFilename());
-        if (extension == null || (!extension.equalsIgnoreCase("jpg") && !extension.equalsIgnoreCase("png"))) {
-            throw new RuntimeException("지원되지 않는 파일 형식입니다.");
+        if (extension == null) {
+            throw new RuntimeException("지원되지 않는 이미지 파일 형식입니다.");
         }
+        return uploadToS3(file, folder, extension);
+    }
 
+    public String uploadVideo(MultipartFile file, String folder) throws IOException {
+        String extension = fileUtility.getVideoFileExtension(file.getOriginalFilename());
+        if (extension == null) {
+            throw new RuntimeException("지원되지 않는 비디오 파일 형식입니다.");
+        }
+        return uploadToS3(file, folder, extension);
+    }
+
+    private String uploadToS3(MultipartFile file, String folder, String extension) throws IOException {
         String key = folder + "/" + UUID.randomUUID() + "." + extension;
 
         getS3Client().putObject(PutObjectRequest.builder()
@@ -69,5 +85,29 @@ public class S3Uploader {
                 .bucket(bucket)
                 .key(key)
                 .build());
+    }
+
+    public void createFolder(String folderPath) {
+        getS3Client().putObject(PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(folderPath.endsWith("/") ? folderPath : folderPath + "/")
+                .build(), RequestBody.empty());
+    }
+
+    public void deleteFolder(String folderPath) {
+        S3Client s3 = getS3Client();
+        ListObjectsV2Request listRequest = ListObjectsV2Request.builder()
+                .bucket(bucket)
+                .prefix(folderPath.endsWith("/") ? folderPath : folderPath + "/")
+                .build();
+
+        ListObjectsV2Response listResponse = s3.listObjectsV2(listRequest);
+
+        for (S3Object s3Object : listResponse.contents()) {
+            s3.deleteObject(DeleteObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(s3Object.key())
+                    .build());
+        }
     }
 }
