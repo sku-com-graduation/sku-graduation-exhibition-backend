@@ -90,7 +90,9 @@ public class TeamService {
             if (updateTeamInfoDTO.getEncryptedProfessorId() != null) {
                 Long professorId = encryptionService.decryptDeterministic(updateTeamInfoDTO.getEncryptedProfessorId());
                 professor = professorRepository.findById(professorId).orElse(null); // 안전하게 조회
+
             }
+
 
             // 💡 무조건 updateTeam 호출 (null을 인자로 넘겨도 괜찮도록)
             ResponseTeamInfoDTO teamInfo = updateTeam(
@@ -102,7 +104,6 @@ public class TeamService {
 
             teams.add(teamInfo);
         }
-
         return teams;
     }
 

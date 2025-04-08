@@ -14,7 +14,7 @@ public class Team {
     @JoinColumn(name = "postId")
     private Post post;
 
-    @OneToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ProfessorId")
     private Professor professor;
 
