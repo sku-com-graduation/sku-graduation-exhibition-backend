@@ -15,7 +15,7 @@ public class Team {
     private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ProfessorId")
+    @JoinColumn(name = "ProfessorId", nullable = true)
     private Professor professor;
 
     private String name;
