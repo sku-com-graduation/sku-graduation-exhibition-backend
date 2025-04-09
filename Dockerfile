@@ -1,22 +1,16 @@
-# 1단계: Build Stage
-FROM gradle:7.6.3-jdk17 AS builder
-
-WORKDIR /app
-COPY . /app
-
-# Gradle 캐시 활용을 위한 의존성 사전 빌드 (선택사항)
-# RUN gradle dependencies
-
-RUN ./gradlew build --exclude-task test
-
-# 2단계: Run Stage
-FROM openjdk:17-jdk-slim
+FROM openjdk:17-jdk-bullseye
 
 WORKDIR /app
 
-# 빌드된 jar 파일만 복사
-COPY --from=builder /app/build/libs/graduationExhibitions-0.0.1-SNAPSHOT.jar app.jar
+# Dockerize 설치
+ENV DOCKERIZE_VERSION v0.2.0
+RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+
+# jar 복사
+COPY build/libs/*.jar app.jar
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "app.jar"]
+# dockerize로 MySQL이 준비될 때까지 기다리고, Spring 애플리케이션 실행
+ENTRYPOINT ["dockerize", "-wait", "tcp://mysql-test:3306", "-timeout", "30s", "java", "-jar", "app.jar"]
