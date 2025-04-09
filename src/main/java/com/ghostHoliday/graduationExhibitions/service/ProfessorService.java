@@ -5,6 +5,7 @@ import com.ghostHoliday.graduationExhibitions.dto.professor.FindProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.professor.RegistProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.professor.UpdateProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.repository.ProfessorRepository;
+import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
 import com.ghostHoliday.graduationExhibitions.utility.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class ProfessorService {
     private final ProfessorRepository professorRepository;
     private final S3Uploader s3Uploader;
     private final EncryptionService encryptionService;
+    private final TeamRepository teamRepository;
 
     @Transactional
     public void registProfessor(RegistProfessorDTO dto) throws IOException {
@@ -93,8 +95,15 @@ public class ProfessorService {
     @Transactional
     public void deleteProfessors(List<String> encryptedIds) throws Exception {
         for (String encryptedId : encryptedIds) {
+
+            Long professorId = encryptionService.decryptPrimaryKey(encryptedId);
             Professor professor = professorRepository.findById(
+
                     encryptionService.decryptPrimaryKey(encryptedId)).get();
+
+
+            // 해당 교수에 담당된 모든 팀에서 professorId를 NULL로 업데이트
+            teamRepository.updateProfessorIdToNull(professorId);
 
             s3Uploader.delete(professor.getImageUrl());
             professorRepository.delete(professor);
