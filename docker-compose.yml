@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-test
+    environment:
+      MYSQL_ROOT_PASSWORD: tiger  # root 비밀번호를 tiger로
+      MYSQL_DATABASE: sku_graduation     # 원하는 DB명
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  spring:
+    image: my-spring-app
+    container_name: spring-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-test:3306/sku_graduation
+      SPRING_DATASOURCE_USERNAME: root                  # root 계정으로
+      SPRING_DATASOURCE_PASSWORD: tiger                 # tiger 비밀번호로
+    restart: "no"
+
+volumes:
+  mysql_data:
