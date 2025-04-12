@@ -15,4 +15,5 @@ public interface StudentRepository extends JpaRepository <Student, Long> {
     List<Student> findByExhibitionYear(String exhibitionYear);
 
     List<Student> findAllByTeamId(Long TeamId);
+    List<Student> findByTeamIsNull();
 }

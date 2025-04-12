@@ -2,22 +2,23 @@ package com.ghostHoliday.graduationExhibitions.controller;
 
 
 import com.ghostHoliday.graduationExhibitions.dto.account.FindAccountByYearResponseDTO;
-import com.ghostHoliday.graduationExhibitions.dto.account.LoginDTO;
+import com.ghostHoliday.graduationExhibitions.dto.account.FindStudentInfoByCreateAccountResponse;
 import com.ghostHoliday.graduationExhibitions.dto.account.LoginRequestDTO;
 import com.ghostHoliday.graduationExhibitions.dto.account.RegistAccountRequest;
+import com.ghostHoliday.graduationExhibitions.dto.home.SearchExhitibitionDateResponse;
 import com.ghostHoliday.graduationExhibitions.exception.UnauthorizedException;
 import com.ghostHoliday.graduationExhibitions.service.AccountService;
 import com.ghostHoliday.graduationExhibitions.service.EncryptionService;
 import com.ghostHoliday.graduationExhibitions.service.HttpOnlyService;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.exceptions.CsvException;
+import io.jsonwebtoken.Jwt;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
@@ -28,6 +29,8 @@ import java.util.*;
 public class AccountController {
     private final AccountService accountService;
     private final EncryptionService encryptionService;
+    private final HttpOnlyService httpOnlyService;
+    private final JwtUtility jwtUtility;
 
 
     @PostMapping("public/account/login")
@@ -80,7 +83,7 @@ public class AccountController {
             @RequestBody List<RegistAccountRequest> requestDTO) {
         try {
             // accessToken이 유효하면 요청 처리
-            accountService.registAccount(requestDTO);
+            accountService.createAccount(requestDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body("계정 및 팀 정보가 성공적으로 등록되었습니다.");
 
         }catch (CsvException e) {
@@ -149,6 +152,23 @@ public class AccountController {
                     .body("계정 초기화 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
+
+    @GetMapping("admin/account/regist/info")
+    public ResponseEntity<?> findInfosByCreateAccount(
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        try {
+            String accessToken = httpOnlyService.refreshTokenIfNeeded(request, response);
+            String token = jwtUtility.extractAccessTokenFromCookie(request);
+            FindStudentInfoByCreateAccountResponse responses = accountService.findInfosByCreateAccount(token);
+            return ResponseEntity.ok(responses);
+        }catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 인증입니다. 다시 로그인 해주세요: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
 }
 
 
