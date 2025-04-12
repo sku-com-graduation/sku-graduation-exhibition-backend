@@ -41,7 +41,6 @@ out/
 
 # Ignore properties and YAML files
 *.properties
-*.yaml
 *.pem
 
 teamPost
