@@ -20,7 +20,7 @@ public class Account {
     @JoinColumn(name = "teamId", nullable = true)
     private Team team;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String userEmail;
 
     private String defaultPwd;
