@@ -245,55 +245,14 @@ public class PostService {
         post.setContent(dto.getContent());
         requestedTeam.setCategory(dto.getCategory());
 
-        String baseDir = "teamPost/" + post.getUuid() + "/";
-
         // 팀 프로필 이미지 업로드
-        if (dto.getTeamProfileImage() != null && !dto.getTeamProfileImage().isEmpty()) {
-            if (post.getTeamProfileUrl() != null) {
-                s3Uploader.delete(post.getTeamProfileUrl());
-            }
-            String fileName = "teamProfile." + fileUtility.getImageFileExtension(dto.getTeamProfileImage().getOriginalFilename());
-            String s3Path = baseDir + "teamProfile/" + fileName;
-            String uploadedUrl = s3Uploader.upload(dto.getTeamProfileImage(), s3Path);
-            post.setTeamProfileUrl(uploadedUrl);
-        } else {
-            if (post.getTeamProfileUrl() != null) {
-                s3Uploader.delete(post.getTeamProfileUrl());
-                post.setTeamProfileUrl(null);
-            }
-        }
+        post.setTeamProfileUrl(dto.getTeamProfileImage());
 
         // 데모 영상 업로드
-        if (dto.getDemoVideo() != null && !dto.getDemoVideo().isEmpty()) {
-            if (post.getDemoUrl() != null) {
-                s3Uploader.delete(post.getDemoUrl());
-            }
-            String fileName = "demo." + fileUtility.getVideoFileExtension(dto.getDemoVideo().getOriginalFilename());
-            String s3Path = baseDir + "demo/" + fileName;
-            String uploadedUrl = s3Uploader.uploadVideo(dto.getDemoVideo(), s3Path);
-            post.setDemoUrl(uploadedUrl);
-        } else {
-            if (post.getDemoUrl() != null) {
-                s3Uploader.delete(post.getDemoUrl());
-                post.setDemoUrl(null);
-            }
-        }
+        post.setTeamProfileUrl(dto.getDemoVideo());
 
         // 포스터 이미지 업로드
-        if (dto.getPosterImage() != null && !dto.getPosterImage().isEmpty()) {
-            if (post.getPosterUrl() != null) {
-                s3Uploader.delete(post.getPosterUrl());
-            }
-            String fileName = "poster." + fileUtility.getImageFileExtension(dto.getPosterImage().getOriginalFilename());
-            String s3Path = baseDir + "poster/" + fileName;
-            String uploadedUrl = s3Uploader.upload(dto.getPosterImage(), s3Path);
-            post.setPosterUrl(uploadedUrl);
-        } else {
-            if (post.getPosterUrl() != null) {
-                s3Uploader.delete(post.getPosterUrl());
-                post.setPosterUrl(null);
-            }
-        }
+        post.setTeamProfileUrl(dto.getPosterImage());
     }
 
     @Transactional
