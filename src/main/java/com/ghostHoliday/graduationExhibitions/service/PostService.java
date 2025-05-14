@@ -245,14 +245,18 @@ public class PostService {
         post.setContent(dto.getContent());
         requestedTeam.setCategory(dto.getCategory());
 
+
         // 팀 프로필 이미지 업로드
         post.setTeamProfileUrl(dto.getTeamProfileImage());
+
 
         // 데모 영상 업로드
         post.setTeamProfileUrl(dto.getDemoVideo());
 
+
         // 포스터 이미지 업로드
         post.setTeamProfileUrl(dto.getPosterImage());
+
     }
 
     @Transactional
