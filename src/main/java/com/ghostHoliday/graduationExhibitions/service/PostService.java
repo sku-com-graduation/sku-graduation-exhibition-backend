@@ -43,9 +43,9 @@ public class PostService {
 
 
     @Transactional
-    public List<UpdatePostInfoTestResponse> updatePostInfoTest(UpdatePostInfoTestRequest request) {
+    public List<S3UrlDTO> updatePostInfoV2(UpdatePostInfoV2Request request) {
 
-        List<UpdatePostInfoTestResponse> responses = new ArrayList<>();
+        List<S3UrlDTO> responses = new ArrayList<>();
         String baseDir = "teamPost/" + request.getTeamUuid() + "/";
 
         for (fileInfoDTO fileInfo : request.getFileInfos()) {
@@ -53,29 +53,24 @@ public class PostService {
                 String fileName = "teamProfile." + fileInfo.getExtention();
                 String s3Path = baseDir + "teamProfile/" + fileName;
                 UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getExtention());
-                responses.add(new UpdatePostInfoTestResponse(FileType.TEAM_PROFILE, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl()));
+                responses.add(new S3UrlDTO(FileType.TEAM_PROFILE, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl()));
 
             }
             else if (fileInfo.getFileType().equals(FileType.DEMO)){
                 String fileName = "demo." + fileInfo.getExtention();
                 String s3Path = baseDir + "demo/" + fileName;
                 UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getExtention());
-                responses.add(new UpdatePostInfoTestResponse(FileType.DEMO, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl()));
+                responses.add(new S3UrlDTO(FileType.DEMO, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl()));
             }
             else if (fileInfo.getFileType().equals(FileType.POSTER)){
                 String fileName = "poster." + fileInfo.getExtention();
                 String s3Path = baseDir + "poster/" + fileName;
                 UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getExtention());
-                responses.add(new UpdatePostInfoTestResponse(FileType.POSTER, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl()));
+                responses.add(new S3UrlDTO(FileType.POSTER, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl()));
             }
         }
         return responses;
-
-
     }
-
-
-
 
 
     @Transactional
