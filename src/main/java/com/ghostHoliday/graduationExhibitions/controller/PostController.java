@@ -35,7 +35,6 @@ public class PostController {
     ) throws Exception {
         try {
 
-
             String token = jwtUtility.extractAccessTokenFromCookie(request);
 
             postService.updateSlideImage(dto, jwtUtility.getEmailFromToken(token));
