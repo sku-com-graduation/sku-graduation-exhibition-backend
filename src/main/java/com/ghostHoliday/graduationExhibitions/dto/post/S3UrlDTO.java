@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdatePostInfoTestResponse {
+public class S3UrlDTO {
     private FileType fileType;
     private String cloudFrontUrl;
     private String s3Url;

@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdatePostInfoTestRequest {
+public class UpdatePostInfoV2Request {
     private String teamUuid;
     private List<fileInfoDTO> fileInfos;
 
