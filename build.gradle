@@ -48,6 +48,9 @@ dependencies {
 
 	implementation platform('software.amazon.awssdk:bom:2.25.4')
 	implementation 'software.amazon.awssdk:s3'
+
+	implementation 'net.bytebuddy:byte-buddy-agent:1.14.4'
+
 }
 
 tasks.named('test') {
