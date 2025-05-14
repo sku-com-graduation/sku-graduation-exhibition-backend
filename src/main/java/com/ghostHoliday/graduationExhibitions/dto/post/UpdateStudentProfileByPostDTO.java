@@ -15,5 +15,5 @@ public class UpdateStudentProfileByPostDTO {
     private String studentEmail;
     private String studentBlog;
     private String info;
-    private MultipartFile profileImage;
+    private String profileImage;
 }

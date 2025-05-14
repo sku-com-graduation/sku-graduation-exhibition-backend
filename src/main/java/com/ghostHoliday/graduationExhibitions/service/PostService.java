@@ -15,12 +15,7 @@ import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.AccessDeniedException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 @Service
@@ -44,6 +39,37 @@ public class PostService {
 
     public Long save(Post post) {
         return postRepository.save(post).getId();
+    }
+
+
+    @Transactional
+    public List<S3UrlDTO> updatePostInfoV2(UpdatePostInfoV2Request request) {
+
+        List<S3UrlDTO> responses = new ArrayList<>();
+        String baseDir = "teamPost/" + request.getTeamUuid() + "/";
+
+        for (FileInfoDTO fileInfo : request.getFileInfos()) {
+            if (fileInfo.getFileType().equals(FileType.TEAM_PROFILE)){
+                String fileName = "teamProfile." + fileInfo.getExtention();
+                String s3Path = baseDir + "teamProfile/" + fileName;
+                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getExtention());
+                responses.add(new S3UrlDTO(FileType.TEAM_PROFILE, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl()));
+
+            }
+            else if (fileInfo.getFileType().equals(FileType.DEMO)){
+                String fileName = "demo." + fileInfo.getExtention();
+                String s3Path = baseDir + "demo/" + fileName;
+                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getExtention());
+                responses.add(new S3UrlDTO(FileType.DEMO, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl()));
+            }
+            else if (fileInfo.getFileType().equals(FileType.POSTER)){
+                String fileName = "poster." + fileInfo.getExtention();
+                String s3Path = baseDir + "poster/" + fileName;
+                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getExtention());
+                responses.add(new S3UrlDTO(FileType.POSTER, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl()));
+            }
+        }
+        return responses;
     }
 
 
@@ -219,55 +245,18 @@ public class PostService {
         post.setContent(dto.getContent());
         requestedTeam.setCategory(dto.getCategory());
 
-        String baseDir = "teamPost/" + post.getUuid() + "/";
 
         // 팀 프로필 이미지 업로드
-        if (dto.getTeamProfileImage() != null && !dto.getTeamProfileImage().isEmpty()) {
-            if (post.getTeamProfileUrl() != null) {
-                s3Uploader.delete(post.getTeamProfileUrl());
-            }
-            String fileName = "teamProfile." + fileUtility.getImageFileExtension(dto.getTeamProfileImage().getOriginalFilename());
-            String s3Path = baseDir + "teamProfile/" + fileName;
-            String uploadedUrl = s3Uploader.upload(dto.getTeamProfileImage(), s3Path);
-            post.setTeamProfileUrl(uploadedUrl);
-        } else {
-            if (post.getTeamProfileUrl() != null) {
-                s3Uploader.delete(post.getTeamProfileUrl());
-                post.setTeamProfileUrl(null);
-            }
-        }
+        post.setTeamProfileUrl(dto.getTeamProfileImage());
+
 
         // 데모 영상 업로드
-        if (dto.getDemoVideo() != null && !dto.getDemoVideo().isEmpty()) {
-            if (post.getDemoUrl() != null) {
-                s3Uploader.delete(post.getDemoUrl());
-            }
-            String fileName = "demo." + fileUtility.getVideoFileExtension(dto.getDemoVideo().getOriginalFilename());
-            String s3Path = baseDir + "demo/" + fileName;
-            String uploadedUrl = s3Uploader.uploadVideo(dto.getDemoVideo(), s3Path);
-            post.setDemoUrl(uploadedUrl);
-        } else {
-            if (post.getDemoUrl() != null) {
-                s3Uploader.delete(post.getDemoUrl());
-                post.setDemoUrl(null);
-            }
-        }
+        post.setTeamProfileUrl(dto.getDemoVideo());
+
 
         // 포스터 이미지 업로드
-        if (dto.getPosterImage() != null && !dto.getPosterImage().isEmpty()) {
-            if (post.getPosterUrl() != null) {
-                s3Uploader.delete(post.getPosterUrl());
-            }
-            String fileName = "poster." + fileUtility.getImageFileExtension(dto.getPosterImage().getOriginalFilename());
-            String s3Path = baseDir + "poster/" + fileName;
-            String uploadedUrl = s3Uploader.upload(dto.getPosterImage(), s3Path);
-            post.setPosterUrl(uploadedUrl);
-        } else {
-            if (post.getPosterUrl() != null) {
-                s3Uploader.delete(post.getPosterUrl());
-                post.setPosterUrl(null);
-            }
-        }
+        post.setTeamProfileUrl(dto.getPosterImage());
+
     }
 
     @Transactional
@@ -340,21 +329,8 @@ public class PostService {
         studentProfile.setStudentEmail(dto.getStudentEmail());
         studentProfile.setStudentBlog(dto.getStudentBlog());
         studentProfile.setInfo(dto.getInfo());
+        studentProfile.setStudentProfileUrl(dto.getProfileImage());
 
-        if (dto.getProfileImage() == null || dto.getProfileImage().isEmpty()) {
-            if (studentProfile.getStudentProfileUrl() != null) {
-                s3Uploader.delete(studentProfile.getStudentProfileUrl());
-                studentProfile.setStudentProfileUrl(null);
-            }
-        } else {
-            if (studentProfile.getStudentProfileUrl() != null) {
-                s3Uploader.delete(studentProfile.getStudentProfileUrl());
-            }
-            String fileName = student.getStudentNumber() + "." + fileUtility.getImageFileExtension(dto.getProfileImage().getOriginalFilename());
-            String s3Path = "studentProfileImage/" + fileName;
-            String uploadedUrl = s3Uploader.upload(dto.getProfileImage(), s3Path);
-            studentProfile.setStudentProfileUrl(uploadedUrl);
-        }
     }
 
 

@@ -1,6 +1,10 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
+import com.ghostHoliday.graduationExhibitions.domain.FileType;
 import com.ghostHoliday.graduationExhibitions.domain.Professor;
+import com.ghostHoliday.graduationExhibitions.dto.post.S3UrlDTO;
+import com.ghostHoliday.graduationExhibitions.dto.post.UploadUrlDTO;
+import com.ghostHoliday.graduationExhibitions.dto.post.FileInfoDTO;
 import com.ghostHoliday.graduationExhibitions.dto.professor.FindProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.professor.RegistProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.professor.UpdateProfessorDTO;
@@ -25,6 +29,15 @@ public class ProfessorService {
     private final S3Uploader s3Uploader;
     private final EncryptionService encryptionService;
     private final TeamRepository teamRepository;
+
+    @Transactional
+    public S3UrlDTO updateProfessorInfoV2(FileInfoDTO request) {
+
+        UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl("professor", request.getExtention());
+
+        return new S3UrlDTO(FileType.PROFESSOR, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl());
+    }
+
 
     @Transactional
     public void registProfessor(RegistProfessorDTO dto) throws IOException {
@@ -52,21 +65,7 @@ public class ProfessorService {
         professor.setEmail(dto.getEmail());
         professor.setTenure(dto.isTenure());
 
-        MultipartFile profileImage = dto.getProfileImage();
-
-        if (profileImage != null && !profileImage.isEmpty()) {
-            // 새 이미지가 들어왔으면 기존 이미지 삭제 후 새 이미지 저장
-            s3Uploader.delete(professor.getImageUrl());
-            String imageUrl = s3Uploader.upload(profileImage, "professor");
-            professor.setImageUrl(imageUrl);
-        } else {
-            // 이미지가 비어 있으면 기존 이미지 삭제 + 필드 null 처리
-            if (professor.getImageUrl() != null && !professor.getImageUrl().isEmpty()) {
-                s3Uploader.delete(professor.getImageUrl());
-                professor.setImageUrl(null);
-            }
-        }
-
+        professor.setImageUrl(dto.getProfileImage());
         professorRepository.save(professor);
     }
 
