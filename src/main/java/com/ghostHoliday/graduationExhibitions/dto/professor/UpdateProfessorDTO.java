@@ -13,6 +13,6 @@ public class UpdateProfessorDTO{
     private String name;
     private String email;
     private boolean tenure;
-    private MultipartFile profileImage;
+    private String profileImage;
 
 }

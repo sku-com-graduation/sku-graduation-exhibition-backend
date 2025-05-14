@@ -65,21 +65,7 @@ public class ProfessorService {
         professor.setEmail(dto.getEmail());
         professor.setTenure(dto.isTenure());
 
-        MultipartFile profileImage = dto.getProfileImage();
-
-        if (profileImage != null && !profileImage.isEmpty()) {
-            // 새 이미지가 들어왔으면 기존 이미지 삭제 후 새 이미지 저장
-            s3Uploader.delete(professor.getImageUrl());
-            String imageUrl = s3Uploader.upload(profileImage, "professor");
-            professor.setImageUrl(imageUrl);
-        } else {
-            // 이미지가 비어 있으면 기존 이미지 삭제 + 필드 null 처리
-            if (professor.getImageUrl() != null && !professor.getImageUrl().isEmpty()) {
-                s3Uploader.delete(professor.getImageUrl());
-                professor.setImageUrl(null);
-            }
-        }
-
+        professor.setImageUrl(dto.getProfileImage());
         professorRepository.save(professor);
     }
 

@@ -329,21 +329,8 @@ public class PostService {
         studentProfile.setStudentEmail(dto.getStudentEmail());
         studentProfile.setStudentBlog(dto.getStudentBlog());
         studentProfile.setInfo(dto.getInfo());
+        studentProfile.setStudentProfileUrl(dto.getProfileImage());
 
-        if (dto.getProfileImage() == null || dto.getProfileImage().isEmpty()) {
-            if (studentProfile.getStudentProfileUrl() != null) {
-                s3Uploader.delete(studentProfile.getStudentProfileUrl());
-                studentProfile.setStudentProfileUrl(null);
-            }
-        } else {
-            if (studentProfile.getStudentProfileUrl() != null) {
-                s3Uploader.delete(studentProfile.getStudentProfileUrl());
-            }
-            String fileName = student.getStudentNumber() + "." + fileUtility.getImageFileExtension(dto.getProfileImage().getOriginalFilename());
-            String s3Path = "studentProfileImage/" + fileName;
-            String uploadedUrl = s3Uploader.upload(dto.getProfileImage(), s3Path);
-            studentProfile.setStudentProfileUrl(uploadedUrl);
-        }
     }
 
 
