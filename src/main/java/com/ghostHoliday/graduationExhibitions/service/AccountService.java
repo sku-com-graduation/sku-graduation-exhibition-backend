@@ -5,10 +5,8 @@ import com.ghostHoliday.graduationExhibitions.dto.account.*;
 import com.ghostHoliday.graduationExhibitions.repository.*;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.ghostHoliday.graduationExhibitions.utility.S3Uploader;
-import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -17,10 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -39,8 +36,8 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
     private final HomeRepository homeRepository;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final HttpOnlyService httpOnlyService;
     private final S3Uploader s3Uploader;
+    private final ProfessorRepository professorRepository;
 
     @Transactional
     public ResponseEntity<Object> login(LoginRequestDTO request ) {
@@ -98,7 +95,7 @@ public class AccountService {
     }
 
     @Transactional
-    public void registAccount(List<RegistAccountRequest> accountInfos) throws IOException, CsvException {
+    public void createAccount(List<RegistAccountRequest> accountInfos) throws IOException, CsvException {
         ArrayList<Account> accounts = new ArrayList<>();
         int year = LocalDateTime.now().getYear();
 
@@ -158,11 +155,6 @@ public class AccountService {
         return result;
     }
 
-    public Account tokenToAccount(String token) {
-        String userEmail = jwtUtility.validateToken(token).getSubject();
-        return accountRepository.findAccountByUserEmail(userEmail).get();
-    }
-
     @Transactional
     public void deleteAccount(ArrayList<Long> accountIds){
         for (Long id : accountIds) {
@@ -179,6 +171,37 @@ public class AccountService {
     @Transactional
     public void resetAccount(ArrayList<Long> AccountsId){
         accountRepository.resetPasswordsToDefault(AccountsId);
+    }
+
+    public FindStudentInfoByCreateAccountResponse findInfosByCreateAccount(String token) throws AccessDeniedException {
+        String userEmail = jwtUtility.getEmailFromToken(token);
+        Account account = accountRepository.findAccountByUserEmail(userEmail)
+                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
+
+        if (!account.getRole().equals(Role.ADMIN)){
+            throw new AccessDeniedException("권한이 없습니다.");
+        }
+
+        //교수 검색
+        List<ProfessorInfosByCreateAccount> professorInfos = new ArrayList<>();
+        for (Professor professor : professorRepository.findAll()) {
+            ProfessorInfosByCreateAccount professorInfo = new ProfessorInfosByCreateAccount();
+            professorInfo.setProfessorName(professor.getName());
+            professorInfos.add(professorInfo);
+        }
+
+        //학생 검색
+        List<StudentInfosByCreateAccount> studentInfos = new ArrayList<>();
+        for (Student student : studentRepository.findByTeamIsNull()) {
+            StudentInfosByCreateAccount studentInfo = new StudentInfosByCreateAccount();
+            studentInfo.setStudentName(student.getName());
+            studentInfo.setStudentNumber(student.getStudentNumber());
+            studentInfo.setStudentEmail(student.getStudentProfile().getStudentEmail());
+            studentInfos.add(studentInfo);
+        }
+        return new FindStudentInfoByCreateAccountResponse(professorInfos, studentInfos);
+
+
     }
 
     public Post createNewPost() {

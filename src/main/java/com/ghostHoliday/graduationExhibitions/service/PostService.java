@@ -15,12 +15,7 @@ import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.AccessDeniedException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 @Service
@@ -44,6 +39,37 @@ public class PostService {
 
     public Long save(Post post) {
         return postRepository.save(post).getId();
+    }
+
+
+    @Transactional
+    public List<S3UrlDTO> updatePostInfoV2(UpdatePostInfoV2Request request) {
+
+        List<S3UrlDTO> responses = new ArrayList<>();
+        String baseDir = "teamPost/" + request.getTeamUuid() + "/";
+
+        for (fileInfoDTO fileInfo : request.getFileInfos()) {
+            if (fileInfo.getFileType().equals(FileType.TEAM_PROFILE)){
+                String fileName = "teamProfile." + fileInfo.getExtention();
+                String s3Path = baseDir + "teamProfile/" + fileName;
+                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getExtention());
+                responses.add(new S3UrlDTO(FileType.TEAM_PROFILE, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl()));
+
+            }
+            else if (fileInfo.getFileType().equals(FileType.DEMO)){
+                String fileName = "demo." + fileInfo.getExtention();
+                String s3Path = baseDir + "demo/" + fileName;
+                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getExtention());
+                responses.add(new S3UrlDTO(FileType.DEMO, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl()));
+            }
+            else if (fileInfo.getFileType().equals(FileType.POSTER)){
+                String fileName = "poster." + fileInfo.getExtention();
+                String s3Path = baseDir + "poster/" + fileName;
+                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getExtention());
+                responses.add(new S3UrlDTO(FileType.POSTER, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl()));
+            }
+        }
+        return responses;
     }
 
 
