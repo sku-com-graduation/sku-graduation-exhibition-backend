@@ -12,8 +12,12 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.UUID;
 
 @Data
@@ -39,6 +43,40 @@ public class S3Uploader {
     private String cloudFrontUrl;
 
     private final FileUtility fileUtility;
+
+
+
+    public String generatePreSignedUploadUrl(String folder, String extension) {
+        String key = folder + "/" + UUID.randomUUID() + "." + extension;
+
+        S3Presigner presigner = S3Presigner.builder()
+                .region(Region.of(region))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)))
+                .build();
+
+        PutObjectRequest objectRequest = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .contentType("application/octet-stream") // 혹은 필요한 타입
+                .build();
+
+        PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(10))
+                .putObjectRequest(objectRequest)
+                .build();
+
+        PresignedPutObjectRequest presignedRequest = presigner.presignPutObject(presignRequest);
+
+        presigner.close();
+
+        return cloudFrontUrl + "/" + key + "|" + presignedRequest.url().toString();
+    }
+
+
+
+
+
 
     public S3Client getS3Client() {
         return S3Client.builder()
