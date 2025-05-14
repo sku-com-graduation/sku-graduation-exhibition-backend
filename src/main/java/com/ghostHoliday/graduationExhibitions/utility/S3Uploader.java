@@ -1,5 +1,6 @@
 package com.ghostHoliday.graduationExhibitions.utility;
 
+import com.ghostHoliday.graduationExhibitions.dto.post.UploadUrlDTO;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,7 @@ public class S3Uploader {
 
 
 
-    public String generatePreSignedUploadUrl(String folder, String extension) {
+    public UploadUrlDTO generatePreSignedUploadUrl(String folder, String extension) {
         String key = folder + "/" + UUID.randomUUID() + "." + extension;
 
         S3Presigner presigner = S3Presigner.builder()
@@ -69,13 +70,8 @@ public class S3Uploader {
         PresignedPutObjectRequest presignedRequest = presigner.presignPutObject(presignRequest);
 
         presigner.close();
-
-        return cloudFrontUrl + "/" + key + "|" + presignedRequest.url().toString();
+        return new UploadUrlDTO(cloudFrontUrl + "/" + key, presignedRequest.url().toString());
     }
-
-
-
-
 
 
     public S3Client getS3Client() {
