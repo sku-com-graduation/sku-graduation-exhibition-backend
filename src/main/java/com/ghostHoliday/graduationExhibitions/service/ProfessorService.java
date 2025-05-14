@@ -4,7 +4,7 @@ import com.ghostHoliday.graduationExhibitions.domain.FileType;
 import com.ghostHoliday.graduationExhibitions.domain.Professor;
 import com.ghostHoliday.graduationExhibitions.dto.post.S3UrlDTO;
 import com.ghostHoliday.graduationExhibitions.dto.post.UploadUrlDTO;
-import com.ghostHoliday.graduationExhibitions.dto.post.fileInfoDTO;
+import com.ghostHoliday.graduationExhibitions.dto.post.FileInfoDTO;
 import com.ghostHoliday.graduationExhibitions.dto.professor.FindProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.professor.RegistProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.professor.UpdateProfessorDTO;
@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,12 +31,11 @@ public class ProfessorService {
     private final TeamRepository teamRepository;
 
     @Transactional
-    public S3UrlDTO updateProfessorInfoV2(fileInfoDTO request) {
+    public S3UrlDTO updateProfessorInfoV2(FileInfoDTO request) {
 
         UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl("professor", request.getExtention());
-        S3UrlDTO response = new S3UrlDTO(FileType.PROFESSOR, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl());
 
-        return response;
+        return new S3UrlDTO(FileType.PROFESSOR, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl());
     }
 
 

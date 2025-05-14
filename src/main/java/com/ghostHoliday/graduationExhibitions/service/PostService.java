@@ -48,7 +48,7 @@ public class PostService {
         List<S3UrlDTO> responses = new ArrayList<>();
         String baseDir = "teamPost/" + request.getTeamUuid() + "/";
 
-        for (fileInfoDTO fileInfo : request.getFileInfos()) {
+        for (FileInfoDTO fileInfo : request.getFileInfos()) {
             if (fileInfo.getFileType().equals(FileType.TEAM_PROFILE)){
                 String fileName = "teamProfile." + fileInfo.getExtention();
                 String s3Path = baseDir + "teamProfile/" + fileName;
