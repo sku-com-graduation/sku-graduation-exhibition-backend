@@ -51,6 +51,10 @@ dependencies {
 
 	implementation 'net.bytebuddy:byte-buddy-agent:1.14.4'
 
+	implementation("software.amazon.awssdk:cloudfront:2.25.15")
+	implementation("software.amazon.awssdk:auth:2.25.15")
+
+
 }
 
 tasks.named('test') {
