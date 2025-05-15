@@ -50,22 +50,22 @@ public class PostService {
 
         for (FileInfoDTO fileInfo : request.getFileInfos()) {
             if (fileInfo.getFileType().equals(FileType.TEAM_PROFILE)){
-                String fileName = "teamProfile." + fileInfo.getExtention();
+                String fileName = "teamProfile." + fileInfo.getExtension();
                 String s3Path = baseDir + "teamProfile/" + fileName;
-                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getExtention());
+                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getExtension());
                 responses.add(new S3UrlDTO(FileType.TEAM_PROFILE, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl()));
 
             }
             else if (fileInfo.getFileType().equals(FileType.DEMO)){
-                String fileName = "demo." + fileInfo.getExtention();
+                String fileName = "demo." + fileInfo.getExtension();
                 String s3Path = baseDir + "demo/" + fileName;
-                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getExtention());
+                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getExtension());
                 responses.add(new S3UrlDTO(FileType.DEMO, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl()));
             }
             else if (fileInfo.getFileType().equals(FileType.POSTER)){
-                String fileName = "poster." + fileInfo.getExtention();
+                String fileName = "poster." + fileInfo.getExtension();
                 String s3Path = baseDir + "poster/" + fileName;
-                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getExtention());
+                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getExtension());
                 responses.add(new S3UrlDTO(FileType.POSTER, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl()));
             }
         }

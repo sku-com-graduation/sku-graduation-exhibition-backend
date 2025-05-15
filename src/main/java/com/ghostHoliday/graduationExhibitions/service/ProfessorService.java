@@ -33,7 +33,7 @@ public class ProfessorService {
     @Transactional
     public S3UrlDTO updateProfessorInfoV2(FileInfoDTO request) {
 
-        UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl("professor", request.getExtention());
+        UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl("professor", request.getExtension());
 
         return new S3UrlDTO(FileType.PROFESSOR, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl());
     }

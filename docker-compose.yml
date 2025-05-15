@@ -13,8 +13,8 @@ services:
       - mysql_data:/var/lib/mysql
 
   spring:
-    image: my-spring-app
-    container_name: spring-app
+    image: dbwlsdud/ghost-holiday
+    container_name: ghost-holiday
     ports:
       - "8080:8080"
     depends_on:
