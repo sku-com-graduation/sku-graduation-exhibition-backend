@@ -123,15 +123,15 @@ public class StudentService {
     @Transactional
     public S3UrlDTO updateStudentInfoV2(UpdateStudentInfoV2Request request) throws Exception {
 
-        UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl("student", request.getExtension());
-
         Student student = studentRepository.findById(encryptionService.decryptPrimaryKey(request.getEncryptedStudentId()))
                 .orElseThrow(() -> new IllegalStateException("학생을 찾을 수 없습니다."));
 
         String fileName = student.getStudentNumber() + "." + request.getExtension();
         String s3Path = "studentProfileImage/" + fileName;
 
-        return new S3UrlDTO(FileType.STUDENT_PROFILE, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl());
+        UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path);
+
+        return new S3UrlDTO(FileType.STUDENT_PROFILE, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getS3Url());
     }
 
 

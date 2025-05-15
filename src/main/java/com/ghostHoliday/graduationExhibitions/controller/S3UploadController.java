@@ -34,7 +34,7 @@ public class S3UploadController {
     @PostMapping("/presigned-url/professor")
     public ResponseEntity<S3UrlDTO> getPreSignedUrlByProfessor(
             @RequestBody FileInfoDTO request
-    ) {
+    ) throws Exception {
         S3UrlDTO response = professorService.updateProfessorInfoV2(request);
 
         return ResponseEntity.ok(response);
