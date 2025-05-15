@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FileInfoDTO {
     private FileType fileType;
-    private String extention;
+    private String extension;
 }
