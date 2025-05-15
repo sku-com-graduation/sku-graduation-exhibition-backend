@@ -1,6 +1,7 @@
 package com.ghostHoliday.graduationExhibitions.dto.post;
 
 import com.ghostHoliday.graduationExhibitions.domain.FileType;
+import com.ghostHoliday.graduationExhibitions.domain.Operation;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
