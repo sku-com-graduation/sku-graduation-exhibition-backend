@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/s3/user")
+@RequestMapping("/api/user/s3")
 public class S3UploadController {
 
     private final PostService postService;
