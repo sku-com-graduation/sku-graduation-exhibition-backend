@@ -21,6 +21,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -60,6 +61,7 @@ public class S3Uploader {
                 .bucket(bucket)
                 .key(key)
                 .contentType(contentType) // 혹은 필요한 타입
+                .metadata(Map.of("Content-Type", contentType))
                 .build();
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
