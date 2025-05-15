@@ -1,6 +1,7 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
 import com.ghostHoliday.graduationExhibitions.domain.FileType;
+import com.ghostHoliday.graduationExhibitions.domain.Operation;
 import com.ghostHoliday.graduationExhibitions.domain.Professor;
 import com.ghostHoliday.graduationExhibitions.dto.post.S3UrlDTO;
 import com.ghostHoliday.graduationExhibitions.dto.post.UploadUrlDTO;
@@ -68,7 +69,12 @@ public class ProfessorService {
         professor.setEmail(dto.getEmail());
         professor.setTenure(dto.isTenure());
 
-        professor.setImageUrl(dto.getProfileImage());
+        if ( dto.getProfileImageOperation().equals(Operation.UPLOAD)){
+            professor.setImageUrl(dto.getProfileImage());
+        } else if ( dto.getProfileImageOperation().equals(Operation.DELETE)) {
+            s3Uploader.delete(dto.getProfileImage());
+            professor.setImageUrl(null);
+        }
         professorRepository.save(professor);
     }
 
