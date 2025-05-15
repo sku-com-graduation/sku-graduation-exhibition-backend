@@ -14,6 +14,8 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.DeleteObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedDeleteObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
@@ -45,6 +47,29 @@ public class S3Uploader {
 
     private final FileUtility fileUtility;
 
+
+    public String generatePreSignedDeleteUrl(String key) {
+        S3Presigner presigner = S3Presigner.builder()
+                .region(Region.of(region))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)))
+                .build();
+
+        DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .build();
+
+        PresignedDeleteObjectRequest presignedRequest = presigner.presignDeleteObject(
+                DeleteObjectPresignRequest.builder()
+                        .signatureDuration(Duration.ofMinutes(10))
+                        .deleteObjectRequest(deleteRequest)
+                        .build()
+        );
+
+        presigner.close();
+        return presignedRequest.url().toString(); // 이 URL로 DELETE 요청하면 파일 삭제됨
+    }
 
 
     public UploadUrlDTO generatePreSignedUploadUrl(String key) {
