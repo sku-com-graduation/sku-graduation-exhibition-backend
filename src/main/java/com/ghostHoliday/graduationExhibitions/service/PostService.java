@@ -50,15 +50,11 @@ public class PostService {
 
         for (FileInfoDTO fileInfo : request.getFileInfos()) {
 
-            if (fileInfo.getFileType().equals(FileType.NONE)){
-                continue;
-            }
             if (fileInfo.getFileType().equals(FileType.TEAM_PROFILE)){
                 String fileName = "teamProfile." + fileInfo.getExtension();
                 String s3Path = baseDir + fileName;
                 UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path);
                 responses.add(new S3UrlDTO(FileType.TEAM_PROFILE, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getS3Url()));
-
             }
             else if (fileInfo.getFileType().equals(FileType.DEMO)){
                 String fileName = "demo." + fileInfo.getExtension();
@@ -249,17 +245,27 @@ public class PostService {
         post.setContent(dto.getContent());
         requestedTeam.setCategory(dto.getCategory());
 
+        if (dto.getTeamProfileOperation().equals(Operation.UPLOAD)) {
+            post.setTeamProfileUrl(dto.getTeamProfileImage());
+        } else if (dto.getTeamProfileOperation().equals(Operation.DELETE)) {
+            s3Uploader.delete(dto.getTeamProfileImage());
+            post.setTeamProfileUrl(null);
+        }
 
-        // 팀 프로필 이미지 업로드
-        post.setTeamProfileUrl(dto.getTeamProfileImage());
+        if (dto.getDemoVideoOperation().equals(Operation.UPLOAD)) {
+            post.setDemoUrl(dto.getDemoVideo());
+        } else if (dto.getDemoVideoOperation().equals(Operation.DELETE)) {
+            s3Uploader.delete(dto.getDemoVideo());
+            post.setDemoUrl(null);
+        }
 
+        if (dto.getPosterImageOperation().equals(Operation.UPLOAD)) {
+            post.setPosterUrl(dto.getPosterImage());
+        } else if (dto.getPosterImageOperation().equals(Operation.DELETE)) {
+            s3Uploader.delete(dto.getPosterImage());
+            post.setPosterUrl(null);
+        }
 
-        // 데모 영상 업로드
-        post.setTeamProfileUrl(dto.getDemoVideo());
-
-
-        // 포스터 이미지 업로드
-        post.setTeamProfileUrl(dto.getPosterImage());
 
     }
 

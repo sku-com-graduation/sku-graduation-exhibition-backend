@@ -116,13 +116,6 @@ public class S3Uploader {
         return uploadToS3(file, folder, extension);
     }
 
-    public String uploadVideo(MultipartFile file, String folder) throws IOException {
-        String extension = fileUtility.getVideoFileExtension(file.getOriginalFilename());
-        if (extension == null) {
-            throw new RuntimeException("지원되지 않는 비디오 파일 형식입니다.");
-        }
-        return uploadToS3(file, folder, extension);
-    }
 
     private String uploadToS3(MultipartFile file, String folder, String extension) throws IOException {
         String key = folder + "/" + UUID.randomUUID() + "." + extension;
