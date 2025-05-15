@@ -1,6 +1,7 @@
 package com.ghostHoliday.graduationExhibitions.dto.post;
 
 import com.ghostHoliday.graduationExhibitions.domain.Category;
+import com.ghostHoliday.graduationExhibitions.domain.Operation;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,9 @@ public class UpdateTeamPostDTO {
     private String content;
     private Category category;
     private String teamProfileImage;
+    private Operation teamProfileOperation;
     private String demoVideo;
+    private Operation demoVideoOperation;
     private String posterImage;
+    private Operation posterImageOperation;
 }
