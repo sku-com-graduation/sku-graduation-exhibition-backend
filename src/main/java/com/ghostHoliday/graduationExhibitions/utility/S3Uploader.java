@@ -47,8 +47,7 @@ public class S3Uploader {
 
 
 
-    public UploadUrlDTO generatePreSignedUploadUrl(String folder, String extension) {
-        String key = folder + "/" + UUID.randomUUID() + "." + extension;
+    public UploadUrlDTO generatePreSignedUploadUrl(String key) {
 
         S3Presigner presigner = S3Presigner.builder()
                 .region(Region.of(region))
@@ -70,7 +69,9 @@ public class S3Uploader {
         PresignedPutObjectRequest presignedRequest = presigner.presignPutObject(presignRequest);
 
         presigner.close();
-        return new UploadUrlDTO(cloudFrontUrl + "/" + key, presignedRequest.url().toString());
+        return new UploadUrlDTO(
+                cloudFrontUrl + "/" + key,
+                presignedRequest.url().toString());
     }
 
 

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FileInfoDTO {
+    private String encryptedProfessorId;
     private FileType fileType;
     private String extension;
 }
