@@ -47,19 +47,19 @@ public class PostService {
         for (FileInfoDTO fileInfo : request.getFileInfos()) {
 
             if (fileInfo.getFileType().equals(FileType.TEAM_PROFILE)){
-                String fileName = "teamProfile." + fileInfo.getExtension();
+                String fileName = "teamProfile";
                 String s3Path = baseDir + fileName;
                 UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getContentType());
                 responses.add(new S3UrlDTO(FileType.TEAM_PROFILE, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getS3Url()));
             }
             else if (fileInfo.getFileType().equals(FileType.DEMO)){
-                String fileName = "demo." + fileInfo.getExtension();
+                String fileName = "demo";
                 String s3Path = baseDir + fileName;
                 UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getContentType());
                 responses.add(new S3UrlDTO(FileType.DEMO, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getS3Url()));
             }
             else if (fileInfo.getFileType().equals(FileType.POSTER)){
-                String fileName = "poster." + fileInfo.getExtension();
+                String fileName = "poster";
                 String s3Path = baseDir + fileName;
                 UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getContentType());
                 responses.add(new S3UrlDTO(FileType.POSTER, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getS3Url()));

@@ -126,7 +126,7 @@ public class StudentService {
         Student student = studentRepository.findById(encryptionService.decryptPrimaryKey(request.getEncryptedStudentId()))
                 .orElseThrow(() -> new IllegalStateException("학생을 찾을 수 없습니다."));
 
-        String fileName = student.getStudentNumber() + "." + request.getExtension();
+        String fileName = student.getStudentNumber();
         String s3Path = "studentProfileImage/" + fileName;
 
         UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, request.getContentType());
