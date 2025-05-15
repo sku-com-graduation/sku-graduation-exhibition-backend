@@ -89,7 +89,7 @@ public class S3Uploader {
                 .build();
 
         CreateInvalidationRequest invalidationRequest = CreateInvalidationRequest.builder()
-                .distributionId("YOUR_DISTRIBUTION_ID")
+                .distributionId("E2BX69LH0CHB4A")
                 .invalidationBatch(InvalidationBatch.builder()
                         .callerReference(String.valueOf(System.currentTimeMillis()))
                         .paths(Paths.builder()
