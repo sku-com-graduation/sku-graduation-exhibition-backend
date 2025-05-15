@@ -48,31 +48,7 @@ public class S3Uploader {
     private final FileUtility fileUtility;
 
 
-    public String generatePreSignedDeleteUrl(String key) {
-        S3Presigner presigner = S3Presigner.builder()
-                .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)))
-                .build();
-
-        DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
-                .bucket(bucket)
-                .key(key)
-                .build();
-
-        PresignedDeleteObjectRequest presignedRequest = presigner.presignDeleteObject(
-                DeleteObjectPresignRequest.builder()
-                        .signatureDuration(Duration.ofMinutes(10))
-                        .deleteObjectRequest(deleteRequest)
-                        .build()
-        );
-
-        presigner.close();
-        return presignedRequest.url().toString(); // 이 URL로 DELETE 요청하면 파일 삭제됨
-    }
-
-
-    public UploadUrlDTO generatePreSignedUploadUrl(String key) {
+    public UploadUrlDTO generatePreSignedUploadUrl(String key, String contentType) {
 
         S3Presigner presigner = S3Presigner.builder()
                 .region(Region.of(region))
@@ -83,7 +59,7 @@ public class S3Uploader {
         PutObjectRequest objectRequest = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
-                .contentType("application/octet-stream") // 혹은 필요한 타입
+                .contentType(contentType) // 혹은 필요한 타입
                 .build();
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
@@ -113,12 +89,11 @@ public class S3Uploader {
         if (extension == null) {
             throw new RuntimeException("지원되지 않는 이미지 파일 형식입니다.");
         }
-        return uploadToS3(file, folder, extension);
+        return uploadToS3(file, folder + "." + extension);
     }
 
 
-    private String uploadToS3(MultipartFile file, String folder, String extension) throws IOException {
-        String key = folder + "/" + UUID.randomUUID() + "." + extension;
+    private String uploadToS3(MultipartFile file, String key) throws IOException {
 
         getS3Client().putObject(PutObjectRequest.builder()
                         .bucket(bucket)

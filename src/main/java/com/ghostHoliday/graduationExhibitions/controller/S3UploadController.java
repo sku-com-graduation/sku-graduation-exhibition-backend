@@ -3,6 +3,7 @@ package com.ghostHoliday.graduationExhibitions.controller;
 import com.ghostHoliday.graduationExhibitions.dto.post.UpdatePostInfoV2Request;
 import com.ghostHoliday.graduationExhibitions.dto.post.S3UrlDTO;
 import com.ghostHoliday.graduationExhibitions.dto.post.FileInfoDTO;
+import com.ghostHoliday.graduationExhibitions.dto.professor.UpdateProfessorInfoV2;
 import com.ghostHoliday.graduationExhibitions.dto.studentProfile.UpdateStudentInfoV2Request;
 import com.ghostHoliday.graduationExhibitions.service.PostService;
 import com.ghostHoliday.graduationExhibitions.service.ProfessorService;
@@ -33,7 +34,7 @@ public class S3UploadController {
 
     @PostMapping("/presigned-url/professor")
     public ResponseEntity<S3UrlDTO> getPreSignedUrlByProfessor(
-            @RequestBody FileInfoDTO request
+            @RequestBody UpdateProfessorInfoV2 request
     ) throws Exception {
         S3UrlDTO response = professorService.updateProfessorInfoV2(request);
 

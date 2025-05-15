@@ -9,6 +9,7 @@ import com.ghostHoliday.graduationExhibitions.dto.post.FileInfoDTO;
 import com.ghostHoliday.graduationExhibitions.dto.professor.FindProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.professor.RegistProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.professor.UpdateProfessorDTO;
+import com.ghostHoliday.graduationExhibitions.dto.professor.UpdateProfessorInfoV2;
 import com.ghostHoliday.graduationExhibitions.repository.ProfessorRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
 import com.ghostHoliday.graduationExhibitions.utility.S3Uploader;
@@ -32,12 +33,12 @@ public class ProfessorService {
     private final TeamRepository teamRepository;
 
     @Transactional
-    public S3UrlDTO updateProfessorInfoV2(FileInfoDTO request) throws Exception {
+    public S3UrlDTO updateProfessorInfoV2(UpdateProfessorInfoV2 request) throws Exception {
 
 
         Professor professor = professorRepository.findById(encryptionService.decryptPrimaryKey(request.getEncryptedProfessorId())).get();
         String s3Path = "professor" + "/" + professor.getName() + "." + request.getExtension();
-        UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path);
+        UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, request.getContentType());
 
         return new S3UrlDTO(FileType.PROFESSOR, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getS3Url());
     }
@@ -52,7 +53,7 @@ public class ProfessorService {
 
         MultipartFile profileImage = dto.getProfileImage();
         if (profileImage != null && !profileImage.isEmpty()) {
-            String imageUrl = s3Uploader.upload(profileImage, "professor");
+            String imageUrl = s3Uploader.upload(profileImage, "professor/");
             professor.setImageUrl(imageUrl);
         }
 
