@@ -339,7 +339,13 @@ public class PostService {
         studentProfile.setStudentEmail(dto.getStudentEmail());
         studentProfile.setStudentBlog(dto.getStudentBlog());
         studentProfile.setInfo(dto.getInfo());
-        studentProfile.setStudentProfileUrl(dto.getProfileImage());
+
+        if(dto.getProfileImageOperation().equals(Operation.UPLOAD)) {
+            studentProfile.setStudentProfileUrl(dto.getProfileImage());
+        } else if (dto.getProfileImageOperation().equals(Operation.DELETE)) {
+            s3Uploader.delete(dto.getProfileImage());
+            studentProfile.setStudentProfileUrl(null);
+        }
 
     }
 
