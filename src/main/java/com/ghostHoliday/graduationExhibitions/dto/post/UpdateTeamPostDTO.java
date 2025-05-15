@@ -16,7 +16,7 @@ public class UpdateTeamPostDTO {
     private String content;
     private Category category;
     private String teamProfileImage;
-    private Operation teamProfileOperation;
+    private Operation teamProfileImageOperation;
     private String demoVideo;
     private Operation demoVideoOperation;
     private String posterImage;
