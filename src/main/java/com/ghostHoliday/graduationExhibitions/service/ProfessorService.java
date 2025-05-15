@@ -31,11 +31,14 @@ public class ProfessorService {
     private final TeamRepository teamRepository;
 
     @Transactional
-    public S3UrlDTO updateProfessorInfoV2(FileInfoDTO request) {
+    public S3UrlDTO updateProfessorInfoV2(FileInfoDTO request) throws Exception {
 
-        UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl("professor", request.getExtension());
 
-        return new S3UrlDTO(FileType.PROFESSOR, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getCloudFrontUrl());
+        Professor professor = professorRepository.findById(encryptionService.decryptPrimaryKey(request.getEncryptedProfessorId())).get();
+        String s3Path = "professor" + "/" + professor.getName() + "." + request.getExtension();
+        UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path);
+
+        return new S3UrlDTO(FileType.PROFESSOR, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getS3Url());
     }
 
 
