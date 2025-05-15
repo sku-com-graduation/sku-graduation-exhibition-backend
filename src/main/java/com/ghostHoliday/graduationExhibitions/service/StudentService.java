@@ -129,7 +129,7 @@ public class StudentService {
         String fileName = student.getStudentNumber() + "." + request.getExtension();
         String s3Path = "studentProfileImage/" + fileName;
 
-        UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path);
+        UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, request.getContentType());
 
         return new S3UrlDTO(FileType.STUDENT_PROFILE, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getS3Url());
     }

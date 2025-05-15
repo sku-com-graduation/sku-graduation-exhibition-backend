@@ -29,8 +29,6 @@ import java.util.List;
 @RequestMapping("api/admin/professor")
 public class ProfessorController {
     private final ProfessorService professorService;
-    private final JwtUtility jwtUtility;
-    private final HttpOnlyService httpOnlyService;
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/regist")

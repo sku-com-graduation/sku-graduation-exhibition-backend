@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UpdateStudentInfoV2Request {
     private String encryptedStudentId;
+    private String contentType;
     private FileType fileType;
     private String extension;
 }
