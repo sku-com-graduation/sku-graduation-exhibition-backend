@@ -37,7 +37,7 @@ public class ProfessorService {
 
 
         Professor professor = professorRepository.findById(encryptionService.decryptPrimaryKey(request.getEncryptedProfessorId())).get();
-        String s3Path = "professor" + "/" + professor.getName() + "." + request.getExtension();
+        String s3Path = "professor" + "/" + professor.getName();
         UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, request.getContentType());
 
         return new S3UrlDTO(FileType.PROFESSOR, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getS3Url());

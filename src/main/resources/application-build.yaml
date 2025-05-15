@@ -1,7 +1,5 @@
 # JPA
 spring:
-  profiles:
-    active: default
   sql:
     init:
       mode: always
@@ -11,9 +9,9 @@ spring:
       max-request-size: 500MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${SPRING_DATASOURCE_URL}
+    url: ${SPRING_DATASOURCE_URL_BUILD}
     username: root
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    password: ${SPRING_DATASOURCE_PASSWORD_BUILD}
   jpa:
     database: mysql
     database-platform: org.hibernate.dialect.MySQLDialect
