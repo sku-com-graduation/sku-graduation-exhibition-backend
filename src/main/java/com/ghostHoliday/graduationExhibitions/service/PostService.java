@@ -245,9 +245,9 @@ public class PostService {
         post.setContent(dto.getContent());
         requestedTeam.setCategory(dto.getCategory());
 
-        if (dto.getTeamProfileOperation().equals(Operation.UPLOAD)) {
+        if (dto.getTeamProfileImageOperation().equals(Operation.UPLOAD)) {
             post.setTeamProfileUrl(dto.getTeamProfileImage());
-        } else if (dto.getTeamProfileOperation().equals(Operation.DELETE)) {
+        } else if (dto.getTeamProfileImageOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getTeamProfileImage());
             post.setTeamProfileUrl(null);
         }
