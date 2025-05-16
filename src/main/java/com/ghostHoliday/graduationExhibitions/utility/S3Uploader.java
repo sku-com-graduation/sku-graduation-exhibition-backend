@@ -11,6 +11,10 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.cloudfront.CloudFrontClient;
+import software.amazon.awssdk.services.cloudfront.model.CreateInvalidationRequest;
+import software.amazon.awssdk.services.cloudfront.model.InvalidationBatch;
+import software.amazon.awssdk.services.cloudfront.model.Paths;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -21,6 +25,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -60,6 +65,7 @@ public class S3Uploader {
                 .bucket(bucket)
                 .key(key)
                 .contentType(contentType) // 혹은 필요한 타입
+                .metadata(Map.of("Content-Type", contentType))
                 .build();
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
@@ -73,6 +79,28 @@ public class S3Uploader {
         return new UploadUrlDTO(
                 cloudFrontUrl + "/" + key,
                 presignedRequest.url().toString());
+    }
+
+    public void invalidateCloudFront(String path) {
+        CloudFrontClient cloudFrontClient = CloudFrontClient.builder()
+                .region(Region.AP_NORTHEAST_2)
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)))
+                .build();
+
+        CreateInvalidationRequest invalidationRequest = CreateInvalidationRequest.builder()
+                .distributionId("E2BX69LH0CHB4A")
+                .invalidationBatch(InvalidationBatch.builder()
+                        .callerReference(String.valueOf(System.currentTimeMillis()))
+                        .paths(Paths.builder()
+                                .quantity(1)
+                                .items(path) // 예: "/teamPost/uuid/poster"
+                                .build())
+                        .build())
+                .build();
+
+        cloudFrontClient.createInvalidation(invalidationRequest);
+        cloudFrontClient.close();
     }
 
 

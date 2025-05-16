@@ -242,13 +242,16 @@ public class PostService {
         requestedTeam.setCategory(dto.getCategory());
 
         if (dto.getTeamProfileImageOperation().equals(Operation.UPLOAD)) {
+            s3Uploader.invalidateCloudFront(dto.getTeamProfileImagePath());
             post.setTeamProfileUrl(dto.getTeamProfileImage());
+
         } else if (dto.getTeamProfileImageOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getTeamProfileImage());
             post.setTeamProfileUrl(null);
         }
 
         if (dto.getDemoVideoOperation().equals(Operation.UPLOAD)) {
+            s3Uploader.invalidateCloudFront(dto.getDemoVideoPath());
             post.setDemoUrl(dto.getDemoVideo());
         } else if (dto.getDemoVideoOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getDemoVideo());
@@ -256,6 +259,7 @@ public class PostService {
         }
 
         if (dto.getPosterImageOperation().equals(Operation.UPLOAD)) {
+            s3Uploader.invalidateCloudFront(dto.getPosterImagePath());
             post.setPosterUrl(dto.getPosterImage());
         } else if (dto.getPosterImageOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getPosterImage());
