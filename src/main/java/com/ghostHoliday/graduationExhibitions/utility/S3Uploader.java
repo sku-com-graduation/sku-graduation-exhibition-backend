@@ -24,9 +24,15 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequ
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Data
 @Component
@@ -52,9 +58,42 @@ public class S3Uploader {
 
     private final FileUtility fileUtility;
 
+    public void cleanupOldVersions(String prefix) {
+        S3Client s3 = getS3Client();
 
-    public UploadUrlDTO generatePreSignedUploadUrl(String key, String contentType) {
+        ListObjectsV2Request listRequest = ListObjectsV2Request.builder()
+                .bucket(bucket)
+                .prefix(prefix) // 예: poster_
+                .build();
 
+        ListObjectsV2Response listResponse = s3.listObjectsV2(listRequest);
+        List<S3Object> allFiles = listResponse.contents();
+
+        System.out.println("전체 파일 수: " + allFiles.size());
+        allFiles.forEach(file -> System.out.println(" - " + file.key()));
+
+        if (allFiles.size() <= 1) return;
+
+        List<S3Object> sorted = allFiles.stream()
+                .sorted(Comparator.comparing(S3Object::key).reversed()) // 파일명 기준 정렬
+                .collect(Collectors.toList());
+
+        List<S3Object> toDelete = sorted.subList(1, sorted.size());
+
+        for (S3Object obj : toDelete) {
+            System.out.println("삭제 대상: " + obj.key());
+            s3.deleteObject(DeleteObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(obj.key())
+                    .build());
+        }
+    }
+
+
+
+    public UploadUrlDTO generatePreSignedUploadUrl(String path, String contentType, String extension) {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String key = path + "_" + timestamp + "." + extension;
         S3Presigner presigner = S3Presigner.builder()
                 .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(
@@ -65,7 +104,6 @@ public class S3Uploader {
                 .bucket(bucket)
                 .key(key)
                 .contentType(contentType) // 혹은 필요한 타입
-                .metadata(Map.of("Content-Type", contentType))
                 .build();
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
@@ -81,27 +119,27 @@ public class S3Uploader {
                 presignedRequest.url().toString());
     }
 
-    public void invalidateCloudFront(String path) {
-        CloudFrontClient cloudFrontClient = CloudFrontClient.builder()
-                .region(Region.AP_NORTHEAST_2)
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)))
-                .build();
-
-        CreateInvalidationRequest invalidationRequest = CreateInvalidationRequest.builder()
-                .distributionId("E2BX69LH0CHB4A")
-                .invalidationBatch(InvalidationBatch.builder()
-                        .callerReference(String.valueOf(System.currentTimeMillis()))
-                        .paths(Paths.builder()
-                                .quantity(1)
-                                .items(path) // 예: "/teamPost/uuid/poster"
-                                .build())
-                        .build())
-                .build();
-
-        cloudFrontClient.createInvalidation(invalidationRequest);
-        cloudFrontClient.close();
-    }
+//    public void invalidateCloudFront(String path) {
+//        CloudFrontClient cloudFrontClient = CloudFrontClient.builder()
+//                .region(Region.AP_NORTHEAST_2)
+//                .credentialsProvider(StaticCredentialsProvider.create(
+//                        AwsBasicCredentials.create(accessKey, secretKey)))
+//                .build();
+//
+//        CreateInvalidationRequest invalidationRequest = CreateInvalidationRequest.builder()
+//                .distributionId("E2BX69LH0CHB4A")
+//                .invalidationBatch(InvalidationBatch.builder()
+//                        .callerReference(String.valueOf(System.currentTimeMillis()))
+//                        .paths(Paths.builder()
+//                                .quantity(1)
+//                                .items(path) // 예: "/teamPost/uuid/poster"
+//                                .build())
+//                        .build())
+//                .build();
+//
+//        cloudFrontClient.createInvalidation(invalidationRequest);
+//        cloudFrontClient.close();
+//    }
 
 
     public S3Client getS3Client() {
