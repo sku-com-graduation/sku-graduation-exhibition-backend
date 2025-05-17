@@ -71,7 +71,6 @@ public class ProfessorService {
         professor.setTenure(dto.isTenure());
 
         if ( dto.getProfileImageOperation().equals(Operation.UPLOAD)){
-            s3Uploader.invalidateCloudFront(dto.getProfileImage());
             professor.setImageUrl(dto.getProfileImage());
         } else if ( dto.getProfileImageOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getProfileImage());
