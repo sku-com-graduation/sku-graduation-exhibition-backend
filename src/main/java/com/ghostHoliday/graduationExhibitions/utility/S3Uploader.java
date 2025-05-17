@@ -29,6 +29,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -140,6 +141,28 @@ public class S3Uploader {
 //        cloudFrontClient.createInvalidation(invalidationRequest);
 //        cloudFrontClient.close();
 //    }
+
+    public void invalidateCloudFront(List<String> paths) {
+        CloudFrontClient cloudFrontClient = CloudFrontClient.builder()
+                .region(Region.AP_NORTHEAST_2)
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)))
+                .build();
+
+        CreateInvalidationRequest invalidationRequest = CreateInvalidationRequest.builder()
+                .distributionId("E2BX69LH0CHB4A")
+                .invalidationBatch(InvalidationBatch.builder()
+                        .callerReference(String.valueOf(System.currentTimeMillis()))
+                        .paths(Paths.builder()
+                                .quantity(paths.size())
+                                .items(paths)
+                                .build())
+                        .build())
+                .build();
+
+        cloudFrontClient.createInvalidation(invalidationRequest);
+        cloudFrontClient.close();
+    }
 
 
     public S3Client getS3Client() {
