@@ -164,6 +164,25 @@ public class S3Uploader {
                 .build();
 
         s3.completeMultipartUpload(request);
+        try {
+            s3.completeMultipartUpload(request);
+        } catch (Exception e) {
+            abortMultipartUpload(s3, key, uploadId);
+            throw e; // 예외 다시 던져 상위에서 처리
+        }
+    }
+
+    private void abortMultipartUpload(S3Client s3, String key, String uploadId) {
+        AbortMultipartUploadRequest abortRequest = AbortMultipartUploadRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .uploadId(uploadId)
+                .build();
+
+        try {
+            s3.abortMultipartUpload(abortRequest);
+        } catch (Exception abortEx) {
+        }
     }
 
     public UploadUrlDTO generatePreSignedUploadUrl(String path, String contentType, String extension) {

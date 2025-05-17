@@ -31,7 +31,6 @@ public class S3UploadController {
             @RequestBody UpdatePostInfoV2Request request
     ) {
         UpdatePostInfoV2Response response = postService.UpdatePostInfoV2(request);
-
         return ResponseEntity.ok(response);
     }
 
