@@ -219,8 +219,6 @@ public class PostService {
 
     @Transactional
     public void updatePostInfo(UpdateTeamPostDTO dto, String userEmail) throws Exception {
-        List<String> invalidatePaths = new ArrayList<>();
-
 
         String requestedTeamUuId = dto.getTeamUuid();
         Post post = postRepository.findByUuid(requestedTeamUuId)
@@ -241,9 +239,11 @@ public class PostService {
         post.setContent(dto.getContent());
         requestedTeam.setCategory(dto.getCategory());
 
+        String path =  "teamPost/" + dto.getTeamUuid();
+
         if (dto.getTeamProfileImageOperation().equals(Operation.UPLOAD)) {
             post.setTeamProfileUrl(dto.getTeamProfileImage());
-            s3Uploader.cleanupOldVersions(dto.getTeamProfileImagePath());
+            s3Uploader.cleanupOldVersions(path + "/teamProfile_");
 
         } else if (dto.getTeamProfileImageOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getTeamProfileImage());
@@ -252,7 +252,7 @@ public class PostService {
 
         if (dto.getDemoVideoOperation().equals(Operation.UPLOAD)) {
             post.setDemoUrl(dto.getDemoVideo());
-            s3Uploader.cleanupOldVersions(dto.getDemoVideoPath());
+            s3Uploader.cleanupOldVersions(path + "/demo_");
         } else if (dto.getDemoVideoOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getDemoVideo());
             post.setDemoUrl(null);
@@ -260,14 +260,10 @@ public class PostService {
 
         if (dto.getPosterImageOperation().equals(Operation.UPLOAD)) {
             post.setPosterUrl(dto.getPosterImage());
-            s3Uploader.cleanupOldVersions(dto.getPosterImagePath());
+            s3Uploader.cleanupOldVersions(path + "/poster_");
         } else if (dto.getPosterImageOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getPosterImage());
             post.setPosterUrl(null);
-        }
-
-        if (!invalidatePaths.isEmpty()) {
-            s3Uploader.invalidateCloudFront(invalidatePaths);
         }
 
 
@@ -345,7 +341,7 @@ public class PostService {
         studentProfile.setInfo(dto.getInfo());
 
         if(dto.getProfileImageOperation().equals(Operation.UPLOAD)) {
-            s3Uploader.invalidateCloudFront(dto.getProfileImage());
+            s3Uploader.cleanupOldVersions("studentProfileImage/");
             studentProfile.setStudentProfileUrl(dto.getProfileImage());
         } else if (dto.getProfileImageOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getProfileImage());
