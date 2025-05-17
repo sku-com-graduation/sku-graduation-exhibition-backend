@@ -64,7 +64,7 @@ public class S3Uploader {
 
         ListObjectsV2Request listRequest = ListObjectsV2Request.builder()
                 .bucket(bucket)
-                .prefix(prefix) // 예: poster_
+                .prefix(prefix)
                 .build();
 
         ListObjectsV2Response listResponse = s3.listObjectsV2(listRequest);
@@ -76,19 +76,26 @@ public class S3Uploader {
         if (allFiles.size() <= 1) return;
 
         List<S3Object> sorted = allFiles.stream()
-                .sorted(Comparator.comparing(S3Object::key).reversed()) // 파일명 기준 정렬
+                .sorted(Comparator.comparing(S3Object::key).reversed())
                 .collect(Collectors.toList());
 
         List<S3Object> toDelete = sorted.subList(1, sorted.size());
 
-        for (S3Object obj : toDelete) {
-            System.out.println("삭제 대상: " + obj.key());
-            s3.deleteObject(DeleteObjectRequest.builder()
-                    .bucket(bucket)
-                    .key(obj.key())
-                    .build());
-        }
+        List<ObjectIdentifier> deleteKeys = toDelete.stream()
+                .map(obj -> ObjectIdentifier.builder().key(obj.key()).build())
+                .collect(Collectors.toList());
+
+        DeleteObjectsRequest deleteRequest = DeleteObjectsRequest.builder()
+                .bucket(bucket)
+                .delete(Delete.builder()
+                        .objects(deleteKeys)
+                        .build())
+                .build();
+
+        DeleteObjectsResponse response = s3.deleteObjects(deleteRequest);
+        System.out.println("삭제 완료: " + response.deleted().size() + "개 파일");
     }
+
 
 
 

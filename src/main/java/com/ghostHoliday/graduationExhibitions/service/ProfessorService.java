@@ -51,11 +51,7 @@ public class ProfessorService {
         professor.setEmail(dto.getEmail());
         professor.setTenure(dto.isTenure());
 
-        MultipartFile profileImage = dto.getProfileImage();
-        if (profileImage != null && !profileImage.isEmpty()) {
-            String imageUrl = s3Uploader.upload(profileImage, "professor/");
-            professor.setImageUrl(imageUrl);
-        }
+        professor.setImageUrl(dto.getProfileImage());
 
         professorRepository.save(professor);
     }
@@ -70,8 +66,9 @@ public class ProfessorService {
         professor.setEmail(dto.getEmail());
         professor.setTenure(dto.isTenure());
 
+        String path = "professor/" + professor.getName() + "_";
         if ( dto.getProfileImageOperation().equals(Operation.UPLOAD)){
-            s3Uploader.invalidateCloudFront(dto.getProfileImage());
+            s3Uploader.cleanupOldVersions(path);
             professor.setImageUrl(dto.getProfileImage());
         } else if ( dto.getProfileImageOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getProfileImage());
