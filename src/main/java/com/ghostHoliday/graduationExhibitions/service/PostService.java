@@ -341,6 +341,7 @@ public class PostService {
         studentProfile.setInfo(dto.getInfo());
 
         if(dto.getProfileImageOperation().equals(Operation.UPLOAD)) {
+            s3Uploader.invalidateCloudFront(dto.getProfileImage());
             studentProfile.setStudentProfileUrl(dto.getProfileImage());
         } else if (dto.getProfileImageOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getProfileImage());
