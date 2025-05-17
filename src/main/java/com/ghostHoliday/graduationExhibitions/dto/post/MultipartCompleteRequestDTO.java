@@ -9,4 +9,3 @@ public class MultipartCompleteRequestDTO {
     private String uploadId;
     private List<CompletedPartDTO> parts;
 }
-
