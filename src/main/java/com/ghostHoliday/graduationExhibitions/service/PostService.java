@@ -219,6 +219,9 @@ public class PostService {
 
     @Transactional
     public void updatePostInfo(UpdateTeamPostDTO dto, String userEmail) throws Exception {
+        List<String> invalidatePaths = new ArrayList<>();
+
+
         String requestedTeamUuId = dto.getTeamUuid();
         Post post = postRepository.findByUuid(requestedTeamUuId)
                 .orElseThrow(() -> new IllegalStateException("해당 UUID의 게시글을 찾을 수 없습니다."));
@@ -239,7 +242,6 @@ public class PostService {
         requestedTeam.setCategory(dto.getCategory());
 
         if (dto.getTeamProfileImageOperation().equals(Operation.UPLOAD)) {
-//            s3Uploader.invalidateCloudFront(dto.getTeamProfileImagePath());
             post.setTeamProfileUrl(dto.getTeamProfileImage());
             s3Uploader.cleanupOldVersions(dto.getTeamProfileImagePath());
 
@@ -249,7 +251,6 @@ public class PostService {
         }
 
         if (dto.getDemoVideoOperation().equals(Operation.UPLOAD)) {
-//            s3Uploader.invalidateCloudFront(dto.getDemoVideoPath());
             post.setDemoUrl(dto.getDemoVideo());
             s3Uploader.cleanupOldVersions(dto.getDemoVideoPath());
         } else if (dto.getDemoVideoOperation().equals(Operation.DELETE)) {
@@ -258,12 +259,15 @@ public class PostService {
         }
 
         if (dto.getPosterImageOperation().equals(Operation.UPLOAD)) {
-//            s3Uploader.invalidateCloudFront(dto.getPosterImagePath());
             post.setPosterUrl(dto.getPosterImage());
             s3Uploader.cleanupOldVersions(dto.getPosterImagePath());
         } else if (dto.getPosterImageOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getPosterImage());
             post.setPosterUrl(null);
+        }
+
+        if (!invalidatePaths.isEmpty()) {
+            s3Uploader.invalidateCloudFront(invalidatePaths);
         }
 
 
@@ -341,6 +345,7 @@ public class PostService {
         studentProfile.setInfo(dto.getInfo());
 
         if(dto.getProfileImageOperation().equals(Operation.UPLOAD)) {
+            s3Uploader.invalidateCloudFront(dto.getProfileImage());
             studentProfile.setStudentProfileUrl(dto.getProfileImage());
         } else if (dto.getProfileImageOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getProfileImage());
