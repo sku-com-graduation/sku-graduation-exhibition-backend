@@ -12,8 +12,8 @@ import java.util.List;
 public class MultipartUploadDTO {
     private String key;
     private String uploadId;
-    private List<PartUrl> preSignedUrls;
-    private String finalObjectUrl;
+    private List<PartUrl> s3Urls;
+    private String cloudFrontUrl;
 
     @Data
     @AllArgsConstructor
