@@ -222,6 +222,10 @@ public class PostService {
 
     @Transactional
     public void updatePostInfo(UpdateTeamPostDTO dto, String userEmail) throws Exception {
+        // ✅ 무효화 경로를 모을 리스트
+        List<String> invalidatePaths = new ArrayList<>();
+
+
         String requestedTeamUuId = dto.getTeamUuid();
         Post post = postRepository.findByUuid(requestedTeamUuId)
                 .orElseThrow(() -> new IllegalStateException("해당 UUID의 게시글을 찾을 수 없습니다."));
@@ -242,7 +246,8 @@ public class PostService {
         requestedTeam.setCategory(dto.getCategory());
 
         if (dto.getTeamProfileImageOperation().equals(Operation.UPLOAD)) {
-            s3Uploader.invalidateCloudFront(dto.getTeamProfileImagePath());
+            invalidatePaths.add(dto.getTeamProfileImagePath()); // CloudFront path 추가
+            // s3Uploader.invalidateCloudFront(dto.getTeamProfileImagePath());
             post.setTeamProfileUrl(dto.getTeamProfileImage());
 
         } else if (dto.getTeamProfileImageOperation().equals(Operation.DELETE)) {
@@ -251,7 +256,8 @@ public class PostService {
         }
 
         if (dto.getDemoVideoOperation().equals(Operation.UPLOAD)) {
-            s3Uploader.invalidateCloudFront(dto.getDemoVideoPath());
+            invalidatePaths.add(dto.getTeamProfileImagePath()); // CloudFront path 추가
+            // s3Uploader.invalidateCloudFront(dto.getDemoVideoPath());
             post.setDemoUrl(dto.getDemoVideo());
         } else if (dto.getDemoVideoOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getDemoVideo());
@@ -259,11 +265,18 @@ public class PostService {
         }
 
         if (dto.getPosterImageOperation().equals(Operation.UPLOAD)) {
-            s3Uploader.invalidateCloudFront(dto.getPosterImagePath());
+            invalidatePaths.add(dto.getTeamProfileImagePath()); // CloudFront path 추가
+            // s3Uploader.invalidateCloudFront(dto.getPosterImagePath());
             post.setPosterUrl(dto.getPosterImage());
         } else if (dto.getPosterImageOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getPosterImage());
             post.setPosterUrl(null);
+        }
+
+
+        // ✅ 무효화 경로가 있다면 한 번에 요청
+        if (!invalidatePaths.isEmpty()) {
+            s3Uploader.invalidateCloudFront(invalidatePaths);
         }
 
 

@@ -25,6 +25,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -95,6 +96,28 @@ public class S3Uploader {
                         .paths(Paths.builder()
                                 .quantity(1)
                                 .items(path) // 예: "/teamPost/uuid/poster"
+                                .build())
+                        .build())
+                .build();
+
+        cloudFrontClient.createInvalidation(invalidationRequest);
+        cloudFrontClient.close();
+    }
+
+    public void invalidateCloudFront(List<String> paths) {
+        CloudFrontClient cloudFrontClient = CloudFrontClient.builder()
+                .region(Region.AP_NORTHEAST_2)
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)))
+                .build();
+
+        CreateInvalidationRequest invalidationRequest = CreateInvalidationRequest.builder()
+                .distributionId("E2BX69LH0CHB4A")
+                .invalidationBatch(InvalidationBatch.builder()
+                        .callerReference(String.valueOf(System.currentTimeMillis()))
+                        .paths(Paths.builder()
+                                .quantity(paths.size())
+                                .items(paths)
                                 .build())
                         .build())
                 .build();
