@@ -12,6 +12,6 @@ public class RegistProfessorDTO{
     private String name;
     private String email;
     private boolean tenure;
-    private MultipartFile profileImage;
+    private String profileImage;
 
 }
