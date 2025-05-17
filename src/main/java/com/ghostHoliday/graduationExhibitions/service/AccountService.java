@@ -206,11 +206,6 @@ public class AccountService {
 
     public Post createNewPost() {
         Post post = new Post();
-        String uuid = post.getUuid();
-
-        // S3에 폴더 생성 (빈 객체 업로드)
-        s3Uploader.createFolder("teamPost/" + uuid + "/");
-        s3Uploader.createFolder("teamPost/" + uuid + "/slideImage/");
 
         // URL은 초기값 null로 설정 (업로드 시점에 반영)
         post.setSlideUrl(null);
