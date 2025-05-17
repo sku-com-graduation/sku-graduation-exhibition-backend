@@ -49,19 +49,19 @@ public class PostService {
             if (fileInfo.getFileType().equals(FileType.TEAM_PROFILE)){
                 String fileName = "teamProfile";
                 String s3Path = baseDir + fileName;
-                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getContentType());
+                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getContentType(), fileInfo.getExtension());
                 responses.add(new S3UrlDTO(FileType.TEAM_PROFILE, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getS3Url()));
             }
             else if (fileInfo.getFileType().equals(FileType.DEMO)){
                 String fileName = "demo";
                 String s3Path = baseDir + fileName;
-                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getContentType());
+                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getContentType(), fileInfo.getExtension());
                 responses.add(new S3UrlDTO(FileType.DEMO, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getS3Url()));
             }
             else if (fileInfo.getFileType().equals(FileType.POSTER)){
                 String fileName = "poster";
                 String s3Path = baseDir + fileName;
-                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getContentType());
+                UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, fileInfo.getContentType(), fileInfo.getExtension());
                 responses.add(new S3UrlDTO(FileType.POSTER, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getS3Url()));
             }
         }
@@ -217,12 +217,8 @@ public class PostService {
         return new SearchPostInfoDTO(studentInfoDTOS, postTeamInfoDTO, professorInfoDTO);
     }
 
-
-// PostService 수정: 기존 파일이 존재할 경우 삭제 후 새 파일 업로드
-
     @Transactional
     public void updatePostInfo(UpdateTeamPostDTO dto, String userEmail) throws Exception {
-        // ✅ 무효화 경로를 모을 리스트
         List<String> invalidatePaths = new ArrayList<>();
 
 
@@ -246,9 +242,8 @@ public class PostService {
         requestedTeam.setCategory(dto.getCategory());
 
         if (dto.getTeamProfileImageOperation().equals(Operation.UPLOAD)) {
-            invalidatePaths.add(dto.getTeamProfileImagePath()); // CloudFront path 추가
-            // s3Uploader.invalidateCloudFront(dto.getTeamProfileImagePath());
             post.setTeamProfileUrl(dto.getTeamProfileImage());
+            s3Uploader.cleanupOldVersions(dto.getTeamProfileImagePath());
 
         } else if (dto.getTeamProfileImageOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getTeamProfileImage());
@@ -256,25 +251,21 @@ public class PostService {
         }
 
         if (dto.getDemoVideoOperation().equals(Operation.UPLOAD)) {
-            invalidatePaths.add(dto.getTeamProfileImagePath()); // CloudFront path 추가
-            // s3Uploader.invalidateCloudFront(dto.getDemoVideoPath());
             post.setDemoUrl(dto.getDemoVideo());
+            s3Uploader.cleanupOldVersions(dto.getDemoVideoPath());
         } else if (dto.getDemoVideoOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getDemoVideo());
             post.setDemoUrl(null);
         }
 
         if (dto.getPosterImageOperation().equals(Operation.UPLOAD)) {
-            invalidatePaths.add(dto.getTeamProfileImagePath()); // CloudFront path 추가
-            // s3Uploader.invalidateCloudFront(dto.getPosterImagePath());
             post.setPosterUrl(dto.getPosterImage());
+            s3Uploader.cleanupOldVersions(dto.getPosterImagePath());
         } else if (dto.getPosterImageOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getPosterImage());
             post.setPosterUrl(null);
         }
 
-
-        // ✅ 무효화 경로가 있다면 한 번에 요청
         if (!invalidatePaths.isEmpty()) {
             s3Uploader.invalidateCloudFront(invalidatePaths);
         }
