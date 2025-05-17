@@ -340,8 +340,9 @@ public class PostService {
         studentProfile.setStudentBlog(dto.getStudentBlog());
         studentProfile.setInfo(dto.getInfo());
 
+        String path = "studentProfileImage/" + student.getStudentNumber() + "_";
         if(dto.getProfileImageOperation().equals(Operation.UPLOAD)) {
-            s3Uploader.cleanupOldVersions("studentProfileImage/");
+            s3Uploader.cleanupOldVersions(path);
             studentProfile.setStudentProfileUrl(dto.getProfileImage());
         } else if (dto.getProfileImageOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getProfileImage());
