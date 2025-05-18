@@ -163,7 +163,6 @@ public class S3Uploader {
                 .multipartUpload(completed)
                 .build();
 
-        s3.completeMultipartUpload(request);
         try {
             s3.completeMultipartUpload(request);
         } catch (Exception e) {
