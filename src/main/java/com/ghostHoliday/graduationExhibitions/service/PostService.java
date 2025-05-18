@@ -258,47 +258,6 @@ public class PostService {
 
     }
 
-//    @Transactional
-//    public void updateSlideImage(UpdateSlideImageDTO dto, String userEmail) throws Exception {
-//        String requestedTeamUuId = dto.getTeamUuid();
-//
-//        Account account = accountRepository.findAccountByUserEmail(userEmail)
-//                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
-//
-//        Post post = postRepository.findByUuid(requestedTeamUuId)
-//                .orElseThrow(() -> new IllegalStateException("해당 포스트를 찾을 수 없습니다."));
-//
-//        Team requestedTeam = teamRepository.findByPostId(post.getId())
-//                .orElseThrow(() -> new IllegalStateException("해당 팀을 찾을 수 없습니다."));
-//
-//        Team userTeam = account.getTeam();
-//        if (!account.getRole().equals(Role.ADMIN) && (userTeam == null || !userTeam.getId().equals(requestedTeam.getId()))) {
-//            throw new IllegalStateException("해당 팀의 슬라이드를 수정할 권한이 없습니다.");
-//        }
-//
-//        String slideDir = "teamPost/" + post.getUuid() + "/slideImage/";
-//        s3Uploader.deleteFolder(slideDir); // 슬라이드 전체 삭제 후 재업로드
-//
-//        List<MultipartFile> files = dto.getFiles();
-//        List<String> uploadedUrls = new ArrayList<>();
-//
-//        int fileIndex = 1;
-//        for (MultipartFile file : files) {
-//            if (file == null || file.isEmpty()) continue;
-//
-//            String extension = fileUtility.getImageFileExtension(file.getOriginalFilename());
-//            if (extension == null) {
-//                throw new IllegalStateException("jpg, png 파일만 업로드 가능합니다. " + file.getOriginalFilename());
-//            }
-//
-//            String fileName = "slide" + fileIndex + "." + extension;
-//            String s3Path = slideDir + fileName;
-//            String uploadedUrl = s3Uploader.upload(file, s3Path);
-//            uploadedUrls.add(uploadedUrl);
-//            fileIndex++;
-//        }
-//        post.setSlideUrl(slideDir);
-//    }
 
     @Transactional
     public void updateStudentProfileByPost(UpdateStudentProfileByPostDTO dto, String userEmail) throws Exception {

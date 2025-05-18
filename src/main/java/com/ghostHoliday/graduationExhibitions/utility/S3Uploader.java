@@ -69,9 +69,6 @@ public class S3Uploader {
         ListObjectsV2Response listResponse = s3.listObjectsV2(listRequest);
         List<S3Object> allFiles = listResponse.contents();
 
-        System.out.println("전체 파일 수: " + allFiles.size());
-        allFiles.forEach(file -> System.out.println(" - " + file.key()));
-
         if (allFiles.size() <= 1) return;
 
         List<S3Object> sorted = allFiles.stream()
@@ -92,7 +89,6 @@ public class S3Uploader {
                 .build();
 
         DeleteObjectsResponse response = s3.deleteObjects(deleteRequest);
-        System.out.println("삭제 완료: " + response.deleted().size() + "개 파일");
     }
 
 
