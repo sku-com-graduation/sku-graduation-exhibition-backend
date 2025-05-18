@@ -148,7 +148,7 @@ public class S3Uploader {
         List<CompletedPart> completedParts = parts.stream()
                 .map(p -> CompletedPart.builder()
                         .partNumber(p.getPartNumber())
-                        .eTag(p.getETag())
+                        .eTag(quoteIfNeeded(p.getETag()))
                         .build())
                 .collect(Collectors.toList());
 
@@ -164,6 +164,10 @@ public class S3Uploader {
                 .build();
 
         s3.completeMultipartUpload(request);
+    }
+
+    private String quoteIfNeeded(String eTag) {
+        return (eTag != null && !eTag.startsWith("\"")) ? "\"" + eTag + "\"" : eTag;
     }
 
     public UploadUrlDTO generatePreSignedUploadUrl(String path, String contentType, String extension) {
