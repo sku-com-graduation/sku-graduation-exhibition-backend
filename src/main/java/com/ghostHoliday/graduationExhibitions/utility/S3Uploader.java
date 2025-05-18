@@ -1,5 +1,7 @@
 package com.ghostHoliday.graduationExhibitions.utility;
 
+import com.ghostHoliday.graduationExhibitions.dto.post.CompletedPartDTO;
+import com.ghostHoliday.graduationExhibitions.dto.post.MultipartUploadDTO;
 import com.ghostHoliday.graduationExhibitions.dto.post.UploadUrlDTO;
 import lombok.Data;
 import lombok.Getter;
@@ -18,10 +20,7 @@ import software.amazon.awssdk.services.cloudfront.model.Paths;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.s3.presigner.model.DeleteObjectPresignRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedDeleteObjectRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.*;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -97,7 +96,97 @@ public class S3Uploader {
     }
 
 
+    public MultipartUploadDTO initiateMultipartUpload(String path, String contentType, String extension, long fileSize, long partSize) {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String key = path + "_" + timestamp + "." + extension;
 
+        S3Client s3 = getS3Client();
+        S3Presigner presigner = S3Presigner.builder()
+                .region(Region.of(region))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)))
+                .build();
+
+        CreateMultipartUploadRequest createRequest = CreateMultipartUploadRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .contentType(contentType)
+                .build();
+
+        CreateMultipartUploadResponse response = s3.createMultipartUpload(createRequest);
+        String uploadId = response.uploadId();
+
+        int totalParts = (int) Math.ceil((double) fileSize / partSize);
+        List<MultipartUploadDTO.PartUrl> presignedUrls = new java.util.ArrayList<>();
+
+        for (int partNumber = 1; partNumber <= totalParts; partNumber++) {
+            UploadPartRequest partRequest = UploadPartRequest.builder()
+                    .bucket(bucket)
+                    .key(key)
+                    .uploadId(uploadId)
+                    .partNumber(partNumber)
+                    .build();
+
+            PresignedUploadPartRequest presignedPart = presigner.presignUploadPart(
+                    UploadPartPresignRequest.builder()
+                            .uploadPartRequest(partRequest)
+                            .signatureDuration(Duration.ofMinutes(15))
+                            .build());
+
+            presignedUrls.add(new MultipartUploadDTO.PartUrl(partNumber, presignedPart.url().toString()));
+        }
+
+        s3.close();
+        presigner.close();
+
+        return new MultipartUploadDTO(key, uploadId, presignedUrls, cloudFrontUrl + "/" + key);
+    }
+
+    public void completeMultipartUpload(String key, String uploadId, List<CompletedPartDTO> parts) {
+        S3Client s3 = getS3Client();
+
+        List<CompletedPart> completedParts = parts.stream()
+                .map(p -> CompletedPart.builder()
+                        .partNumber(p.getPartNumber())
+                        .eTag(quoteIfNeeded(p.getETag()))
+                        .build())
+                .collect(Collectors.toList());
+
+        CompletedMultipartUpload completed = CompletedMultipartUpload.builder()
+                .parts(completedParts)
+                .build();
+
+        CompleteMultipartUploadRequest request = CompleteMultipartUploadRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .uploadId(uploadId)
+                .multipartUpload(completed)
+                .build();
+
+        try {
+            s3.completeMultipartUpload(request);
+        } catch (Exception e) {
+            abortMultipartUpload(s3, key, uploadId);
+            throw e; // 예외 다시 던져 상위에서 처리
+        }
+    }
+
+    private void abortMultipartUpload(S3Client s3, String key, String uploadId) {
+        AbortMultipartUploadRequest abortRequest = AbortMultipartUploadRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .uploadId(uploadId)
+                .build();
+
+        try {
+            s3.abortMultipartUpload(abortRequest);
+        } catch (Exception abortEx) {
+        }
+    }
+
+    private String quoteIfNeeded(String eTag) {
+        return (eTag != null && !eTag.startsWith("\"")) ? "\"" + eTag + "\"" : eTag;
+    }
 
     public UploadUrlDTO generatePreSignedUploadUrl(String path, String contentType, String extension) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
@@ -127,49 +216,6 @@ public class S3Uploader {
                 presignedRequest.url().toString());
     }
 
-//    public void invalidateCloudFront(String path) {
-//        CloudFrontClient cloudFrontClient = CloudFrontClient.builder()
-//                .region(Region.AP_NORTHEAST_2)
-//                .credentialsProvider(StaticCredentialsProvider.create(
-//                        AwsBasicCredentials.create(accessKey, secretKey)))
-//                .build();
-//
-//        CreateInvalidationRequest invalidationRequest = CreateInvalidationRequest.builder()
-//                .distributionId("E2BX69LH0CHB4A")
-//                .invalidationBatch(InvalidationBatch.builder()
-//                        .callerReference(String.valueOf(System.currentTimeMillis()))
-//                        .paths(Paths.builder()
-//                                .quantity(1)
-//                                .items(path) // 예: "/teamPost/uuid/poster"
-//                                .build())
-//                        .build())
-//                .build();
-//
-//        cloudFrontClient.createInvalidation(invalidationRequest);
-//        cloudFrontClient.close();
-//    }
-
-    public void invalidateCloudFront(List<String> paths) {
-        CloudFrontClient cloudFrontClient = CloudFrontClient.builder()
-                .region(Region.AP_NORTHEAST_2)
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)))
-                .build();
-
-        CreateInvalidationRequest invalidationRequest = CreateInvalidationRequest.builder()
-                .distributionId("E2BX69LH0CHB4A")
-                .invalidationBatch(InvalidationBatch.builder()
-                        .callerReference(String.valueOf(System.currentTimeMillis()))
-                        .paths(Paths.builder()
-                                .quantity(paths.size())
-                                .items(paths)
-                                .build())
-                        .build())
-                .build();
-
-        cloudFrontClient.createInvalidation(invalidationRequest);
-        cloudFrontClient.close();
-    }
 
 
     public S3Client getS3Client() {
@@ -180,26 +226,6 @@ public class S3Uploader {
                 .build();
     }
 
-    public String upload(MultipartFile file, String folder) throws IOException {
-        String extension = fileUtility.getImageFileExtension(file.getOriginalFilename());
-        if (extension == null) {
-            throw new RuntimeException("지원되지 않는 이미지 파일 형식입니다.");
-        }
-        return uploadToS3(file, folder + "." + extension);
-    }
-
-
-    private String uploadToS3(MultipartFile file, String key) throws IOException {
-
-        getS3Client().putObject(PutObjectRequest.builder()
-                        .bucket(bucket)
-                        .key(key)
-                        .contentType(file.getContentType())
-                        .build(),
-                RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-
-        return cloudFrontUrl + "/" + key;
-    }
 
     public void delete(String imageUrl) {
         if (imageUrl == null || imageUrl.isEmpty()) return;
@@ -211,27 +237,4 @@ public class S3Uploader {
                 .build());
     }
 
-    public void createFolder(String folderPath) {
-        getS3Client().putObject(PutObjectRequest.builder()
-                .bucket(bucket)
-                .key(folderPath.endsWith("/") ? folderPath : folderPath + "/")
-                .build(), RequestBody.empty());
-    }
-
-    public void deleteFolder(String folderPath) {
-        S3Client s3 = getS3Client();
-        ListObjectsV2Request listRequest = ListObjectsV2Request.builder()
-                .bucket(bucket)
-                .prefix(folderPath.endsWith("/") ? folderPath : folderPath + "/")
-                .build();
-
-        ListObjectsV2Response listResponse = s3.listObjectsV2(listRequest);
-
-        for (S3Object s3Object : listResponse.contents()) {
-            s3.deleteObject(DeleteObjectRequest.builder()
-                    .bucket(bucket)
-                    .key(s3Object.key())
-                    .build());
-        }
-    }
 }

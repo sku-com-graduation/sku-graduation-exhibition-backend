@@ -16,7 +16,6 @@ public class EditPostInfoResponseDTO {
     private String content;
     private Category category;
     private String teamProfileImage;
-    private List<String> slideImages;
     private String posterImage;
     private String demoVideo;
     private List<EditStudentResponse> students;
