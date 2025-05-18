@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class CompletedPartDTO {
     private int partNumber;
-    private String eTag;
+    private String e_Tag;
 }
