@@ -58,11 +58,15 @@ public class PostService {
         }
         response.setImages(images);
         UpdatePostInfoV2Request.VideoInfo videoInfo = request.getVideoInfo();
+
         if (videoInfo.getFileType().equals(FileType.DEMO)){
             String fileName = "demo";
             String s3Path = baseDir + fileName;
             response.setVideo(s3Uploader.initiateMultipartUpload(
                     s3Path, videoInfo.getContentType(), videoInfo.getExtension(), videoInfo.getFileSize(), videoInfo.getPartSize()));
+        }
+        else{
+            response.setVideo(null);
         }
 
 
