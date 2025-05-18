@@ -26,25 +26,25 @@ public class PostController {
     private final JwtUtility jwtUtility;
     private final HttpOnlyService httpOnlyService;
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
-    @PutMapping("user/post/update/slideImage")
-    public ResponseEntity<String> updateSlideImages(
-            HttpServletRequest request,
-            HttpServletResponse response,  // accessToken 재발급을 위해 추가
-            @ModelAttribute UpdateSlideImageDTO dto
-    ) throws Exception {
-        try {
-
-            String token = jwtUtility.extractAccessTokenFromCookie(request);
-
-            postService.updateSlideImage(dto, jwtUtility.getEmailFromToken(token));
-            return ResponseEntity.ok("파일 업로드에 성공했습니다.");
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("파일 업로드 실패: " + e.getMessage());
-        }
-    }
+//    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+//    @PutMapping("user/post/update/slideImage")
+//    public ResponseEntity<String> updateSlideImages(
+//            HttpServletRequest request,
+//            HttpServletResponse response,  // accessToken 재발급을 위해 추가
+//            @ModelAttribute UpdateSlideImageDTO dto
+//    ) throws Exception {
+//        try {
+//
+//            String token = jwtUtility.extractAccessTokenFromCookie(request);
+//
+//            postService.updateSlideImage(dto, jwtUtility.getEmailFromToken(token));
+//            return ResponseEntity.ok("파일 업로드에 성공했습니다.");
+//        } catch (IllegalStateException e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        } catch (Exception e) {
+//            return ResponseEntity.status(500).body("파일 업로드 실패: " + e.getMessage());
+//        }
+//    }
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     @PutMapping("user/post/update/teamPost")
