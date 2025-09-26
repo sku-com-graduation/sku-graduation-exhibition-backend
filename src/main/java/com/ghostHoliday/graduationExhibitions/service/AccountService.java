@@ -117,6 +117,7 @@ public class AccountService {
             boolean isLeader = true;
             for (StudentInfoByAccountDTO studentInfo : accountInfo.getStudentInfos()) {
                 Student student = studentRepository.findByStudentNumber(studentInfo.getStudentNumber());
+                student.setExhibitionYear(String.valueOf(year));
                 if (isLeader) {
                     student.setRole(Role.LEADER);
                     Account account = createAccount(studentInfo.getStudentEmail(), passwordEncoder.encode(studentInfo.getStudentNumber()), team);
