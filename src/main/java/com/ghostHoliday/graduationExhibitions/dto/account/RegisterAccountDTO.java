@@ -4,13 +4,12 @@ import com.ghostHoliday.graduationExhibitions.domain.Category;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegistAccountRequest {
+public class RegisterAccountDTO {
     private String teamName;
     private Category category;
     private String professorName;
