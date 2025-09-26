@@ -95,9 +95,9 @@ public class AccountService {
     }
 
     @Transactional
-    public void createAccount(List<RegistAccountRequest> accountInfos) throws IOException, CsvException {
+    public void createAccount(RegisterAccountRequest request) throws IOException, CsvException {
         ArrayList<Account> accounts = new ArrayList<>();
-        int year = LocalDateTime.now().getYear();
+        int year = request.getYear();
 
         if (!homeRepository.existsByExhibitionYear(String.valueOf(year))){
             Home home = new Home();
@@ -107,7 +107,7 @@ public class AccountService {
             homeRepository.save(home);
         }
 
-        for (RegistAccountRequest accountInfo : accountInfos) {
+        for (RegisterAccountDTO accountInfo : request.getRegisterAccounts()) {
             Post post = createNewPost();
             postRepository.save(post);
 
