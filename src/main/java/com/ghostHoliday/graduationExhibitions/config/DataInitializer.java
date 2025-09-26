@@ -3,6 +3,7 @@ package com.ghostHoliday.graduationExhibitions.config;
 import com.ghostHoliday.graduationExhibitions.domain.*;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +17,11 @@ public class DataInitializer {
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${ADMIN_EMAIL}")
+    private String adminEmail;
+
+    @Value("${ADMIN_PW}")
+    private String adminPw;
     @Bean
     public CommandLineRunner initData() {
         return args -> initializeData();
@@ -24,12 +30,12 @@ public class DataInitializer {
     @Transactional
     public void initializeData() {
 
-        if (!accountRepository.existsAccountByUserEmail("computeraee@sungkyul.ac.kr")){
+        if (!accountRepository.existsAccountByUserEmail(adminEmail)){
             Account adminAccount = new Account();
             adminAccount.setTeam(null);
-            adminAccount.setUserEmail("computeraee@sungkyul.ac.kr");
-            adminAccount.setDefaultPwd(passwordEncoder.encode("computeraee@sungkyul.ac.kr"));
-            adminAccount.setPwd(passwordEncoder.encode("computeraee@sungkyul.ac.kr"));
+            adminAccount.setUserEmail(adminEmail);
+            adminAccount.setDefaultPwd(passwordEncoder.encode(adminPw));
+            adminAccount.setPwd(passwordEncoder.encode(adminPw));
             adminAccount.setRole(Role.ADMIN);
             accountRepository.save(adminAccount);
         }
