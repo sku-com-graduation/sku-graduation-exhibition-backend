@@ -13,6 +13,7 @@ import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.exceptions.CsvException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -78,7 +79,7 @@ public class AccountController {
     public ResponseEntity<String> registAccountAndTeam(
             HttpServletRequest request,
             HttpServletResponse response,  // accessToken 재발급을 위해 추가
-            @RequestBody RegisterAccountRequest requestDTO) {
+            @RequestBody @Valid RegisterAccountRequest requestDTO) {
         try {
             // accessToken이 유효하면 요청 처리
             accountService.createAccount(requestDTO);
