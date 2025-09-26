@@ -1,5 +1,6 @@
 package com.ghostHoliday.graduationExhibitions.dto.account;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,5 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 public class RegisterAccountRequest {
     private int year;
-    private List<@NotBlank RegisterAccountDTO> registerAccounts;
+    @Valid
+    private List<RegisterAccountDTO> registerAccounts;
 }

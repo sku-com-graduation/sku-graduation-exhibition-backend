@@ -1,6 +1,7 @@
 package com.ghostHoliday.graduationExhibitions.dto.account;
 
 import com.ghostHoliday.graduationExhibitions.domain.Category;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,5 +15,6 @@ public class RegisterAccountDTO {
     private String teamName;
     private Category category;
     private String professorName;
-    private List<@NotBlank StudentInfoByAccountDTO> studentInfos;
+    @Valid
+    private List<StudentInfoByAccountDTO> studentInfos;
 }
