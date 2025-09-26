@@ -110,8 +110,8 @@ public class AccountService {
         for (RegisterAccountDTO accountInfo : request.getRegisterAccounts()) {
             Post post = createNewPost();
             postRepository.save(post);
-
-            Team team = createTeam(accountInfo.getTeamName(), accountInfo.getCategory(), year, post);
+            Professor professor = professorRepository.findByName(accountInfo.getProfessorName()).orElseThrow(() -> new IllegalArgumentException("교수 정보가 없습니다."));
+            Team team = createTeam(accountInfo.getTeamName(), accountInfo.getCategory(),professor, year, post);
             teamRepository.save(team);
 
             boolean isLeader = true;
@@ -217,11 +217,11 @@ public class AccountService {
         return post;
     }
 
-    public static Team createTeam(String teamName, Category category, int year, Post post){
+    public static Team createTeam(String teamName, Category category,Professor professor, int year, Post post){
         Team team = new Team();
         team.setName(teamName);
         team.setCategory(category);
-        team.setProfessor(null);
+        team.setProfessor(professor);
         team.setExhibitionYear(year);
         team.setPost(post);
         return team;
