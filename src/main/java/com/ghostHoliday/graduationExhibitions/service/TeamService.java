@@ -8,6 +8,7 @@ import com.ghostHoliday.graduationExhibitions.repository.ProfessorRepository;
 import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
 import com.ghostHoliday.graduationExhibitions.utility.Base64Utility;
+import com.ghostHoliday.graduationExhibitions.utility.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class TeamService {
+    private final S3Uploader s3Uploader;
     private final TeamRepository teamRepository;
     private final EncryptionService encryptionService;
     private final AccountRepository accountRepository;
@@ -46,7 +48,11 @@ public class TeamService {
             findTeamPostInfoByYearDTO.setTeamName(team.getName());
             findTeamPostInfoByYearDTO.setUuid(post.getUuid());
             findTeamPostInfoByYearDTO.setTitle(post.getTitle());
-            findTeamPostInfoByYearDTO.setTeamProfileImage(post != null && post.getTeamProfileUrl() != null && !post.getTeamProfileUrl().isEmpty() ? post.getTeamProfileUrl() : null);
+            findTeamPostInfoByYearDTO.setTeamProfileImage(
+                    post != null && post.getTeamProfileUrl() != null && !post.getTeamProfileUrl().isEmpty()
+                            ? s3Uploader.rebuildCdnUrl(post.getTeamProfileUrl())
+                            : null);
+
             findTeamPostInfoByYearDTO.setCategory(team.getCategory());
 
             findTeamPostInfoByYearDTOS.add(findTeamPostInfoByYearDTO);
@@ -151,7 +157,7 @@ public class TeamService {
         List<String> response = new ArrayList<>();
         List<Team> teams = teamRepository.findAllByExhibitionYear(year);
         for (Team team : teams) {
-            String teamProfileUrl = team.getPost().getTeamProfileUrl();
+            String teamProfileUrl = s3Uploader.rebuildCdnUrl(team.getPost().getTeamProfileUrl() );
             if (teamProfileUrl != null){
                 response.add(teamProfileUrl);
             }

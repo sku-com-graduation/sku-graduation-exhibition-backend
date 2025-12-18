@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class ProfessorService {
 
+    private final S3Uploader s3Uploaderl; // 카멜 케이스 원하지 않으면 변경해주세요.
     private final ProfessorRepository professorRepository;
     private final S3Uploader s3Uploader;
     private final EncryptionService encryptionService;
@@ -91,7 +92,8 @@ public class ProfessorService {
             dto.setName(professor.getName());
             dto.setEmail(professor.getEmail());
             dto.setTenure(professor.isTenure());
-            dto.setProfileImage(professor.getImageUrl());
+            dto.setProfileImage(s3Uploaderl.rebuildCdnUrl(professor.getImageUrl()));
+
         } catch (Exception e) {
             e.printStackTrace();
             dto.setProfileImage(null);
