@@ -23,8 +23,6 @@ public class PostService {
     private final PostRepository postRepository;
     private final EncryptionService encryptionService;
     private final StudentRepository studentRepository;
-    private final FileUtility fileUtility;
-    private final int MAX_IMAGES = 10;
     private final TeamRepository teamRepository;
     private final AccountRepository accountRepository;
     private final JwtUtility jwtUtility;
@@ -97,15 +95,15 @@ public class PostService {
 
         // S3 URL 그대로 반환
         response.setTeamProfileImage(
-                post.getTeamProfileUrl() != null ? post.getTeamProfileUrl() : null
+                post.getTeamProfileUrl() != null ? s3Uploader.rebuildCdnUrl(post.getTeamProfileUrl()) : null
         );
 
         response.setPosterImage(
-                post.getPosterUrl() != null ? post.getPosterUrl() : null
+                post.getPosterUrl() != null ? s3Uploader.rebuildCdnUrl(post.getPosterUrl()) : null
         );
 
         response.setDemoVideo(
-                post.getDemoUrl() != null ? post.getDemoUrl() : null
+                post.getDemoUrl() != null ? s3Uploader.rebuildCdnUrl(post.getDemoUrl()) : null
         );
 
         List<EditStudentResponse> editStudentResponses = new ArrayList<>();
@@ -117,12 +115,12 @@ public class PostService {
             studentResponse.setName(Optional.ofNullable(student.getName()).orElse(""));
             studentResponse.setInfo(Optional.ofNullable(profile.getInfo()).orElse(""));
             studentResponse.setRole(student.getRole());
-            studentResponse.setGithubUrl(Optional.ofNullable(profile.getGithubUrl()).orElse(""));
+            studentResponse.setGithubUrl(Optional.ofNullable(s3Uploader.rebuildCdnUrl(profile.getGithubUrl())).orElse(""));
             studentResponse.setStudentEmail(Optional.ofNullable(profile.getStudentEmail()).orElse(""));
             studentResponse.setStudentBlog(Optional.ofNullable(profile.getStudentBlog()).orElse(""));
 
             studentResponse.setProfileImage(
-                    profile.getStudentProfileUrl() != null ? profile.getStudentProfileUrl() : ""
+                    profile.getStudentProfileUrl() != null ? s3Uploader.rebuildCdnUrl(profile.getStudentProfileUrl()) : ""
             );
 
             editStudentResponses.add(studentResponse);
@@ -155,7 +153,7 @@ public class PostService {
             studentInfoDTO.setStudentEmail(Optional.ofNullable(studentProfile.getStudentEmail()).orElse(""));
             studentInfoDTO.setStudentBlog(Optional.ofNullable(studentProfile.getStudentBlog()).orElse(""));
 
-            String profileImageUrl = studentProfile.getStudentProfileUrl();
+            String profileImageUrl = s3Uploader.rebuildCdnUrl(studentProfile.getStudentProfileUrl());
             studentInfoDTO.setProfileImage(profileImageUrl != null ? profileImageUrl : "");
 
             studentInfoDTOS.add(studentInfoDTO);
@@ -167,9 +165,9 @@ public class PostService {
         postTeamInfoDTO.setContent(post.getContent());
         postTeamInfoDTO.setCategory(team.getCategory());
 
-        postTeamInfoDTO.setTeamProfileImage(post.getTeamProfileUrl());
-        postTeamInfoDTO.setPosterImage(post.getPosterUrl());
-        postTeamInfoDTO.setDemoVideo(post.getDemoUrl());
+        postTeamInfoDTO.setTeamProfileImage(s3Uploader.rebuildCdnUrl(post.getTeamProfileUrl() ));
+        postTeamInfoDTO.setPosterImage(s3Uploader.rebuildCdnUrl(post.getPosterUrl()));
+        postTeamInfoDTO.setDemoVideo(s3Uploader.rebuildCdnUrl(post.getDemoUrl()));
 
         // 슬라이드 이미지 목록 S3에서 동적으로 조회
         List<String> slideImageUrls = new ArrayList<>();
@@ -192,7 +190,7 @@ public class PostService {
         ProfessorInfoDTO professorInfoDTO = new ProfessorInfoDTO();
         if (professor != null) {
             professorInfoDTO.setProfessorImage(
-                    professor.getImageUrl() != null ? professor.getImageUrl() : ""
+                    professor.getImageUrl() != null ? s3Uploader.rebuildCdnUrl(professor.getImageUrl()) : ""
             );
             professorInfoDTO.setProfessorName(Optional.ofNullable(professor.getName()).orElse(""));
             professorInfoDTO.setProfessorEmail(Optional.ofNullable(professor.getEmail()).orElse(""));
@@ -231,7 +229,7 @@ public class PostService {
         String path =  "teamPost/" + dto.getTeamUuid();
 
         if (dto.getTeamProfileImageOperation().equals(Operation.UPLOAD)) {
-            post.setTeamProfileUrl(dto.getTeamProfileImage());
+            post.setTeamProfileUrl(s3Uploader.rebuildCdnUrl(dto.getTeamProfileImage()));
             s3Uploader.cleanupOldVersions(path + "/teamProfile_");
 
         } else if (dto.getTeamProfileImageOperation().equals(Operation.DELETE)) {
@@ -240,7 +238,7 @@ public class PostService {
         }
 
         if (dto.getDemoVideoOperation().equals(Operation.UPLOAD)) {
-            post.setDemoUrl(dto.getDemoVideo());
+            post.setDemoUrl(s3Uploader.rebuildCdnUrl(dto.getDemoVideo()));
             s3Uploader.cleanupOldVersions(path + "/demo_");
         } else if (dto.getDemoVideoOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getDemoVideo());
@@ -248,7 +246,7 @@ public class PostService {
         }
 
         if (dto.getPosterImageOperation().equals(Operation.UPLOAD)) {
-            post.setPosterUrl(dto.getPosterImage());
+            post.setPosterUrl(s3Uploader.rebuildCdnUrl(dto.getPosterImage()));
             s3Uploader.cleanupOldVersions(path + "/poster_");
         } else if (dto.getPosterImageOperation().equals(Operation.DELETE)) {
             s3Uploader.delete(dto.getPosterImage());

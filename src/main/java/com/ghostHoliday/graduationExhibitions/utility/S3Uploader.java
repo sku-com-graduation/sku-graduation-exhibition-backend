@@ -23,6 +23,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.*;
 
 import java.io.IOException;
+import java.net.URI;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -135,7 +136,7 @@ public class S3Uploader {
         s3.close();
         presigner.close();
 
-        return new MultipartUploadDTO(key, uploadId, presignedUrls, cloudFrontUrl + "/" + key);
+        return new MultipartUploadDTO(key, uploadId, presignedUrls, rebuildCdnUrl(cloudFrontUrl + "/" + key));
     }
 
     public void completeMultipartUpload(String key, String uploadId, List<CompletedPartDTO> parts) {
@@ -231,6 +232,17 @@ public class S3Uploader {
                 .bucket(bucket)
                 .key(key)
                 .build());
+    }
+
+    public String rebuildCdnUrl(String rawUrl) {
+        if (rawUrl == null || rawUrl.isBlank()) return rawUrl;
+
+        try {
+            URI uri = URI.create(rawUrl);
+            return cloudFrontUrl + uri.getPath();
+        } catch (Exception e) {
+            return rawUrl;
+        }
     }
 
 }
