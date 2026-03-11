@@ -15,6 +15,13 @@ public class DataInitializer {
 
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
+    
+    @Value("${ADMIN_EMAIL}")
+    private String adminEmail;
+
+    @Value("${ADMIN_PW}")
+    private String adminPassword;
+
 
     @Bean
     public CommandLineRunner initData() {
@@ -24,12 +31,12 @@ public class DataInitializer {
     @Transactional
     public void initializeData() {
 
-        if (!accountRepository.existsAccountByUserEmail("computeraee@sungkyul.ac.kr")){
+        if (!accountRepository.existsAccountByUserEmail(ADMIN_ID)){
             Account adminAccount = new Account();
             adminAccount.setTeam(null);
-            adminAccount.setUserEmail("computeraee@sungkyul.ac.kr");
-            adminAccount.setDefaultPwd(passwordEncoder.encode("computeraee@sungkyul.ac.kr"));
-            adminAccount.setPwd(passwordEncoder.encode("computeraee@sungkyul.ac.kr"));
+            adminAccount.setUserEmail(adminEmail);
+            adminAccount.setDefaultPwd(passwordEncoder.encode(adminPassword));
+            adminAccount.setPwd(passwordEncoder.encode(adminPassword));
             adminAccount.setRole(Role.ADMIN);
             accountRepository.save(adminAccount);
         }
