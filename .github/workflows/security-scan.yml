@@ -1,0 +1,36 @@
+name: Public Release Security Scan
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - develop/main
+  pull_request:
+    branches:
+      - main
+      - develop/main
+
+permissions:
+  contents: read
+
+jobs:
+  sensitive-history-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install ripgrep
+        run: |
+          if ! command -v rg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ripgrep
+          fi
+
+      - name: Run sensitive history scan
+        shell: pwsh
+        run: ./scripts/security/scan-sensitive-history.ps1
