@@ -9,8 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudfront.CloudFrontClient;
@@ -39,12 +38,6 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class S3Uploader {
-
-    @Value("${AWS_ACCESS_KEY}")
-    private String accessKey;
-
-    @Value("${AWS_SECRET_KEY}")
-    private String secretKey;
 
     @Value("${AWS_REGION}")
     private String region;
@@ -100,8 +93,7 @@ public class S3Uploader {
         S3Client s3 = getS3Client();
         S3Presigner presigner = S3Presigner.builder()
                 .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)))
+                .credentialsProvider(DefaultCredentialsProvider.create())
                 .build();
 
         CreateMultipartUploadRequest createRequest = CreateMultipartUploadRequest.builder()
@@ -190,8 +182,7 @@ public class S3Uploader {
         String key = path + "_" + timestamp + "." + extension;
         S3Presigner presigner = S3Presigner.builder()
                 .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)))
+                .credentialsProvider(DefaultCredentialsProvider.create())
                 .build();
 
         PutObjectRequest objectRequest = PutObjectRequest.builder()
@@ -218,8 +209,7 @@ public class S3Uploader {
     public S3Client getS3Client() {
         return S3Client.builder()
                 .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)))
+                .credentialsProvider(DefaultCredentialsProvider.create())
                 .build();
     }
 

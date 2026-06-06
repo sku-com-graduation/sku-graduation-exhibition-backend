@@ -95,7 +95,6 @@ public class ProfessorService {
             dto.setProfileImage(s3Uploaderl.rebuildCdnUrl(professor.getImageUrl()));
 
         } catch (Exception e) {
-            e.printStackTrace();
             dto.setProfileImage(null);
         }
         return dto;

@@ -40,7 +40,14 @@ out/
 
 # Ignore properties and YAML files
 *.properties
+*.yml
+*.yaml
+!.github/workflows/**/*.yml
+!.github/workflows/**/*.yaml
 *.pem
+.env
+.env.*
+!.env.example
 
 teamPost
 professorImage
