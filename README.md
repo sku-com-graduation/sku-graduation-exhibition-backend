@@ -1,6 +1,8 @@
 # SKU Graduation Exhibition Backend
 
-서경대학교 졸업전시 운영을 위해 개발된 백엔드 서버입니다.
+성결대학교 졸업전시 운영을 위해 개발된 백엔드 서버입니다.
+
+Service: [https://www.sku-graduation.p-e.kr/](https://www.sku-graduation.p-e.kr/)
 
 ## Overview
 
@@ -54,8 +56,21 @@
 
 ## Future Direction
 
-- 학과별 설정을 분리할 수 있는 구조 개선
-- API 문서화
-- 관리자 업무 흐름 단순화
-- 전시 데이터 입력 및 수정 과정 개선
-- 유사한 학과/기관 전시 프로젝트에서도 참고 가능한 형태로 정리
+- Multi-tenant architecture
+  - 학과별 데이터 분리
+  - 학과별 관리자 권한 분리
+  - 학과별 전시 설정 관리
+
+- Service expansion
+  - 여러 학과가 함께 사용하는 전시 운영 플랫폼
+  - 졸업전시, 학과 전시, 포트폴리오 아카이브 운영 지원
+
+- Quality improvement
+  - 의존성 및 프레임워크 업그레이드
+  - 테스트 코드 보강
+  - CI 기반 품질 검증 강화
+
+- Operation automation
+  - 전시 데이터 입력, 수정, 검수 자동화
+  - 운영 및 배포 과정 표준화
+  - 관리자 업무 흐름 단순화
