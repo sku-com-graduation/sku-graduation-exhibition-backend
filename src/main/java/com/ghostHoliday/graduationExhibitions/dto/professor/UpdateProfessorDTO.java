@@ -1,5 +1,6 @@
 package com.ghostHoliday.graduationExhibitions.dto.professor;
 
+import com.ghostHoliday.graduationExhibitions.domain.Operation;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,6 @@ public class UpdateProfessorDTO{
     private String name;
     private String email;
     private boolean tenure;
-    private MultipartFile profileImage;
-
+    private String profileImage;
+    private Operation profileImageOperation;
 }

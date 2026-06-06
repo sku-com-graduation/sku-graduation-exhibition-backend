@@ -3,6 +3,7 @@ package com.ghostHoliday.graduationExhibitions.config;
 import com.ghostHoliday.graduationExhibitions.domain.*;
 import com.ghostHoliday.graduationExhibitions.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +23,6 @@ public class DataInitializer {
     @Value("${ADMIN_PW}")
     private String adminPassword;
 
-
     @Bean
     public CommandLineRunner initData() {
         return args -> initializeData();
@@ -31,7 +31,7 @@ public class DataInitializer {
     @Transactional
     public void initializeData() {
 
-        if (!accountRepository.existsAccountByUserEmail(ADMIN_ID)){
+        if (!accountRepository.existsAccountByUserEmail(adminEmail)){
             Account adminAccount = new Account();
             adminAccount.setTeam(null);
             adminAccount.setUserEmail(adminEmail);

@@ -5,7 +5,6 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 .properties
-.yaml
 ### STS ###
 .apt_generated
 .classpath
@@ -41,7 +40,14 @@ out/
 
 # Ignore properties and YAML files
 *.properties
+*.yml
+*.yaml
+!.github/workflows/**/*.yml
+!.github/workflows/**/*.yaml
 *.pem
+.env
+.env.*
+!.env.example
 
 teamPost
 professorImage

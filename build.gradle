@@ -32,7 +32,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	// Security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	testImplementation 'org.springframework.security:spring-security-test'
@@ -48,6 +48,13 @@ dependencies {
 
 	implementation platform('software.amazon.awssdk:bom:2.25.4')
 	implementation 'software.amazon.awssdk:s3'
+
+	implementation 'net.bytebuddy:byte-buddy-agent:1.14.4'
+
+	implementation("software.amazon.awssdk:cloudfront:2.25.15")
+	implementation("software.amazon.awssdk:auth:2.25.15")
+
+
 }
 
 tasks.named('test') {

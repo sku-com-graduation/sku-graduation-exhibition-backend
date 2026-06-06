@@ -1,9 +1,15 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
+import com.ghostHoliday.graduationExhibitions.domain.FileType;
+import com.ghostHoliday.graduationExhibitions.domain.Operation;
 import com.ghostHoliday.graduationExhibitions.domain.Professor;
+import com.ghostHoliday.graduationExhibitions.dto.post.S3UrlDTO;
+import com.ghostHoliday.graduationExhibitions.dto.post.UploadUrlDTO;
+import com.ghostHoliday.graduationExhibitions.dto.post.FileInfoDTO;
 import com.ghostHoliday.graduationExhibitions.dto.professor.FindProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.professor.RegistProfessorDTO;
 import com.ghostHoliday.graduationExhibitions.dto.professor.UpdateProfessorDTO;
+import com.ghostHoliday.graduationExhibitions.dto.professor.UpdateProfessorInfoV2;
 import com.ghostHoliday.graduationExhibitions.repository.ProfessorRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
 import com.ghostHoliday.graduationExhibitions.utility.S3Uploader;
@@ -21,10 +27,23 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class ProfessorService {
 
+    private final S3Uploader s3Uploaderl; // 카멜 케이스 원하지 않으면 변경해주세요.
     private final ProfessorRepository professorRepository;
     private final S3Uploader s3Uploader;
     private final EncryptionService encryptionService;
     private final TeamRepository teamRepository;
+
+    @Transactional
+    public S3UrlDTO updateProfessorInfoV2(UpdateProfessorInfoV2 request) throws Exception {
+
+
+        Professor professor = professorRepository.findById(encryptionService.decryptPrimaryKey(request.getEncryptedProfessorId())).get();
+        String s3Path = "professor" + "/" + professor.getName();
+        UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, request.getContentType(), request.getExtension());
+
+        return new S3UrlDTO(FileType.PROFESSOR, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getS3Url());
+    }
+
 
     @Transactional
     public void registProfessor(RegistProfessorDTO dto) throws IOException {
@@ -33,11 +52,7 @@ public class ProfessorService {
         professor.setEmail(dto.getEmail());
         professor.setTenure(dto.isTenure());
 
-        MultipartFile profileImage = dto.getProfileImage();
-        if (profileImage != null && !profileImage.isEmpty()) {
-            String imageUrl = s3Uploader.upload(profileImage, "professor");
-            professor.setImageUrl(imageUrl);
-        }
+        professor.setImageUrl(dto.getProfileImage());
 
         professorRepository.save(professor);
     }
@@ -52,21 +67,14 @@ public class ProfessorService {
         professor.setEmail(dto.getEmail());
         professor.setTenure(dto.isTenure());
 
-        MultipartFile profileImage = dto.getProfileImage();
-
-        if (profileImage != null && !profileImage.isEmpty()) {
-            // 새 이미지가 들어왔으면 기존 이미지 삭제 후 새 이미지 저장
-            s3Uploader.delete(professor.getImageUrl());
-            String imageUrl = s3Uploader.upload(profileImage, "professor");
-            professor.setImageUrl(imageUrl);
-        } else {
-            // 이미지가 비어 있으면 기존 이미지 삭제 + 필드 null 처리
-            if (professor.getImageUrl() != null && !professor.getImageUrl().isEmpty()) {
-                s3Uploader.delete(professor.getImageUrl());
-                professor.setImageUrl(null);
-            }
+        String path = "professor/" + professor.getName() + "_";
+        if ( dto.getProfileImageOperation().equals(Operation.UPLOAD)){
+            s3Uploader.cleanupOldVersions(path);
+            professor.setImageUrl(dto.getProfileImage());
+        } else if ( dto.getProfileImageOperation().equals(Operation.DELETE)) {
+            s3Uploader.delete(dto.getProfileImage());
+            professor.setImageUrl(null);
         }
-
         professorRepository.save(professor);
     }
 
@@ -84,9 +92,9 @@ public class ProfessorService {
             dto.setName(professor.getName());
             dto.setEmail(professor.getEmail());
             dto.setTenure(professor.isTenure());
-            dto.setProfileImage(professor.getImageUrl());
+            dto.setProfileImage(s3Uploaderl.rebuildCdnUrl(professor.getImageUrl()));
+
         } catch (Exception e) {
-            e.printStackTrace();
             dto.setProfileImage(null);
         }
         return dto;

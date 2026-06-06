@@ -95,9 +95,9 @@ public class AccountService {
     }
 
     @Transactional
-    public void createAccount(List<RegistAccountRequest> accountInfos) throws IOException, CsvException {
+    public void createAccount(RegisterAccountRequest request) throws IOException, CsvException {
         ArrayList<Account> accounts = new ArrayList<>();
-        int year = LocalDateTime.now().getYear();
+        int year = request.getYear();
 
         if (!homeRepository.existsByExhibitionYear(String.valueOf(year))){
             Home home = new Home();
@@ -107,16 +107,17 @@ public class AccountService {
             homeRepository.save(home);
         }
 
-        for (RegistAccountRequest accountInfo : accountInfos) {
+        for (RegisterAccountDTO accountInfo : request.getRegisterAccounts()) {
             Post post = createNewPost();
             postRepository.save(post);
-
-            Team team = createTeam(accountInfo.getTeamName(), accountInfo.getCategory(), year, post);
+            Professor professor = professorRepository.findByName(accountInfo.getProfessorName()).orElseThrow(() -> new IllegalArgumentException("교수 정보가 없습니다."));
+            Team team = createTeam(accountInfo.getTeamName(), accountInfo.getCategory(),professor, year, post);
             teamRepository.save(team);
 
             boolean isLeader = true;
             for (StudentInfoByAccountDTO studentInfo : accountInfo.getStudentInfos()) {
                 Student student = studentRepository.findByStudentNumber(studentInfo.getStudentNumber());
+                student.setExhibitionYear(String.valueOf(year));
                 if (isLeader) {
                     student.setRole(Role.LEADER);
                     Account account = createAccount(studentInfo.getStudentEmail(), passwordEncoder.encode(studentInfo.getStudentNumber()), team);
@@ -206,11 +207,6 @@ public class AccountService {
 
     public Post createNewPost() {
         Post post = new Post();
-        String uuid = post.getUuid();
-
-        // S3에 폴더 생성 (빈 객체 업로드)
-        s3Uploader.createFolder("teamPost/" + uuid + "/");
-        s3Uploader.createFolder("teamPost/" + uuid + "/slideImage/");
 
         // URL은 초기값 null로 설정 (업로드 시점에 반영)
         post.setSlideUrl(null);
@@ -221,11 +217,11 @@ public class AccountService {
         return post;
     }
 
-    public static Team createTeam(String teamName, Category category, int year, Post post){
+    public static Team createTeam(String teamName, Category category,Professor professor, int year, Post post){
         Team team = new Team();
         team.setName(teamName);
         team.setCategory(category);
-        team.setProfessor(null);
+        team.setProfessor(professor);
         team.setExhibitionYear(year);
         team.setPost(post);
         return team;

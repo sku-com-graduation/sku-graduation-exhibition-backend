@@ -4,17 +4,16 @@ package com.ghostHoliday.graduationExhibitions.controller;
 import com.ghostHoliday.graduationExhibitions.dto.account.FindAccountByYearResponseDTO;
 import com.ghostHoliday.graduationExhibitions.dto.account.FindStudentInfoByCreateAccountResponse;
 import com.ghostHoliday.graduationExhibitions.dto.account.LoginRequestDTO;
-import com.ghostHoliday.graduationExhibitions.dto.account.RegistAccountRequest;
-import com.ghostHoliday.graduationExhibitions.dto.home.SearchExhitibitionDateResponse;
+import com.ghostHoliday.graduationExhibitions.dto.account.RegisterAccountRequest;
 import com.ghostHoliday.graduationExhibitions.exception.UnauthorizedException;
 import com.ghostHoliday.graduationExhibitions.service.AccountService;
 import com.ghostHoliday.graduationExhibitions.service.EncryptionService;
 import com.ghostHoliday.graduationExhibitions.service.HttpOnlyService;
 import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import com.opencsv.exceptions.CsvException;
-import io.jsonwebtoken.Jwt;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -80,7 +79,7 @@ public class AccountController {
     public ResponseEntity<String> registAccountAndTeam(
             HttpServletRequest request,
             HttpServletResponse response,  // accessToken 재발급을 위해 추가
-            @RequestBody List<RegistAccountRequest> requestDTO) {
+            @RequestBody @Valid RegisterAccountRequest requestDTO) {
         try {
             // accessToken이 유효하면 요청 처리
             accountService.createAccount(requestDTO);

@@ -147,7 +147,6 @@ public class JwtUtility {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("accessToken".equals(cookie.getName())) {
-                    System.out.println("Found access token cookie: " + cookie.getValue());  // 디버그 로그 추가
                     return cookie.getValue();
                 }
             }

@@ -15,18 +15,15 @@ spring:
   jpa:
     database: mysql
     database-platform: org.hibernate.dialect.MySQLDialect
-    show-sql: true
+    show-sql: ${JPA_SHOW_SQL:false}
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
 
 cloud:
   aws:
-    credentials:
-      accessKey: ${AWS_ACCESS_KEY}
-      secretKey: ${AWS_SECRET_KEY}
     region:
       static: ${AWS_REGION}
     stack:
@@ -38,6 +35,5 @@ s3:
 
 
 logging.level:
-  org.hibernate.SQL: debug
-  org.hibernate.orm.jdbc.bind: trace
-
+  org.hibernate.SQL: ${HIBERNATE_SQL_LOG_LEVEL:off}
+  org.hibernate.orm.jdbc.bind: ${HIBERNATE_BIND_LOG_LEVEL:off}

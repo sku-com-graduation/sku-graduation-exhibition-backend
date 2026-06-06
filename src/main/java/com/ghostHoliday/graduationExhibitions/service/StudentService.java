@@ -1,13 +1,14 @@
 package com.ghostHoliday.graduationExhibitions.service;
 
 
-import com.ghostHoliday.graduationExhibitions.domain.Role;
-import com.ghostHoliday.graduationExhibitions.domain.Student;
-import com.ghostHoliday.graduationExhibitions.domain.StudentProfile;
-import com.ghostHoliday.graduationExhibitions.domain.Team;
+import com.ghostHoliday.graduationExhibitions.domain.*;
+import com.ghostHoliday.graduationExhibitions.dto.post.S3UrlDTO;
+import com.ghostHoliday.graduationExhibitions.dto.post.UploadUrlDTO;
 import com.ghostHoliday.graduationExhibitions.dto.student.*;
+import com.ghostHoliday.graduationExhibitions.dto.studentProfile.UpdateStudentInfoV2Request;
 import com.ghostHoliday.graduationExhibitions.repository.StudentRepository;
 import com.ghostHoliday.graduationExhibitions.repository.TeamRepository;
+import com.ghostHoliday.graduationExhibitions.utility.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,8 +29,7 @@ public class StudentService {
     private final StudentProfileService studentProfileService;
     private final TeamRepository teamRepository;
     private final EncryptionService encryptionService;
-
-
+    private final S3Uploader s3Uploader;
 
 
     @Transactional
@@ -118,6 +118,20 @@ public class StudentService {
                 }
             }
         }
+    }
+
+    @Transactional
+    public S3UrlDTO updateStudentInfoV2(UpdateStudentInfoV2Request request) throws Exception {
+
+        Student student = studentRepository.findById(encryptionService.decryptPrimaryKey(request.getEncryptedStudentId()))
+                .orElseThrow(() -> new IllegalStateException("학생을 찾을 수 없습니다."));
+
+        String fileName = student.getStudentNumber();
+        String s3Path = "studentProfileImage/" + fileName;
+
+        UploadUrlDTO uploadUrlDTO = s3Uploader.generatePreSignedUploadUrl(s3Path, request.getContentType(), request.getExtension());
+
+        return new S3UrlDTO(FileType.STUDENT_PROFILE, uploadUrlDTO.getCloudFrontUrl(), uploadUrlDTO.getS3Url());
     }
 
 
