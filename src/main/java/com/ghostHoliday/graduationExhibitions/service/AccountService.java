@@ -193,7 +193,8 @@ public class AccountService {
 
         //학생 검색
         List<StudentInfosByCreateAccount> studentInfos = new ArrayList<>();
-        for (Student student : studentRepository.findByTeamIsNull()) {
+        // 학생마다 프로필의 이메일을 꺼내 쓰므로 조인해서 한 번에 읽는다.
+        for (Student student : studentRepository.findByTeamIsNullWithProfile()) {
             StudentInfosByCreateAccount studentInfo = new StudentInfosByCreateAccount();
             studentInfo.setStudentName(student.getName());
             studentInfo.setStudentNumber(student.getStudentNumber());

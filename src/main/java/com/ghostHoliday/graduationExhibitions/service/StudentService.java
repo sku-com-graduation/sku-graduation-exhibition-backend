@@ -81,7 +81,8 @@ public class StudentService {
     @Transactional
     public void deleteStudents(List<Long> ids) {
         // 학생들을 삭제하는 로직
-        List<Student> students = studentRepository.findAllById(ids);
+        // 프로필 이미지를 지우려면 프로필이 필요하므로 함께 읽는다.
+        List<Student> students = studentRepository.findAllByIdWithProfile(ids);
         if (students.isEmpty()) {
             throw new RuntimeException("해당 학생들이 존재하지 않습니다.");
         }

@@ -107,7 +107,8 @@ public class PostService {
         );
 
         List<EditStudentResponse> editStudentResponses = new ArrayList<>();
-        for (Student student : studentRepository.findAllByTeamId(team.getId())) {
+        // 학생마다 프로필을 꺼내 쓰므로 조인해서 한 번에 읽는다.
+        for (Student student : studentRepository.findAllByTeamIdWithProfile(team.getId())) {
             StudentProfile profile = student.getStudentProfile();
             EditStudentResponse studentResponse = new EditStudentResponse();
 
@@ -140,7 +141,8 @@ public class PostService {
         Long requestTeamId = team.getId();
 
         List<StudentInfoDTO> studentInfoDTOS = new ArrayList<>();
-        List<Student> students = studentRepository.findAllByTeamId(requestTeamId);
+        // 학생마다 프로필을 꺼내 쓰므로 조인해서 한 번에 읽는다.
+        List<Student> students = studentRepository.findAllByTeamIdWithProfile(requestTeamId);
 
         for (Student student : students) {
             StudentInfoDTO studentInfoDTO = new StudentInfoDTO();
