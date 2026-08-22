@@ -9,6 +9,8 @@ import jakarta.persistence.EntityManager;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class ExhibitionListQueryCountTest {
 
+    private static final Logger log = LoggerFactory.getLogger(ExhibitionListQueryCountTest.class);
+
     private static final int YEAR = 2025;
 
     @Autowired
@@ -54,7 +58,7 @@ class ExhibitionListQueryCountTest {
     void exhibitionList_40teams() {
         Result result = measurePostList(40);
 
-        System.out.println(result.report("전시 목록 (게시글 조인) — 팀 40개"));
+        log.info(result.report("전시 목록 (게시글 조인) — 팀 40개"));
 
         assertThat(result.legacyTitles).isEqualTo(result.improvedTitles);
         assertThat(result.legacyQueries).isEqualTo(1 + 40);
@@ -66,7 +70,7 @@ class ExhibitionListQueryCountTest {
     void exhibitionList_200teams() {
         Result result = measurePostList(200);
 
-        System.out.println(result.report("전시 목록 (게시글 조인) — 팀 200개"));
+        log.info(result.report("전시 목록 (게시글 조인) — 팀 200개"));
 
         assertThat(result.legacyTitles).isEqualTo(result.improvedTitles);
         assertThat(result.legacyQueries).isEqualTo(1 + 200);
@@ -94,7 +98,7 @@ class ExhibitionListQueryCountTest {
                 .toList();
         long improvedQueries = statistics.getPrepareStatementCount();
 
-        System.out.println(String.format(
+        log.info(String.format(
                 "%n팀 관리 목록 (교수 조인) — 팀 40개%n  개선 전 쿼리 %d회 / 개선 후 쿼리 %d회%n",
                 legacyQueries, improvedQueries));
 

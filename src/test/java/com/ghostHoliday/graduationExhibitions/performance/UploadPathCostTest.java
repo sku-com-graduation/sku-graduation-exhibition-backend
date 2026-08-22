@@ -9,6 +9,8 @@ import jakarta.servlet.ServletResponse;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -69,6 +71,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(UploadPathCostTest.BenchConfig.class)
 class UploadPathCostTest {
+
+    private static final Logger log = LoggerFactory.getLogger(UploadPathCostTest.class);
 
     private static final int MB = 1024 * 1024;
     private static final String BOUNDARY = "----UploadPathCostBoundary";
@@ -136,7 +140,7 @@ class UploadPathCostTest {
     void upload10MB() throws Exception {
         Result relay = measureRelay(10);
         Result presigned = measurePresigned(10);
-        System.out.println(report("10MB 파일 1건", relay, presigned));
+        log.info(report("10MB 파일 1건", relay, presigned));
         assertBackendIsFreeOfFileBytes(relay, presigned, 10);
     }
 
@@ -145,7 +149,7 @@ class UploadPathCostTest {
     void upload100MB() throws Exception {
         Result relay = measureRelay(100);
         Result presigned = measurePresigned(100);
-        System.out.println(report("100MB 파일 1건", relay, presigned));
+        log.info(report("100MB 파일 1건", relay, presigned));
         assertBackendIsFreeOfFileBytes(relay, presigned, 100);
     }
 

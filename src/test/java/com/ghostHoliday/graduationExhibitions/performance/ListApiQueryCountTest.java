@@ -13,6 +13,8 @@ import jakarta.persistence.EntityManager;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class ListApiQueryCountTest {
+
+    private static final Logger log = LoggerFactory.getLogger(ListApiQueryCountTest.class);
 
     private static final int YEAR = 2025;
 
@@ -138,7 +142,7 @@ class ListApiQueryCountTest {
                 .toList();
         long queries = statistics.getPrepareStatementCount();
 
-        System.out.printf("%n  학생 50명 + 소속 팀 id — 쿼리 %d회 (조인 없이도 1회)%n", queries);
+        log.info(String.format("%n  학생 50명 + 소속 팀 id — 쿼리 %d회 (조인 없이도 1회)%n", queries));
 
         assertThat(teamIds).hasSize(50);
         // 지연 로딩 프록시는 식별자를 이미 들고 있어서 getId() 만으로는 초기화되지 않는다.
@@ -206,6 +210,6 @@ class ListApiQueryCountTest {
         lines.add(" " + title);
         lines.add(String.format("  개선 전 쿼리 %d회  →  개선 후 %d회", legacyQueries, improvedQueries));
         lines.add("─────────────────────────────────────────────");
-        System.out.println(String.join(System.lineSeparator(), lines));
+        log.info(String.join(System.lineSeparator(), lines));
     }
 }
