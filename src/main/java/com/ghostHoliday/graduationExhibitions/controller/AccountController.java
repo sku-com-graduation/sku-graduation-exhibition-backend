@@ -75,7 +75,7 @@ public class AccountController {
 
 
     @PostMapping("admin/account/regist")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> registAccountAndTeam(
             HttpServletRequest request,
             HttpServletResponse response,  // accessToken 재발급을 위해 추가
@@ -97,7 +97,7 @@ public class AccountController {
     }
 
     @GetMapping("admin/account/search")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<FindAccountByYearResponseDTO>> searchAccount(@RequestParam int year) throws Exception {
         List<FindAccountByYearResponseDTO> accounts = accountService.findAllAccountByYear(year);
         if (accounts.isEmpty()) {
@@ -107,7 +107,7 @@ public class AccountController {
     }
 
     @DeleteMapping("admin/account/delete")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteAccount(@RequestBody List<String> encryptedAccountIds) throws Exception {
 
         if (encryptedAccountIds == null || encryptedAccountIds.isEmpty()) {
@@ -129,7 +129,7 @@ public class AccountController {
     }
 
     @PostMapping("admin/account/reset")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> resetAccount(@RequestBody List<String> encryptedAccountIds) throws Exception {
         ArrayList<Long> accountsId = new ArrayList<>();
 

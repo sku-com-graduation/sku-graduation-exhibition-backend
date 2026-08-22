@@ -1,0 +1,48 @@
+# 테스트 전용 설정 — 운영 MySQL 대신 인메모리 H2를 쓴다.
+# 이 파일이 클래스패스에서 src/main/resources/application.yaml 을 가린다.
+spring:
+  sql:
+    init:
+      mode: never
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:graduation;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        # 쿼리 수 측정용 — SessionFactory.getStatistics() 를 켠다.
+        generate_statistics: true
+
+# 외부 연동 값은 테스트에서 실제로 쓰지 않는다. 컨텍스트가 뜨도록 자리만 채운다.
+cloud:
+  aws:
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+
+s3:
+  bucket: test-bucket
+  cloudfront-url: https://cdn.example.test
+
+encryption:
+  aes-secret-key: 0123456789abcdef0123456789abcdef
+
+# 코드가 @Value 로 직접 읽는 키들. 테스트에서는 실제로 호출하지 않으므로 자리만 채운다.
+ADMIN_EMAIL: admin@test.local
+ADMIN_PW: test-password
+AWS_REGION: ap-northeast-2
+BUCKET_NAME: test-bucket
+CLOUDFRONT_URL: https://cdn.example.test
+
+logging.level:
+  org.hibernate.SQL: warn
+  org.hibernate.orm.jdbc.bind: warn
+  org.hibernate.stat: warn

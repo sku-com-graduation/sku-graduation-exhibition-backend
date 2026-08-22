@@ -30,7 +30,7 @@ import java.util.List;
 public class ProfessorController {
     private final ProfessorService professorService;
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/regist")
     public ResponseEntity<String> registProfessor(
             HttpServletRequest request,
@@ -51,7 +51,7 @@ public class ProfessorController {
                 }
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update")
     public ResponseEntity<String> updateProfessor(
             HttpServletRequest request,
@@ -73,7 +73,7 @@ public class ProfessorController {
         }
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/search")
     public ResponseEntity<?> findAllProfessors(
             HttpServletRequest request,
@@ -96,7 +96,7 @@ public class ProfessorController {
 
 
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteStudents(
             HttpServletRequest request,

@@ -6,6 +6,7 @@ import com.ghostHoliday.graduationExhibitions.utility.JwtUtility;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,6 +22,9 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+// @PreAuthorize 를 실제로 동작시키려면 이게 있어야 한다. Spring Boot 3 에서는 기본으로 켜지지 않아,
+// 이 선언이 없으면 컨트롤러에 붙은 @PreAuthorize 가 전부 조용히 무시된다.
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtUtility jwtUtility;
@@ -46,7 +50,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // ADMIN만 접근 가능
                         .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN") // USER 이상 접근 가능
-                        .anyRequest().permitAll() // 그 외 모든 요청은 인증 필요
+                        // 그 외 경로는 로그인 필요. 예전에는 permitAll 이라 적혀 있었지만 실제로는
+                        // JwtAuthenticationFilter 가 토큰 없는 요청을 막고 있어 설정과 동작이 어긋나 있었다.
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtility, httpOnlyService), UsernamePasswordAuthenticationFilter.class);
 

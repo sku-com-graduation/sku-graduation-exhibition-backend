@@ -77,11 +77,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         authenticateUser(claims);
 
-        if (requestURI.startsWith("/account/admin") && !claims.get("role", String.class).equals("ADMIN")) {
-            sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "관리자 권한이 필요합니다.");
-            return;
-        }
-
+        // 권한 검사는 SecurityConfig 의 URL 규칙과 컨트롤러의 @PreAuthorize 가 맡는다.
+        // (여기 있던 "/account/admin" 검사는 그런 경로가 없어 한 번도 실행되지 않는 죽은 코드였다.)
         filterChain.doFilter(request, response);
     }
 

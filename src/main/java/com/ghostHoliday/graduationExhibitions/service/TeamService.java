@@ -39,21 +39,24 @@ public class TeamService {
     public List<FindPostInfoByYearDTO> findPostsInfoByYear(int year) throws Exception {
         ArrayList<FindPostInfoByYearDTO> findTeamPostInfoByYearDTOS = new ArrayList<>();
 
-        List<Team> teams = teamRepository.findAllByExhibitionYear(year);
+        // 팀마다 게시글을 꺼내 쓰므로 조인해서 한 번에 읽는다(지연 로딩이면 팀 수만큼 쿼리가 더 나간다).
+        List<Team> teams = teamRepository.findAllWithPostByExhibitionYear(year);
 
         for (Team team : teams) {
             FindPostInfoByYearDTO findTeamPostInfoByYearDTO = new FindPostInfoByYearDTO();
             Post post = team.getPost();
             // PK 암호화 후 저장
             findTeamPostInfoByYearDTO.setTeamName(team.getName());
-            findTeamPostInfoByYearDTO.setUuid(post.getUuid());
-            findTeamPostInfoByYearDTO.setTitle(post.getTitle());
-            findTeamPostInfoByYearDTO.setTeamProfileImage(
-                    post != null && post.getTeamProfileUrl() != null && !post.getTeamProfileUrl().isEmpty()
-                            ? s3Uploader.rebuildCdnUrl(post.getTeamProfileUrl())
-                            : null);
-
             findTeamPostInfoByYearDTO.setCategory(team.getCategory());
+
+            if (post != null) {
+                findTeamPostInfoByYearDTO.setUuid(post.getUuid());
+                findTeamPostInfoByYearDTO.setTitle(post.getTitle());
+                findTeamPostInfoByYearDTO.setTeamProfileImage(
+                        post.getTeamProfileUrl() != null && !post.getTeamProfileUrl().isEmpty()
+                                ? s3Uploader.rebuildCdnUrl(post.getTeamProfileUrl())
+                                : null);
+            }
 
             findTeamPostInfoByYearDTOS.add(findTeamPostInfoByYearDTO);
         }
@@ -123,7 +126,8 @@ public class TeamService {
     public FindTeamInfoByYearDTO findTeamInfoByYear(int year) throws Exception {
 
 
-        List<Team> teams = teamRepository.findAllByExhibitionYear(year);
+        // 팀마다 담당 교수를 꺼내 쓰므로 조인해서 한 번에 읽는다.
+        List<Team> teams = teamRepository.findAllWithProfessorByExhibitionYear(year);
         List<FindTeamInfoByYearTeamsDTO> requestedTeams = new ArrayList<>();
         for (Team team : teams) {
             FindTeamInfoByYearTeamsDTO requestedTeam = new FindTeamInfoByYearTeamsDTO();
@@ -155,9 +159,14 @@ public class TeamService {
     
     public List<String> findTeamProfileImageByYear(int year){
         List<String> response = new ArrayList<>();
-        List<Team> teams = teamRepository.findAllByExhibitionYear(year);
+        // 팀마다 게시글의 대표 이미지를 꺼내 쓰므로 조인해서 한 번에 읽는다.
+        List<Team> teams = teamRepository.findAllWithPostByExhibitionYear(year);
         for (Team team : teams) {
-            String teamProfileUrl = s3Uploader.rebuildCdnUrl(team.getPost().getTeamProfileUrl() );
+            Post post = team.getPost();
+            if (post == null){
+                continue;
+            }
+            String teamProfileUrl = s3Uploader.rebuildCdnUrl(post.getTeamProfileUrl());
             if (teamProfileUrl != null){
                 response.add(teamProfileUrl);
             }

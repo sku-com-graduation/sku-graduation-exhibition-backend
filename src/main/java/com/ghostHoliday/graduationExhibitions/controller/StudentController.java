@@ -25,7 +25,7 @@ public class StudentController {
 
     // CSV 파일을 받아서 처리하는 메소드
     @PostMapping("/save")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> saveStudent(
 
             @RequestBody List<SaveStudentDTO> dto) {
@@ -42,7 +42,7 @@ public class StudentController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteStudents(
 
@@ -66,7 +66,7 @@ public class StudentController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update")
     public ResponseEntity<String> updateStudents(
 
@@ -84,7 +84,7 @@ public class StudentController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/search")
     public ResponseEntity<?> searchStudents(
 
