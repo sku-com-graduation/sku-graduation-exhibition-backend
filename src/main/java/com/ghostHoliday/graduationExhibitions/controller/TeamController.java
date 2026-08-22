@@ -38,7 +38,7 @@ public class TeamController {
         return ResponseEntity.ok(teams);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("admin/team/delete")
     public ResponseEntity<String> deleteTeam(
             HttpServletRequest request,
@@ -53,7 +53,7 @@ public class TeamController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("admin/team/update")
     public ResponseEntity<?> updateTeamInfo(
             HttpServletRequest request,
@@ -81,7 +81,7 @@ public class TeamController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("admin/team/search/teamInfo")
     public ResponseEntity<?> findTeamInfoByYear(
             HttpServletRequest request,

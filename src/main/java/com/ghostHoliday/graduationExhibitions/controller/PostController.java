@@ -26,7 +26,7 @@ public class PostController {
     private final JwtUtility jwtUtility;
     private final HttpOnlyService httpOnlyService;
 
-//    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+//    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 //    @PutMapping("user/post/update/slideImage")
 //    public ResponseEntity<String> updateSlideImages(
 //            HttpServletRequest request,
@@ -46,7 +46,7 @@ public class PostController {
 //        }
 //    }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @PutMapping("user/post/update/teamPost")
     public ResponseEntity<String> updateTeamPost(
             HttpServletRequest request,
@@ -65,7 +65,7 @@ public class PostController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @PutMapping("user/post/update/studentProfile")
     public ResponseEntity<String> updateStudentProfile(
             HttpServletRequest request,
@@ -95,7 +95,7 @@ public class PostController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @PostMapping("user/post/edit/search")
     public ResponseEntity<?> searchEditPostInfo(
             HttpServletRequest request,
