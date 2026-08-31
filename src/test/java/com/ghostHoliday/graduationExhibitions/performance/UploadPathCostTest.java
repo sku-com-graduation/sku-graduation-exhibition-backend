@@ -194,7 +194,8 @@ class UploadPathCostTest {
                 BenchConfig.requestThreadNanos.get(),
                 BenchConfig.bytesReceived.get() + BenchConfig.bytesForwarded.get(),
                 maxTemp,
-                s3StubBytesReceived.get());
+                s3StubBytesReceived.get(),
+                BenchConfig.s3ForwardNanos.get());
     }
 
     /** 지금 구조: 백엔드는 URL만 발급 → 프론트 → S3 직접. */
@@ -229,7 +230,8 @@ class UploadPathCostTest {
                 BenchConfig.requestThreadNanos.get(),
                 urlResponse.body().getBytes(StandardCharsets.UTF_8).length,
                 maxTemp,
-                s3StubBytesReceived.get());
+                s3StubBytesReceived.get(),
+                0);
     }
 
     // --- 리포트 -------------------------------------------------------------
@@ -247,6 +249,8 @@ class UploadPathCostTest {
                 mb(relay.maxTempBytes), mb(presigned.maxTempBytes)));
         lines.add(String.format("  %-26s %14s %14s", "요청 스레드 점유 시간",
                 ms(relay.requestThreadNanos), ms(presigned.requestThreadNanos)));
+        lines.add(String.format("  %-26s %14s %14s", "S3 로 다시 보낸 시간",
+                ms(relay.s3ForwardNanos), "없음"));
         lines.add(String.format("  %-26s %14s %14s", "S3 도착 바이트",
                 mb(relay.s3Bytes), mb(presigned.s3Bytes)));
         lines.add("──────────────────────────────────────────────────────────────");
@@ -267,7 +271,8 @@ class UploadPathCostTest {
     }
 
     private record Result(long elapsedNanos, long requestThreadNanos,
-                          long backendBytes, long maxTempBytes, long s3Bytes) {
+                          long backendBytes, long maxTempBytes, long s3Bytes,
+                          long s3ForwardNanos) {
     }
 
     // --- 보조 도구 -----------------------------------------------------------
@@ -370,11 +375,14 @@ class UploadPathCostTest {
         static final AtomicLong requestThreadNanos = new AtomicLong();
         static final AtomicLong bytesReceived = new AtomicLong();
         static final AtomicLong bytesForwarded = new AtomicLong();
+        /** 파일을 다 받은 뒤 S3 로 다시 보내는 데만 쓴 시간. 중계 구조가 업로드에 얹는 구간이다. */
+        static final AtomicLong s3ForwardNanos = new AtomicLong();
 
         static void reset() {
             requestThreadNanos.set(0);
             bytesReceived.set(0);
             bytesForwarded.set(0);
+            s3ForwardNanos.set(0);
         }
 
         /** 요청 스레드가 실제로 묶여 있던 시간 — 멀티파트 수신까지 포함해야 하므로 필터에서 잰다. */
@@ -404,6 +412,9 @@ class UploadPathCostTest {
             public Map<String, Object> relay(@RequestParam("file") MultipartFile file) throws Exception {
                 bytesReceived.set(file.getSize());
 
+                // 여기 도달한 시점에 파일은 이미 다 도착해 디스크에 있다.
+                // 아래 구간이 사용자 전송이 끝난 뒤에 따로 흐르는 되보내기다.
+                long forwardStart = System.nanoTime();
                 HttpClient client = HttpClient.newHttpClient();
                 try (InputStream in = file.getInputStream()) {
                     HttpResponse<Void> response = client.send(
@@ -416,6 +427,7 @@ class UploadPathCostTest {
                         throw new ServletException("S3 stub 응답 이상: " + response.statusCode());
                     }
                 }
+                s3ForwardNanos.set(System.nanoTime() - forwardStart);
                 bytesForwarded.set(file.getSize());
 
                 return Map.of("size", file.getSize());
